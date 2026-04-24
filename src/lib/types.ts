@@ -120,7 +120,7 @@ export const SESSION_TYPE_SPOTS: Record<SessionType, string> = {
 export const STANDARD_PRICES: Record<SessionType, number> = {
   "private": 85,        // per session (trainer-set; this is the reference rate)
   "semi-private": 30,   // per player (2–3 players)
-  "small-group": 30,    // per player (4–6 players) — NC sweet spot
+  "small-group": 25,    // per player (4–6 players) — NC sweet spot
   "clinic": 20,         // per player (7+ players)
 };
 
