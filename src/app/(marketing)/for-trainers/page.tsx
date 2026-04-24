@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     q: "Do I set my own rates?",
-    a: "Yes. You set your hourly rate based on your experience and demand. Most trainers on the platform charge between $50-$120 per session.",
+    a: "For private sessions, yes — you set your own rate based on your experience and demand. For group formats (semi-private, small group, clinic), the platform sets the per-player rate. You choose the format and schedule; we handle the pricing.",
   },
   {
     q: "Is there an exclusivity requirement?",
