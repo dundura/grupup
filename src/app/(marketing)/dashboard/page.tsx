@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Bell, Star, MapPin, Clock, ChevronRight, Search } from "lucide-react";
+import { Bell, Star, MapPin, Clock, ChevronRight, Search, Plus, Users } from "lucide-react";
 import { groupSessions, trainers } from "@/lib/mock-data";
 
 interface Profile {
@@ -80,6 +80,7 @@ export default function DashboardPage() {
             {name ? `Hey, ${name} 👋` : "Your Dashboard"}
           </h1>
           <p className="text-white/50 text-sm">
+            {profile.role === "trainer" && <span className="inline-block bg-white/10 text-white/80 text-xs font-semibold px-2 py-0.5 rounded-full mr-2">Coach</span>}
             {profile.sport && `${profile.sport} · `}{profile.city}
             {profile.level && ` · ${profile.level}`}
           </p>
@@ -88,28 +89,55 @@ export default function DashboardPage() {
 
       <div className="container max-w-5xl py-10 space-y-10">
 
-        {/* My sessions — empty for now */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">My sessions</h2>
-            <Link href="/groups" className="text-sm font-medium text-[#DC373E] flex items-center gap-1 hover:underline">
-              Browse all <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="bg-white rounded-2xl border p-10 text-center">
-            <div className="text-4xl mb-3">📅</div>
-            <p className="font-semibold text-lg mb-1">No sessions booked yet</p>
-            <p className="text-muted-foreground text-sm mb-5">
-              Find a group session near you and reserve your spot.
-            </p>
-            <Button style={{ backgroundColor: "#DC373E" }} asChild>
-              <Link href="/groups">
-                <Search className="h-4 w-4 mr-2" />
-                Find a group session
+        {/* Trainer view */}
+        {profile.role === "trainer" ? (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">My sessions</h2>
+              <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
+                <Link href="/groups/create">
+                  <Plus className="h-4 w-4 mr-1" /> New session
+                </Link>
+              </Button>
+            </div>
+            <div className="bg-white rounded-2xl border p-10 text-center">
+              <div className="text-4xl mb-3">🎯</div>
+              <p className="font-semibold text-lg mb-1">No sessions yet</p>
+              <p className="text-muted-foreground text-sm mb-5">
+                Create your first group session and start filling spots.
+              </p>
+              <Button style={{ backgroundColor: "#DC373E" }} asChild>
+                <Link href="/groups/create">
+                  <Users className="h-4 w-4 mr-2" />
+                  Create a group session
+                </Link>
+              </Button>
+            </div>
+          </section>
+        ) : (
+          /* Player / Parent view */
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">My sessions</h2>
+              <Link href="/groups" className="text-sm font-medium text-[#DC373E] flex items-center gap-1 hover:underline">
+                Browse all <ChevronRight className="h-4 w-4" />
               </Link>
-            </Button>
-          </div>
-        </section>
+            </div>
+            <div className="bg-white rounded-2xl border p-10 text-center">
+              <div className="text-4xl mb-3">📅</div>
+              <p className="font-semibold text-lg mb-1">No sessions booked yet</p>
+              <p className="text-muted-foreground text-sm mb-5">
+                Find a group session near you and reserve your spot.
+              </p>
+              <Button style={{ backgroundColor: "#DC373E" }} asChild>
+                <Link href="/groups">
+                  <Search className="h-4 w-4 mr-2" />
+                  Find a group session
+                </Link>
+              </Button>
+            </div>
+          </section>
+        )}
 
         {/* Recommended sessions */}
         {recommended.length > 0 && (
@@ -161,8 +189,8 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* Following */}
-        <section>
+        {/* Following — players/parents only */}
+        {profile.role !== "trainer" && <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Trainers you follow</h2>
           </div>
@@ -204,7 +232,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </section>
+        </section>}
 
       </div>
     </div>
