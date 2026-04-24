@@ -97,6 +97,10 @@ export interface GroupSession {
   skillLevel: SkillLevel;
   ageRange: string;
   recurring: boolean;
+  specialOffer?: {
+    label: string;       // e.g. "First session free", "20% off this week"
+    discountPct: number; // 0–100; 100 = free
+  };
 }
 
 export type SessionType = "private" | "semi-private" | "small-group" | "clinic";

@@ -41,6 +41,13 @@ export function SessionCard({ session }: SessionCardProps) {
   const fillPct = Math.round((spotsFilled / session.totalSpots) * 100);
   const almostFull = session.spotsLeft <= 2;
 
+  const offer = session.specialOffer;
+  const discountedPrice = offer
+    ? offer.discountPct === 100
+      ? 0
+      : Math.round(session.pricePerPlayer * (1 - offer.discountPct / 100))
+    : null;
+
   return (
     <Link
       href={`/sessions/${session.id}`}
@@ -48,6 +55,11 @@ export function SessionCard({ session }: SessionCardProps) {
     >
       {/* Header band */}
       <div className="px-5 pt-5 pb-4" style={{ backgroundColor: "#0F3154" }}>
+        {offer && (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-3" style={{ backgroundColor: "#DC373E", color: "#fff" }}>
+            🏷️ {offer.label}
+          </div>
+        )}
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -60,7 +72,16 @@ export function SessionCard({ session }: SessionCardProps) {
             <p className="text-white/50 text-xs mt-0.5">{session.focus}</p>
           </div>
           <div className="text-right shrink-0">
-            <div className="text-white font-extrabold text-xl leading-none">${session.pricePerPlayer}</div>
+            {offer && discountedPrice !== null ? (
+              <>
+                <div className="text-white/40 text-sm line-through leading-none">${session.pricePerPlayer}</div>
+                <div className="font-extrabold text-xl leading-none" style={{ color: discountedPrice === 0 ? "#6EE7B7" : "#FCD34D" }}>
+                  {discountedPrice === 0 ? "FREE" : `$${discountedPrice}`}
+                </div>
+              </>
+            ) : (
+              <div className="text-white font-extrabold text-xl leading-none">${session.pricePerPlayer}</div>
+            )}
             <div className="text-white/50 text-xs mt-0.5">
               {session.sessionType === "private" ? "/ session" : "/ player"}
             </div>

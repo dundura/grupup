@@ -905,6 +905,7 @@ export const groupSessions: GroupSession[] = [
     date: "2026-05-01", totalSpots: 3, spotsLeft: 1,
     pricePerPlayer: P["semi-private"],
     skillLevel: "Advanced", ageRange: "12–17", recurring: false,
+    specialOffer: { label: "20% off this week", discountPct: 20 },
   },
   {
     id: "session-priya-semi",
@@ -931,6 +932,7 @@ export const groupSessions: GroupSession[] = [
     date: "2026-04-29", totalSpots: 6, spotsLeft: 3,
     pricePerPlayer: P["small-group"],
     skillLevel: "Intermediate", ageRange: "10–15", recurring: true,
+    specialOffer: { label: "First session free", discountPct: 100 },
   },
   {
     id: "session-rachel-sat",
