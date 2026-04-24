@@ -108,10 +108,11 @@ export default function PricingPage() {
             return (
               <div
                 key={config.type}
-                className={`relative rounded-2xl overflow-hidden flex flex-col ${
-                  config.highlight ? "ring-2 shadow-xl" : "border"
-                }`}
-                style={config.highlight ? { ringColor: "#DC373E" } : {}}
+                className="relative rounded-2xl overflow-hidden flex flex-col shadow-xl"
+                style={config.highlight
+                  ? { border: "2px solid #DC373E" }
+                  : { border: "1px solid hsl(var(--border))" }
+                }
               >
                 {config.highlight && (
                   <div className="text-center text-xs font-bold uppercase tracking-wider text-white py-2" style={{ backgroundColor: "#DC373E" }}>
