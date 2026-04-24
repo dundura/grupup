@@ -237,73 +237,96 @@ export default function SessionPage({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          {/* ── Right: Booking sidebar ─────────────────────────── */}
+          {/* ── Right: Group offerings + booking ──────────────── */}
           <div className="lg:col-span-1">
             <div className="sticky top-28 space-y-4">
-              <div className="rounded-2xl border p-6 shadow-sm">
-                <div className="flex items-end gap-1 mb-1">
+
+              {/* Group sessions — primary emphasis */}
+              {(() => {
+                const groupOfferings = groupSessions.filter(
+                  (s) => s.trainer.id === session.trainer.id && s.sessionType !== "private"
+                );
+                if (groupOfferings.length === 0) return null;
+                return (
+                  <div className="rounded-2xl overflow-hidden border shadow-sm">
+                    <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
+                      <p className="text-white font-bold text-sm">Group sessions with {session.trainer.name.split(" ")[0]}</p>
+                      <p className="text-white/60 text-xs mt-0.5">Split the cost · same quality</p>
+                    </div>
+                    <div className="divide-y">
+                      {groupOfferings.map((s) => {
+                        const sOffer = s.specialOffer;
+                        const sDiscounted = sOffer
+                          ? sOffer.discountPct === 100 ? 0 : Math.round(s.pricePerPlayer * (1 - sOffer.discountPct / 100))
+                          : null;
+                        const sHot = s.spotsLeft <= 2;
+                        return (
+                          <Link
+                            key={s.id}
+                            href={`/sessions/${s.id}`}
+                            className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-accent/5 transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              {sOffer && (
+                                <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full text-white mb-1" style={{ backgroundColor: "#DC373E" }}>
+                                  🏷️ {sOffer.label}
+                                </span>
+                              )}
+                              <p className="font-semibold text-sm leading-snug">{s.title}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {SESSION_TYPE_LABELS[s.sessionType]} · {s.dayOfWeek}s {s.time}
+                              </p>
+                              <p className="text-xs mt-1" style={{ color: sHot ? "#DC373E" : "#6B7280" }}>
+                                {sHot ? `⚡ ${s.spotsLeft} spot${s.spotsLeft === 1 ? "" : "s"} left` : `${s.spotsLeft} of ${s.totalSpots} spots open`}
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              {sOffer && sDiscounted !== null && (
+                                <p className="text-xs line-through text-muted-foreground">${s.pricePerPlayer}</p>
+                              )}
+                              <p className="font-bold text-base" style={{ color: sDiscounted === 0 ? "#059669" : "#0F3154" }}>
+                                {sDiscounted === 0 ? "FREE" : `$${sDiscounted ?? s.pricePerPlayer}`}
+                              </p>
+                              <p className="text-xs text-muted-foreground">/ player</p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    <div className="px-5 pb-4 pt-2">
+                      <Button asChild className="w-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                        <Link href={`/groups?trainer=${session.trainer.id}`}>See all group sessions</Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Book this session (compact) */}
+              <div className="rounded-2xl border p-5 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                  {isPrivate ? "Book private session" : "Join this session"}
+                </p>
+                <div className="flex items-end gap-1 mb-3">
                   {offer && discountedPrice !== null && (
-                    <span className="text-muted-foreground line-through text-lg mr-1">${session.pricePerPlayer}</span>
+                    <span className="text-muted-foreground line-through mr-1">${session.pricePerPlayer}</span>
                   )}
-                  <span className="font-extrabold text-3xl" style={{ color: discountedPrice === 0 ? "#059669" : "#0F3154" }}>
+                  <span className="font-extrabold text-2xl" style={{ color: discountedPrice === 0 ? "#059669" : "#0F3154" }}>
                     {discountedPrice === 0 ? "FREE" : `$${displayPrice}`}
                   </span>
-                  <span className="text-muted-foreground text-sm mb-1">{isPrivate ? "/ session" : "/ player"}</span>
+                  <span className="text-muted-foreground text-sm mb-0.5">{isPrivate ? "/ session" : "/ player"}</span>
                 </div>
-                {offer && (
-                  <p className="text-sm font-semibold mb-3" style={{ color: "#DC373E" }}>🏷️ {offer.label}</p>
-                )}
-                {!isPrivate && (
-                  <p className="text-xs text-muted-foreground mb-4">
-                    {session.spotsLeft} spot{session.spotsLeft !== 1 ? "s" : ""} remaining
-                  </p>
-                )}
-
                 <Button
-                  className="w-full text-white font-bold h-12 text-base mb-3"
+                  className="w-full text-white font-bold mb-2"
                   style={{ backgroundColor: "#DC373E" }}
                   disabled={session.spotsLeft === 0}
                 >
                   {isPrivate ? "Book Session" : session.spotsLeft === 0 ? "Session Full" : "Join Session"}
                 </Button>
-
-                <Button variant="outline" className="w-full">
-                  Message Trainer
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground mt-4">
-                  No payment charged until confirmed
-                </p>
+                <Button variant="outline" className="w-full text-sm">Message Trainer</Button>
+                <p className="text-xs text-center text-muted-foreground mt-3">No payment charged until confirmed</p>
               </div>
 
-              {/* Trainer quick stats */}
-              {trainer && (
-                <div className="rounded-2xl border p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                      <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="40px" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{trainer.name}</p>
-                      <p className="text-xs text-muted-foreground">{trainer.city}, {trainer.state}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl p-2" style={{ backgroundColor: "#f4f6f9" }}>
-                      <p className="font-bold text-sm" style={{ color: "#0F3154" }}>{trainer.rating}</p>
-                      <p className="text-xs text-muted-foreground">Rating</p>
-                    </div>
-                    <div className="rounded-xl p-2" style={{ backgroundColor: "#f4f6f9" }}>
-                      <p className="font-bold text-sm" style={{ color: "#0F3154" }}>{trainer.reviewCount}</p>
-                      <p className="text-xs text-muted-foreground">Reviews</p>
-                    </div>
-                    <div className="rounded-xl p-2" style={{ backgroundColor: "#f4f6f9" }}>
-                      <p className="font-bold text-sm" style={{ color: "#0F3154" }}>{trainer.yearsExperience}yr</p>
-                      <p className="text-xs text-muted-foreground">Exp</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
