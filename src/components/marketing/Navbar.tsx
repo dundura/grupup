@@ -10,7 +10,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   const links = [
-    { href: "/trainers", label: "Find Trainers" },
+    { href: "/trainers", label: "Find Groups" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/for-trainers", label: "For Trainers" },
   ];
