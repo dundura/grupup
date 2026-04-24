@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { Bell, MessageCircle, MapPin, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { PlayerProfile } from "@/lib/types";
 
-const TIER_STYLES: Record<string, { bg: string; color: string }> = {
-  "MLS Next":             { bg: "#FEF3C7", color: "#92400E" },
-  "ECNL / ECNL Regional": { bg: "#EDE9FE", color: "#5B21B6" },
-  "NPL / USYS":           { bg: "#DBEAFE", color: "#1E40AF" },
-  "Club Travel":          { bg: "#D1FAE5", color: "#065F46" },
-  "High School Varsity":  { bg: "#FFE4E6", color: "#9F1239" },
-  "High School JV":       { bg: "#FEE2E2", color: "#B91C1C" },
-  "Recreational":         { bg: "#F3F4F6", color: "#374151" },
+const TIER_COLORS: Record<string, { bg: string; text: string }> = {
+  "MLS Next":             { bg: "rgba(251,191,36,0.2)",  text: "#FCD34D" },
+  "ECNL / ECNL Regional": { bg: "rgba(167,139,250,0.2)", text: "#C4B5FD" },
+  "NPL / USYS":           { bg: "rgba(96,165,250,0.2)",  text: "#93C5FD" },
+  "Club Travel":          { bg: "rgba(52,211,153,0.2)",  text: "#6EE7B7" },
+  "High School Varsity":  { bg: "rgba(251,113,133,0.2)", text: "#FCA5A5" },
+  "High School JV":       { bg: "rgba(251,113,133,0.15)", text: "#FCA5A5" },
+  "Recreational":         { bg: "rgba(255,255,255,0.1)", text: "rgba(255,255,255,0.6)" },
 };
 
 interface PlayerCardProps {
@@ -21,94 +20,108 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const [following, setFollowing] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
-  const tierStyle = TIER_STYLES[player.competitiveTier] ?? { bg: "#F3F4F6", color: "#374151" };
-  const lastName = player.lastName ? player.lastName[0] + "." : "";
+  const tierColor = TIER_COLORS[player.competitiveTier] ?? { bg: "rgba(255,255,255,0.1)", text: "rgba(255,255,255,0.6)" };
 
   return (
-    <div className="bg-card border rounded-2xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all flex flex-col">
-      {/* Top accent bar — navy */}
-      <div className="h-1.5" style={{ backgroundColor: "#0F3154" }} />
-
-      <div className="p-5 flex flex-col gap-4 flex-1">
-        {/* Header row */}
-        <div className="flex items-start gap-3">
-          {/* Avatar */}
+    <div className="relative group pt-16">
+      {/* Circular avatar overlapping top */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+        {!imgError && player.photo ? (
+          <img
+            src={player.photo}
+            alt={player.firstName}
+            onError={() => setImgError(true)}
+            className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
+          />
+        ) : (
           <div
-            className="h-12 w-12 rounded-full flex-shrink-0 flex items-center justify-center text-xl font-bold text-white"
-            style={{ backgroundColor: "#0F3154" }}
+            className="w-28 h-28 rounded-full border-4 border-white shadow-md flex items-center justify-center text-3xl font-bold text-white"
+            style={{ backgroundColor: "#1a4a73" }}
           >
             {player.firstName[0]}
           </div>
+        )}
+      </div>
 
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-base leading-tight">
-              {player.firstName} {lastName}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {player.sport} {player.sportEmoji} · {player.position}
-            </p>
-          </div>
+      {/* Dark navy card top */}
+      <div
+        className="rounded-t-2xl pt-16 pb-5 px-5 text-center"
+        style={{ backgroundColor: "#0F3154" }}
+      >
+        {/* Name */}
+        <h3 className="text-base font-bold text-white uppercase tracking-wide mt-1">
+          {player.firstName} {player.lastName}
+        </h3>
 
-          {/* Competitive tier badge */}
+        {/* Location · Position · Sport row */}
+        <div className="flex items-center justify-center gap-4 mt-2 text-white/70 text-xs flex-wrap">
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3 h-3" />
+            {player.city}, {player.state}
+          </span>
+          <span className="flex items-center gap-1">
+            <User className="w-3 h-3" />
+            {player.position}
+          </span>
+          <span>{player.sportEmoji} {player.sport}</span>
+        </div>
+
+        {/* Competitive tier badge */}
+        <div className="flex items-center justify-center gap-2 mt-3">
           <span
-            className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: tierStyle.bg, color: tierStyle.color }}
+            className="px-2.5 py-1 rounded-full text-xs font-semibold"
+            style={{ backgroundColor: tierColor.bg, color: tierColor.text }}
           >
             {player.competitiveTier}
           </span>
         </div>
+      </div>
 
-        {/* Team */}
-        <p className="text-sm font-semibold text-foreground leading-snug -mt-1">
-          {player.team}
-        </p>
-
-        {/* Location + age */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            {player.city}, {player.state}
-          </span>
-          <span className="flex items-center gap-1">
-            <User className="h-3 w-3" />
-            Age {player.age}
-          </span>
+      {/* White bottom section */}
+      <div className="bg-white rounded-b-2xl border border-t-0 px-5 py-4">
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="text-center">
+            <p className="text-sm font-bold" style={{ color: "#0F3154" }}>Age {player.age}</p>
+            <p className="text-xs text-muted-foreground">Age</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-bold truncate" style={{ color: "#0F3154" }}>{player.team.split(" ").slice(-2).join(" ")}</p>
+            <p className="text-xs text-muted-foreground">Club</p>
+          </div>
         </div>
 
-        {/* Looking for */}
-        <p className="text-sm text-muted-foreground leading-relaxed border-t pt-3">
-          <span className="font-medium text-foreground">Looking for: </span>
-          {player.lookingFor}
-        </p>
+        {/* Team name full */}
+        <p className="text-xs text-center text-muted-foreground mb-3 leading-snug line-clamp-1">{player.team}</p>
 
-        {/* Actions */}
+        {/* Action buttons */}
         {following && (
-          <p className="text-xs text-muted-foreground -mt-1 flex items-center gap-1">
+          <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1 mb-2">
             <Bell className="h-3 w-3" />
-            You'll be notified when they book or post a session
+            Notified when they book or post
           </p>
         )}
-        <div className="flex gap-2 mt-auto pt-1">
-          <Button
-            size="sm"
-            variant={following ? "default" : "outline"}
-            className="flex-1 gap-1.5 text-xs"
-            style={following ? { backgroundColor: "#0F3154", color: "#fff" } : {}}
+        <div className="flex gap-2">
+          <button
             onClick={() => setFollowing((v) => !v)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-colors"
+            style={following
+              ? { backgroundColor: "#0F3154", color: "#fff" }
+              : { border: "1px solid #0F3154", color: "#0F3154", backgroundColor: "transparent" }
+            }
           >
             <Bell className="h-3.5 w-3.5" />
             {following ? "Following" : "Follow"}
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 gap-1.5 text-xs"
+          </button>
+          <button
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
+            style={{ backgroundColor: "#DC373E" }}
           >
             <MessageCircle className="h-3.5 w-3.5" />
-            Message
-          </Button>
+            Connect
+          </button>
         </div>
       </div>
     </div>
