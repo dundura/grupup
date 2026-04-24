@@ -9,8 +9,17 @@ import { SessionCard } from "@/components/marketing/SessionCard";
 import { groupSessions, cities } from "@/lib/mock-data";
 
 const sports = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis"];
+const sessionTypes = ["All Types", "Private", "Semi-Private", "Small Group", "Clinic"];
 const skillLevels = ["Any Level", "Beginner", "Intermediate", "Advanced", "Elite"];
 const days = ["Any Day", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const typeValueMap: Record<string, string> = {
+  "All Types": "",
+  "Private": "private",
+  "Semi-Private": "semi-private",
+  "Small Group": "small-group",
+  "Clinic": "clinic",
+};
 
 function SessionsPageInner() {
   const searchParams = useSearchParams();
@@ -22,6 +31,7 @@ function SessionsPageInner() {
     initialSport ? initialSport.charAt(0).toUpperCase() + initialSport.slice(1) : "All Sports"
   );
   const [selectedCity, setSelectedCity] = useState(initialCity);
+  const [selectedType, setSelectedType] = useState("All Types");
   const [selectedDay, setSelectedDay] = useState("Any Day");
   const [selectedLevel, setSelectedLevel] = useState("Any Level");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -40,6 +50,7 @@ function SessionsPageInner() {
       }
       if (selectedSport !== "All Sports" && s.sport !== selectedSport) return false;
       if (selectedCity !== "all" && s.city !== selectedCity) return false;
+      if (typeValueMap[selectedType] && s.sessionType !== typeValueMap[selectedType]) return false;
       if (selectedDay !== "Any Day" && s.dayOfWeek !== selectedDay) return false;
       if (selectedLevel !== "Any Level" && s.skillLevel !== selectedLevel) return false;
       return true;
@@ -49,12 +60,14 @@ function SessionsPageInner() {
   const hasFilters =
     selectedSport !== "All Sports" ||
     selectedCity !== "all" ||
+    selectedType !== "All Types" ||
     selectedDay !== "Any Day" ||
     selectedLevel !== "Any Level";
 
   const resetFilters = () => {
     setSelectedSport("All Sports");
     setSelectedCity("all");
+    setSelectedType("All Types");
     setSelectedDay("Any Day");
     setSelectedLevel("Any Level");
     setSearch("");
@@ -78,6 +91,25 @@ function SessionsPageInner() {
               style={selectedSport === s ? { backgroundColor: "#0F3154" } : undefined}
             >
               {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Session Type */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Session Type</p>
+        <div className="space-y-1">
+          {sessionTypes.map((t) => (
+            <button
+              key={t}
+              onClick={() => setSelectedType(t)}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedType === t ? "text-white" : "text-foreground hover:bg-muted"
+              }`}
+              style={selectedType === t ? { backgroundColor: "#0F3154" } : undefined}
+            >
+              {t}
             </button>
           ))}
         </div>

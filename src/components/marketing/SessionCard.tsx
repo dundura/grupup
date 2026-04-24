@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Clock, Users, Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import type { GroupSession } from "@/lib/types";
+import { SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS } from "@/lib/types";
 
 const skillColors: Record<string, string> = {
   Beginner: "bg-green-100 text-green-700",
@@ -32,13 +32,20 @@ export function SessionCard({ session }: SessionCardProps) {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl leading-none">{session.sportEmoji}</span>
               <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">{session.sport}</span>
+              <span className="text-white/40 text-xs">·</span>
+              <span className="text-white/60 text-xs font-semibold">{SESSION_TYPE_LABELS[session.sessionType]}</span>
             </div>
             <h3 className="text-white font-bold text-base leading-tight">{session.title}</h3>
             <p className="text-white/50 text-xs mt-0.5">{session.focus}</p>
           </div>
           <div className="text-right shrink-0">
             <div className="text-white font-extrabold text-xl leading-none">${session.pricePerPlayer}</div>
-            <div className="text-white/50 text-xs mt-0.5">per player</div>
+            <div className="text-white/50 text-xs mt-0.5">
+              {session.sessionType === "private" ? "/ session" : "/ player"}
+            </div>
+            {session.sessionType === "private" && session.trainerRate && (
+              <div className="text-white/30 text-xs mt-0.5">incl. 15% fee</div>
+            )}
           </div>
         </div>
       </div>

@@ -67,6 +67,7 @@ export interface FilterState {
 }
 
 export interface GroupSession {
+  sessionType: SessionType;
   id: string;
   title: string;
   sport: string;
@@ -87,8 +88,40 @@ export interface GroupSession {
   date: string;
   totalSpots: number;
   spotsLeft: number;
+  /**
+   * For group sessions (semi-private, small-group, clinic): platform-set standard price.
+   * For private: trainer sets their own rate; pricePerPlayer = trainerRate * (1 + PLATFORM_FEE).
+   */
+  trainerRate?: number;
   pricePerPlayer: number;
   skillLevel: SkillLevel;
   ageRange: string;
   recurring: boolean;
 }
+
+export type SessionType = "private" | "semi-private" | "small-group" | "clinic";
+
+export const SESSION_TYPE_LABELS: Record<SessionType, string> = {
+  "private": "Private",
+  "semi-private": "Semi-Private",
+  "small-group": "Small Group",
+  "clinic": "Clinic",
+};
+
+export const SESSION_TYPE_SPOTS: Record<SessionType, string> = {
+  "private": "1 player",
+  "semi-private": "2–3 players",
+  "small-group": "4–6 players",
+  "clinic": "7+ players",
+};
+
+// Platform sets all prices — trainers pick the format, not the rate (Uber model)
+export const STANDARD_PRICES: Record<SessionType, number> = {
+  "private": 85,        // per session
+  "semi-private": 40,   // per player
+  "small-group": 28,    // per player
+  "clinic": 18,         // per player
+};
+
+export const PLATFORM_FEE = 0.15;
+export const TRAINER_SHARE = 1 - PLATFORM_FEE; // 85% to trainer
