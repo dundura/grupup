@@ -112,7 +112,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
             style={{ backgroundColor: "#DC373E" }}
           >
             <MessageCircle className="h-3.5 w-3.5" />
-            Connect
+            Message
           </button>
         </div>
       </div>
