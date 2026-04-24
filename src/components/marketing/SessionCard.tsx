@@ -19,12 +19,13 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session }: SessionCardProps) {
-  const [following, setFollowing] = useState(false);
+  const [interested, setInterested] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  function handleFollow(e: React.MouseEvent) {
+  function handleInterested(e: React.MouseEvent) {
     e.preventDefault();
-    setFollowing((f) => !f);
+    setInterested((v) => !v);
+    // When marked interested, followers are notified so they can join together
   }
 
   function handleShare(e: React.MouseEvent) {
@@ -151,14 +152,14 @@ export function SessionCard({ session }: SessionCardProps) {
           Join Session
         </div>
         <button
-          onClick={handleFollow}
-          title={following ? "Following this trainer" : "Follow trainer for updates"}
+          onClick={handleInterested}
+          title={interested ? "You're interested — your followers have been notified" : "Mark as interested — notifies your followers"}
           className="flex items-center justify-center w-10 h-10 rounded-xl border transition-colors shrink-0"
-          style={following
+          style={interested
             ? { backgroundColor: "#0F3154", borderColor: "#0F3154" }
             : { borderColor: "#e2e8f0" }}
         >
-          <Bell className="h-4 w-4" style={{ color: following ? "white" : "#94a3b8" }} />
+          <Bell className="h-4 w-4" style={{ color: interested ? "white" : "#94a3b8" }} />
         </button>
         <button
           onClick={handleShare}
