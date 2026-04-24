@@ -56,39 +56,30 @@ export default function SessionPage({ params }: { params: { id: string } }) {
             <div className="rounded-2xl overflow-hidden border shadow-sm">
               {/* Navy header — trainer focused */}
               <div className="px-6 pt-6 pb-6" style={{ backgroundColor: "#0F3154" }}>
-                <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-2">
+                <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4">
                   {session.sport} · {session.city}, {session.state}
                 </p>
-                <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
-                  {session.trainer.name}
-                </h1>
-                {trainer && (
-                  <div className="flex items-center gap-2 mt-2 text-white/70 text-sm">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    <span className="font-semibold text-white">{trainer.rating}</span>
-                    <span>· {trainer.reviewCount} reviews · {trainer.yearsExperience} yrs experience</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Trainer info — below hero */}
-              <div className="relative px-6 pb-6 pt-5 border-t">
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 flex-shrink-0" style={{ borderColor: "#0F3154" }}>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 flex-shrink-0 border-white/30">
                     <Image src={session.trainer.photo} alt={session.trainer.name} fill className="object-cover" sizes="64px" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">{session.trainer.name}</h2>
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="font-semibold text-foreground">{session.trainer.rating}</span>
-                      {trainer && <span>· {trainer.reviewCount} reviews</span>}
-                      {trainer && <span>· {trainer.yearsExperience} yrs exp</span>}
-                    </div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                      {session.trainer.name}
+                    </h1>
+                    {trainer && (
+                      <div className="flex items-center gap-2 mt-1.5 text-white/70 text-sm">
+                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        <span className="font-semibold text-white">{trainer.rating}</span>
+                        <span>· {trainer.reviewCount} reviews · {trainer.yearsExperience} yrs experience</span>
+                      </div>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                {/* Session details */}
+              {/* Session details */}
+              <div className="relative px-6 pb-6 pt-5 border-t">
                 <div className="grid sm:grid-cols-2 gap-3 mb-5">
                   {[
                     { icon: Calendar, text: `${session.dayOfWeek}s · ${session.time}` },
@@ -164,6 +155,27 @@ export default function SessionPage({ params }: { params: { id: string } }) {
                 )}
               </div>
             )}
+
+            {/* Trainer video */}
+            {trainer?.videoUrl && (() => {
+              const url = trainer.videoUrl;
+              const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+              const videoId = ytMatch?.[1];
+              if (!videoId) return null;
+              return (
+                <div className="rounded-2xl border overflow-hidden">
+                  <div className="aspect-video w-full">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title={`${trainer.name} training video`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Other sessions by this trainer */}
             {trainerSessions.length > 0 && (

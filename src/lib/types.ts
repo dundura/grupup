@@ -46,6 +46,7 @@ export interface Trainer {
   skillLevels: SkillLevel[];
   availability: AvailabilitySlot[];
   reviews: Review[];
+  videoUrl?: string; // YouTube or direct video URL
 }
 
 export interface Testimonial {
