@@ -5,19 +5,6 @@ import { STANDARD_PRICES, SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS, PLATFORM_FEE,
 
 const SESSION_CONFIGS = [
   {
-    type: "private" as const,
-    icon: "👤",
-    description: "One player, one trainer. Full attention, flexible scheduling.",
-    highlight: false,
-    perks: [
-      "Trainer sets their own rate",
-      "100% of the session is yours",
-      "Best for targeted skill work",
-      "Most flexible scheduling",
-    ],
-    savingsLabel: null,
-  },
-  {
     type: "semi-private" as const,
     icon: "👥",
     description: "2–3 players training together. Split the cost, keep quality high.",
