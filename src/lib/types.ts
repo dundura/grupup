@@ -65,3 +65,30 @@ export interface FilterState {
   experienceLevel: string;
   specialties: Specialty[];
 }
+
+export interface GroupSession {
+  id: string;
+  title: string;
+  sport: string;
+  sportEmoji: string;
+  focus: string;
+  trainer: {
+    id: string;
+    name: string;
+    photo: string;
+    rating: number;
+  };
+  city: string;
+  state: string;
+  venue: string;
+  dayOfWeek: string;
+  time: string;
+  duration: number;
+  date: string;
+  totalSpots: number;
+  spotsLeft: number;
+  pricePerPlayer: number;
+  skillLevel: SkillLevel;
+  ageRange: string;
+  recurring: boolean;
+}
