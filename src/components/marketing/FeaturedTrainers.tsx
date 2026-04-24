@@ -8,7 +8,7 @@ export function FeaturedTrainers() {
   const featured = groupSessions.filter((s) => s.sessionType !== "private").slice(0, 4);
 
   return (
-    <section className="py-16 md:py-24 bg-secondary/30">
+    <section className="pb-16 md:pb-24 bg-secondary/30">
       <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-12">
           <div>
