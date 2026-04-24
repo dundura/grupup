@@ -4,7 +4,7 @@ const steps = [
   {
     icon: Search,
     number: "01",
-    title: "Find Your Trainer",
+    title: "Find a Group Session",
     description: "Browse group training sessions by location, specialty, and skill level. Read reviews from real parents.",
   },
   {
@@ -28,7 +28,7 @@ export function HowItWorks() {
         <div className="max-w-2xl mx-auto text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">How it works</h2>
           <p className="text-lg text-muted-foreground">
-            Three simple steps from finding a trainer to getting better on the field.
+            Three simple steps from finding a group session to leveling up on the field.
           </p>
         </div>
 
