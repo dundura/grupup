@@ -7,7 +7,7 @@ const steps = [
   {
     icon: Search,
     title: "1. Find Your Trainer",
-    description: "Browse vetted private trainers by location, specialty, price, and skill level.",
+    description: "Browse group training sessions by location, specialty, price, and skill level.",
     details: [
       "Filter by city, price, and training focus",
       "Read authentic reviews from soccer parents",
@@ -31,7 +31,7 @@ const steps = [
     title: "3. Train & Improve",
     description: "Meet at an agreed location. Train. Get a personalized recap.",
     details: [
-      "Focused 1-on-1 attention",
+      "Small group, focused attention",
       "Session notes sent after training",
       "Track progress over multiple sessions",
       "Rate and review your experience",
@@ -58,7 +58,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "Session rates are set by individual trainers, typically between $40-$120 per session depending on experience and demand. The price you see on the trainer's profile is what you pay.",
+    a: "Session rates vary by coach and group size, typically between $40-$120 per session depending on experience and demand. The price you see on the session listing is what you pay.",
   },
   {
     q: "Is this just for elite players?",

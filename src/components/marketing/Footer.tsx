@@ -14,7 +14,7 @@ export function Footer() {
               <span>Grupup</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Book elite 1-on-1 soccer training with vetted private trainers. Anywhere, anytime.
+              The only platform built for group soccer training sessions. Find coaches near you.
             </p>
           </div>
 

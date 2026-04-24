@@ -417,7 +417,7 @@ export const testimonials: Testimonial[] = [
     kidAge: 15,
     city: "Charlotte, NC",
     quote:
-      "We've tried clinics and camps. Nothing beats focused 1-on-1 training. Anthony transformed Diego's 1v1 game in just 8 weeks. Booking is simple and the trainers are elite.",
+      "We've tried clinics and camps. Nothing beats focused group training. Anthony transformed Diego's 1v1 game in just 8 weeks. Booking is simple and the trainers are elite.",
     rating: 5,
   },
 ];

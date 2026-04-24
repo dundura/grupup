@@ -12,7 +12,7 @@ const benefits = [
   {
     icon: Users,
     title: "We bring you the clients",
-    description: "Soccer parents actively search our platform for private trainers. No more cold outreach.",
+    description: "Soccer families actively search our platform for group training sessions. No more cold outreach.",
   },
   {
     icon: Calendar,

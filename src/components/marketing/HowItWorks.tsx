@@ -5,7 +5,7 @@ const steps = [
     icon: Search,
     number: "01",
     title: "Find Your Trainer",
-    description: "Browse vetted private trainers by location, specialty, and skill level. Read reviews from real parents.",
+    description: "Browse group training sessions by location, specialty, and skill level. Read reviews from real parents.",
   },
   {
     icon: Calendar,

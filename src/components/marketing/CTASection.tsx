@@ -11,7 +11,7 @@ export function CTASection() {
             Ready to find your trainer?
           </h2>
           <p className="text-lg md:text-xl text-primary-foreground/80 mb-10">
-            Join hundreds of soccer families getting elite private training. Book your first session today.
+            Join hundreds of soccer families finding elite group training sessions. Book your spot today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild>
