@@ -20,6 +20,7 @@ const shortcuts = [
   { label: "👥 Group Sessions", href: "/groups?type=group" },
   { label: "🔒 Private Sessions", href: "/groups?type=private" },
   { label: "🎮 Free Play", href: "/free-play" },
+  { label: "🤝 Connect", href: "/connect" },
   { label: "👶 Youth", href: "/groups?level=beginner" },
   { label: "🏆 Competitive", href: "/groups?level=advanced" },
 ];

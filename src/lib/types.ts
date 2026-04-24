@@ -125,3 +125,66 @@ export const STANDARD_PRICES: Record<SessionType, number> = {
 
 export const PLATFORM_FEE = 0.15;
 export const TRAINER_SHARE = 1 - PLATFORM_FEE; // 85% to trainer
+
+export interface PlayerProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  sport: string;
+  sportEmoji: string;
+  team: string;             // e.g. "Triangle United MLS Next U16"
+  competitiveTier: string;  // e.g. "MLS Next", "ECNL", "Club Travel"
+  position: string;         // e.g. "Forward", "Midfielder"
+  age: number;
+  city: string;
+  state: string;
+  lookingFor: string;       // e.g. "2–3 training partners for group sessions in Cary"
+  photo: string;
+}
+
+export const COMPETITIVE_TIERS = [
+  "MLS Next",
+  "ECNL / ECNL Regional",
+  "NPL / USYS",
+  "Club Travel",
+  "High School Varsity",
+  "High School JV",
+  "Recreational",
+];
+
+export interface Squad {
+  id: string;
+  name: string;
+  sport: string;
+  sportEmoji: string;
+  level: string;
+  competitiveTier: string; // e.g. "MLS Next", "ECNL", "Club", "Recreational"
+  ageRange: string;
+  city: string;
+  state: string;
+  memberCount: number;
+  maxMembers: number;
+  lookingForTrainer: boolean;
+  description: string;
+  createdBy: string;
+}
+
+export interface FreePlayEvent {
+  id: string;
+  sport: string;
+  sportEmoji: string;
+  title: string;
+  level: string;
+  competitiveTier: string;
+  venue: string;
+  city: string;
+  state: string;
+  date: string;
+  time: string;
+  duration: number;
+  playersConfirmed: number;
+  playersNeeded: number;
+  ageRange: string;
+  description: string;
+  organizer: string;
+}
