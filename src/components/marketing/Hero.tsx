@@ -38,12 +38,12 @@ export function Hero() {
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-            Elite sports training,{" "}
-            <span className="text-primary">your way.</span>
+            Group sports training,{" "}
+            <span className="text-primary">built for your crew.</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Grupup is the only platform built for <strong className="text-foreground">group sports training sessions</strong> — train with friends in soccer, basketball, and more, coached by elite trainers near you. Private sessions available too.
+            Grupup is the only platform dedicated to <strong className="text-foreground">group training sessions</strong> — soccer, basketball, and more. Train with your friends, split the cost, and find a coach near you.
           </p>
 
           {/* Search bar */}
