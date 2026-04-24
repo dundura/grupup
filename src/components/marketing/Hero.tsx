@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MapPin } from "lucide-react";
+
+const sportWords = ["soccer,", "basketball,", "football,", "baseball,", "tennis,", "swimming,"];
 
 const sports = [
   { label: "All Sports", value: "" },
@@ -28,6 +30,19 @@ export function Hero() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [sport, setSport] = useState("");
+  const [sportIndex, setSportIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setSportIndex((i) => (i + 1) % sportWords.length);
+        setVisible(true);
+      }, 300);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -62,7 +77,12 @@ export function Hero() {
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
                 Group training for{" "}
-                <span className="text-[#DC373E]">every sport,</span>{" "}
+                <span
+                  className="text-[#DC373E] inline-block transition-all duration-300"
+                  style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(-8px)" }}
+                >
+                  {sportWords[sportIndex]}
+                </span>{" "}
                 every crew.
               </h1>
 
