@@ -5,9 +5,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Grupup - Group Soccer Training Sessions",
+  title: "Grupup - Group Sports Training Sessions",
   description:
-    "The only platform built for group soccer training. Find and book group sessions with elite coaches near you. Available across NC.",
+    "The only platform built for group sports training. Find and book group sessions in soccer, basketball, and more with elite coaches near you.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -12,7 +12,7 @@ const benefits = [
   {
     icon: Users,
     title: "We bring you the clients",
-    description: "Soccer families actively search our platform for group training sessions. No more cold outreach.",
+    description: "Sports families actively search our platform for group training sessions. No more cold outreach.",
   },
   {
     icon: Calendar,
@@ -69,7 +69,7 @@ export default function ForTrainersPage() {
             <span className="text-primary">Get paid for it.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join a platform built for private soccer trainers. We handle bookings, payments, and marketing. You do what you do best.
+            Join a platform built for group sports coaches. We handle bookings, payments, and marketing. You do what you do best.
           </p>
           <Button size="lg" asChild>
             <Link href="#apply">Apply Now</Link>

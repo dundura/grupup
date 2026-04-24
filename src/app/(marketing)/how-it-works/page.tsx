@@ -10,7 +10,7 @@ const steps = [
     description: "Browse group training sessions by location, specialty, price, and skill level.",
     details: [
       "Filter by city, price, and training focus",
-      "Read authentic reviews from soccer parents",
+      "Read authentic reviews from real parents",
       "See certifications and years of experience",
       "Compare trainers side by side",
     ],

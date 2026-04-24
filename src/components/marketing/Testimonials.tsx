@@ -10,7 +10,7 @@ export function Testimonials() {
             Parents love the results
           </h2>
           <p className="text-lg text-muted-foreground">
-            Real reviews from real soccer families.
+            Real reviews from real sports families.
           </p>
         </div>
 

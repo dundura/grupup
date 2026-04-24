@@ -14,7 +14,7 @@ export function Footer() {
               <span>Grupup</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
-              The only platform built for group soccer training sessions. Find coaches near you.
+              The only platform built for group sports training sessions. Find coaches near you.
             </p>
           </div>
 

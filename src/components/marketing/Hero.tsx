@@ -21,29 +21,29 @@ export function Hero() {
       <div className="container relative py-16 md:py-24 lg:py-32">
         <div className="max-w-4xl mx-auto text-center">
 
-          {/* Problem / value pills */}
+          {/* Value pills */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-xs font-semibold">
-              <DollarSign className="h-3.5 w-3.5" />
-              <span>Private training too expensive?</span>
+              <Users className="h-3.5 w-3.5" />
+              <span>Soccer · Basketball · More</span>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 text-accent px-4 py-1.5 text-xs font-semibold">
-              <Users className="h-3.5 w-3.5" />
-              <span>Your kid wants to train with friends?</span>
+              <DollarSign className="h-3.5 w-3.5" />
+              <span>Group &amp; private sessions available</span>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full bg-green-100 text-green-700 px-4 py-1.5 text-xs font-semibold">
               <TrendingUp className="h-3.5 w-3.5" />
-              <span>Group training is more effective</span>
+              <span>Train with friends, level up faster</span>
             </div>
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-            Elite soccer training,{" "}
-            <span className="text-primary">shared with your crew.</span>
+            Elite sports training,{" "}
+            <span className="text-primary">your way.</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Grupup is the only platform built for <strong className="text-foreground">group soccer training sessions</strong> — split the cost with friends, train together, and get coached by elite trainers near you.
+            Grupup is the only platform built for <strong className="text-foreground">group sports training sessions</strong> — train with friends in soccer, basketball, and more, coached by elite trainers near you. Private sessions available too.
           </p>
 
           {/* Search bar */}
