@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, Users, DollarSign } from "lucide-react";
+import { Search, MapPin, Users, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -30,6 +30,10 @@ export function Hero() {
             <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 text-accent px-4 py-1.5 text-xs font-semibold">
               <Users className="h-3.5 w-3.5" />
               <span>Your kid wants to train with friends?</span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 text-green-700 px-4 py-1.5 text-xs font-semibold">
+              <TrendingUp className="h-3.5 w-3.5" />
+              <span>Group training is more effective</span>
             </div>
           </div>
 
