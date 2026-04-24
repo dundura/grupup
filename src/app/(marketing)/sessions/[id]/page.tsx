@@ -54,31 +54,21 @@ export default function SessionPage({ params }: { params: { id: string } }) {
 
             {/* Hero card */}
             <div className="rounded-2xl overflow-hidden border shadow-sm">
-              {/* Navy header */}
+              {/* Navy header — trainer focused */}
               <div className="px-6 pt-6 pb-6" style={{ backgroundColor: "#0F3154" }}>
-                {offer && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white mb-4" style={{ backgroundColor: "#DC373E" }}>
-                    🏷️ {offer.label}
-                  </span>
+                <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-2">
+                  {session.sport} · {session.city}, {session.state}
+                </p>
+                <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                  {session.trainer.name}
+                </h1>
+                {trainer && (
+                  <div className="flex items-center gap-2 mt-2 text-white/70 text-sm">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <span className="font-semibold text-white">{trainer.rating}</span>
+                    <span>· {trainer.reviewCount} reviews · {trainer.yearsExperience} yrs experience</span>
+                  </div>
                 )}
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">
-                      {session.sport} · {SESSION_TYPE_LABELS[session.sessionType]}
-                    </p>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">{session.title}</h1>
-                    <p className="text-white/60 mt-1">{session.focus}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {offer && discountedPrice !== null && (
-                      <p className="text-white/40 text-sm line-through">${session.pricePerPlayer}</p>
-                    )}
-                    <p className="font-extrabold text-3xl" style={{ color: discountedPrice === 0 ? "#6EE7B7" : "#fff" }}>
-                      {discountedPrice === 0 ? "FREE" : `$${displayPrice}`}
-                    </p>
-                    <p className="text-white/50 text-xs mt-0.5">{isPrivate ? "/ session" : "/ player"}</p>
-                  </div>
-                </div>
               </div>
 
               {/* Trainer info — below hero */}
