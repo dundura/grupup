@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, ArrowRight, Users } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { STANDARD_PRICES, SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS, PLATFORM_FEE, TRAINER_SHARE } from "@/lib/types";
 
@@ -203,47 +203,6 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Trainer earnings */}
-      <div className="container py-16 md:py-20">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Trainers keep 85%</h2>
-            <p className="text-muted-foreground text-lg">
-              No bidding. No rate negotiation. Set your schedule — we handle the rest.
-            </p>
-          </div>
-
-          {/* Trainer tip callout */}
-          <div className="rounded-2xl border px-6 py-5 mb-10" style={{ backgroundColor: "#f4f6f9" }}>
-            <p className="font-semibold text-sm mb-2">💡 Pro tip: require a minimum to confirm</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Set a minimum player count — e.g. "session runs with 4+ players" — to protect your earnings.
-              Package pricing (8-week programs) locks in revenue and builds community. Both are supported on the platform.
-            </p>
-          </div>
-
-          {/* Trainer CTA */}
-          <div className="rounded-2xl p-8 text-center text-white" style={{ backgroundColor: "#0F3154" }}>
-            <div className="flex justify-center mb-4">
-              <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#DC373E" }}>
-                <Users className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Ready to build your roster?</h3>
-            <p className="text-white/70 mb-6 max-w-md mx-auto">
-              Create group sessions on your schedule. We bring the players, you bring the expertise.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" style={{ backgroundColor: "#DC373E", color: "#fff" }}>
-                <Link href="/profile/create">Become a trainer</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                <Link href="/how-it-works">How it works</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* FAQ */}
       <div className="border-t" style={{ backgroundColor: "#f4f6f9" }}>
