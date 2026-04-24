@@ -11,7 +11,7 @@ export function Navbar() {
 
   const links = [
     { href: "/groups", label: "Find Groups" },
-    { href: "/free-play", label: "Free Play" },
+    { href: "/free-play", label: "Find Free Play" },
     { href: "/connect", label: "Connect" },
     { href: "/pricing", label: "Pricing" },
     { href: "/for-trainers", label: "For Trainers" },
