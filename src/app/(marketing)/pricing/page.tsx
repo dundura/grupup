@@ -148,18 +148,6 @@ export default function PricingPage() {
           })}
         </div>
 
-        {/* NC market callout */}
-        <div className="max-w-4xl mx-auto mt-8 rounded-2xl border px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4" style={{ backgroundColor: "#f4f6f9" }}>
-          <span className="text-2xl">📍</span>
-          <div>
-            <p className="font-semibold text-sm mb-1">Calibrated for the Cary / Raleigh market</p>
-            <p className="text-sm text-muted-foreground">
-              Standard group rate: <strong>$30/player</strong> for small groups · <strong>$20/player</strong> for clinics ·
-              Elite-level (ECNL / MLS Next): <strong>$45/player</strong> semi-private.
-              Rates are based on NC youth soccer market data.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Savings table */}
