@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, ArrowRight, Users, Zap } from "lucide-react";
+import { Check, ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { STANDARD_PRICES, SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS, PLATFORM_FEE, TRAINER_SHARE } from "@/lib/types";
 
@@ -74,13 +74,9 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Platform-set rates on every group session. The more players, the less each person pays —
-            without sacrificing trainer quality.
+            Your player gets expert coaching. You split the cost with friends.
+            Same quality as private training — at a fraction of the price.
           </p>
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff" }}>
-            <Zap className="h-4 w-4" style={{ color: "#DC373E" }} />
-            Platform takes {Math.round(PLATFORM_FEE * 100)}% · Trainers keep {Math.round(TRAINER_SHARE * 100)}% · No hidden fees
-          </div>
         </div>
       </div>
 
