@@ -8,8 +8,17 @@ import { freePlayEvents } from "@/lib/mock-data";
 import { FreePlayEvent } from "@/lib/types";
 
 const SPORTS = ["All Sports", "Soccer", "Basketball"];
-const LEVELS = ["All Levels", "Beginner", "Intermediate", "Advanced"];
+const AGE_GROUPS = ["All Ages", "Kids (8–12)", "Teens (13–17)", "Adults (18+)"];
 const ALL_CITIES = ["All Cities", ...Array.from(new Set(freePlayEvents.map((e) => e.city))).sort()];
+
+function matchesAge(ageRange: string, group: string) {
+  if (group === "All Ages") return true;
+  const r = ageRange.toLowerCase();
+  if (group === "Kids (8–12)")    return r.includes("8") || r.includes("9") || r.includes("10") || r.includes("11") || r.includes("12") || r.includes("all");
+  if (group === "Teens (13–17)")  return r.includes("13") || r.includes("14") || r.includes("15") || r.includes("16") || r.includes("17") || r.includes("all");
+  if (group === "Adults (18+)")   return r.includes("18") || r.includes("20") || r.includes("25") || r.includes("30") || r.includes("adult") || r.includes("all");
+  return true;
+}
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + "T00:00:00");
@@ -272,7 +281,7 @@ function CreateEventModal({ onClose, onSave }: { onClose: () => void; onSave: (e
 
 export default function FreePlayPage() {
   const [sport, setSport] = useState("All Sports");
-  const [level, setLevel] = useState("All Levels");
+  const [ageGroup, setAgeGroup] = useState("All Ages");
   const [city, setCity] = useState("All Cities");
   const [events, setEvents] = useState<FreePlayEvent[]>(freePlayEvents);
   const [showCreate, setShowCreate] = useState(false);
@@ -281,11 +290,11 @@ export default function FreePlayPage() {
   const filtered = useMemo(() => {
     return events.filter((e) => {
       if (sport !== "All Sports" && e.sport !== sport) return false;
-      if (level !== "All Levels" && e.level !== level) return false;
+      if (!matchesAge(e.ageRange, ageGroup)) return false;
       if (city !== "All Cities" && e.city !== city) return false;
       return true;
     });
-  }, [events, sport, level, city]);
+  }, [events, sport, ageGroup, city]);
 
   function handleJoin(id: string) {
     setJoined((prev) => new Set([...prev, id]));
@@ -346,16 +355,16 @@ export default function FreePlayPage() {
             ))}
           </div>
 
-          {/* Level */}
+          {/* Age */}
           <div className="flex rounded-xl border overflow-hidden">
-            {LEVELS.map((l) => (
+            {AGE_GROUPS.map((a) => (
               <button
-                key={l}
-                onClick={() => setLevel(l)}
+                key={a}
+                onClick={() => setAgeGroup(a)}
                 className="px-4 py-2 text-sm font-medium transition-colors"
-                style={level === l ? { backgroundColor: "#0F3154", color: "#fff" } : { color: "#6B7280" }}
+                style={ageGroup === a ? { backgroundColor: "#0F3154", color: "#fff" } : { color: "#6B7280" }}
               >
-                {l}
+                {a}
               </button>
             ))}
           </div>
