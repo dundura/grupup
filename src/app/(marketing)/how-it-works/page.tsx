@@ -6,32 +6,32 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const steps = [
   {
     icon: Search,
-    title: "1. Find Your Trainer",
-    description: "Browse group training sessions by location, specialty, price, and skill level.",
+    title: "1. Find a Group Session",
+    description: "Browse group training sessions by location, sport, price, and skill level.",
     details: [
       "Filter by city, price, and training focus",
       "Read authentic reviews from real parents",
-      "See certifications and years of experience",
-      "Compare trainers side by side",
+      "See open spots and session schedules",
+      "Compare groups side by side",
     ],
   },
   {
     icon: Calendar,
-    title: "2. Book a Session",
-    description: "Pick a time, pay securely, and confirm. No awkward back-and-forth.",
+    title: "2. Join the Group",
+    description: "Pick a session with open spots, pay securely, and you're in. No back-and-forth.",
     details: [
-      "Transparent pricing - see rates upfront",
+      "Transparent platform pricing — always know what you pay",
       "Secure payment with Stripe",
-      "Pick from trainer's live availability",
+      "See live spot availability before booking",
       "Free cancellation up to 24 hours before",
     ],
   },
   {
     icon: Trophy,
     title: "3. Train & Improve",
-    description: "Meet at an agreed location. Train. Get a personalized recap.",
+    description: "Show up, train with your group, and get better together.",
     details: [
-      "Small group, focused attention",
+      "Small group, focused coaching attention",
       "Session notes sent after training",
       "Track progress over multiple sessions",
       "Rate and review your experience",
@@ -41,28 +41,28 @@ const steps = [
 
 const faqs = [
   {
-    q: "How do you vet trainers?",
-    a: "Every trainer submits proof of certifications, coaching experience, and a background check. We verify credentials and review coaching style before approving them to offer sessions on the platform.",
+    q: "How do you vet coaches?",
+    a: "Every coach submits proof of certifications, coaching experience, and a background check. We verify credentials and review coaching style before approving them to create sessions on the platform.",
   },
   {
-    q: "What ages do you train?",
-    a: "Most of our trainers work with players ages 6-18. Each trainer lists the age groups and skill levels they specialize in on their profile.",
+    q: "What ages do sessions cover?",
+    a: "Most group sessions are designed for players ages 6–18. Each session lists the age range and skill level it targets — filter to find the right fit.",
   },
   {
     q: "Where do sessions take place?",
-    a: "Sessions happen at public fields, parks, or facilities agreed upon by the trainer and parent. Some trainers have preferred locations listed on their profile.",
+    a: "Sessions happen at public fields, parks, or facilities listed by the coach. The venue is shown on every session card before you book.",
   },
   {
     q: "What if I need to cancel?",
-    a: "Free cancellation up to 24 hours before your session. Cancellations within 24 hours may incur a 50% fee, at the trainer's discretion.",
+    a: "Free cancellation up to 24 hours before your session. Cancellations within 24 hours may incur a 50% fee.",
   },
   {
-    q: "How much does it cost?",
-    a: "Session rates vary by coach and group size, typically between $40-$120 per session depending on experience and demand. The price you see on the session listing is what you pay.",
+    q: "How is pricing set?",
+    a: "Grupup uses standard platform pricing based on session type: $18/player for clinics, $28 for small groups, $40 for semi-private, and $85 for private 1-on-1 sessions. No surprises — the price you see is what you pay.",
   },
   {
     q: "Is this just for elite players?",
-    a: "Not at all. We have trainers who love working with beginners as much as elite-level players. Filter by skill level to find the right match for your player.",
+    a: "Not at all. We have sessions for every level — beginner to elite. Filter by skill level to find the right group for your player.",
   },
 ];
 
@@ -75,7 +75,7 @@ export default function HowItWorksPage() {
             How <span className="text-primary">Grupup</span> works
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Three simple steps from finding a trainer to getting better on the field.
+            Three simple steps from finding a group session to leveling up on the field.
           </p>
         </div>
       </section>
@@ -125,9 +125,9 @@ export default function HowItWorksPage() {
       <section className="py-16 md:py-24 text-center">
         <div className="container">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-lg text-muted-foreground mb-8">Browse trainers in your area and book your first session.</p>
+          <p className="text-lg text-muted-foreground mb-8">Find a group session near you and join today.</p>
           <Button size="lg" asChild>
-            <Link href="/trainers">Find a Trainer</Link>
+            <Link href="/trainers">Find a Group Session</Link>
           </Button>
         </div>
       </section>

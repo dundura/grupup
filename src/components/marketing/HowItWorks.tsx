@@ -10,8 +10,8 @@ const steps = [
   {
     icon: Calendar,
     number: "02",
-    title: "Book a Session",
-    description: "Pick a time that works for you. Secure booking with transparent pricing. Cancel free up to 24 hours before.",
+    title: "Join the Group",
+    description: "Pick a session with open spots, pay securely, and you're in. Standard pricing — no surprises.",
   },
   {
     icon: Trophy,
