@@ -27,7 +27,6 @@ const SESSION_CONFIGS = [
     perks: [
       "Most popular format",
       "Competitive team environment",
-      "NC market sweet spot: $30/player",
       "~65% less than private",
     ],
     savingsLabel: "~65% less than private",
