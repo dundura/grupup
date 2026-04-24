@@ -68,33 +68,25 @@ export function PlayerCard({ player }: PlayerCardProps) {
           <span>{player.sportEmoji} {player.sport}</span>
         </div>
 
-        {/* Competitive tier badge */}
-        <div className="flex items-center justify-center gap-2 mt-3">
+        {/* Competitive tier badge + team */}
+        <div className="flex flex-col items-center gap-1.5 mt-3">
           <span
             className="px-2.5 py-1 rounded-full text-xs font-semibold"
             style={{ backgroundColor: tierColor.bg, color: tierColor.text }}
           >
             {player.competitiveTier}
           </span>
+          <p className="text-xs text-white/50 leading-snug text-center">{player.team}</p>
         </div>
       </div>
 
       {/* White bottom section */}
       <div className="bg-white rounded-b-2xl border border-t-0 px-5 py-4">
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center">
-            <p className="text-sm font-bold" style={{ color: "#0F3154" }}>Age {player.age}</p>
-            <p className="text-xs text-muted-foreground">Age</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-bold truncate" style={{ color: "#0F3154" }}>{player.team.split(" ").slice(-2).join(" ")}</p>
-            <p className="text-xs text-muted-foreground">Club</p>
-          </div>
-        </div>
-
-        {/* Team name full */}
-        <p className="text-xs text-center text-muted-foreground mb-3 leading-snug line-clamp-1">{player.team}</p>
+        {/* Looking for */}
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+          <span className="font-semibold" style={{ color: "#0F3154" }}>Looking for: </span>
+          {player.lookingFor}
+        </p>
 
         {/* Action buttons */}
         {following && (
