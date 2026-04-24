@@ -55,7 +55,7 @@ export default function SessionPage({ params }: { params: { id: string } }) {
             {/* Hero card */}
             <div className="rounded-2xl overflow-hidden border shadow-sm">
               {/* Navy header */}
-              <div className="px-6 pt-6 pb-16 relative" style={{ backgroundColor: "#0F3154" }}>
+              <div className="px-6 pt-6 pb-6" style={{ backgroundColor: "#0F3154" }}>
                 {offer && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white mb-4" style={{ backgroundColor: "#DC373E" }}>
                     🏷️ {offer.label}
@@ -81,13 +81,13 @@ export default function SessionPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
 
-              {/* Trainer avatar overlapping */}
-              <div className="relative px-6 pb-6">
-                <div className="flex items-end gap-4 -mt-12 mb-5">
-                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
-                    <Image src={session.trainer.photo} alt={session.trainer.name} fill className="object-cover" sizes="80px" />
+              {/* Trainer info — below hero */}
+              <div className="relative px-6 pb-6 pt-5 border-t">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 flex-shrink-0" style={{ borderColor: "#0F3154" }}>
+                    <Image src={session.trainer.photo} alt={session.trainer.name} fill className="object-cover" sizes="64px" />
                   </div>
-                  <div className="pb-1">
+                  <div>
                     <h2 className="text-xl font-bold">{session.trainer.name}</h2>
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
