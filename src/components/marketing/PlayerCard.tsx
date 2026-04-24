@@ -71,7 +71,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
         {/* Competitive tier badge + team */}
         <div className="flex flex-col items-center gap-1.5 mt-3">
           <span
-            className="px-2.5 py-1 rounded-full text-xs font-semibold"
+            className="px-2.5 py-1 rounded-full text-xs font-semibold animate-pulse"
             style={{ backgroundColor: tierColor.bg, color: tierColor.text }}
           >
             {player.competitiveTier}
