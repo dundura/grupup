@@ -302,30 +302,25 @@ export default function SessionPage({ params }: { params: { id: string } }) {
                 );
               })()}
 
-              {/* Book this session (compact) */}
-              <div className="rounded-2xl border p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                  {isPrivate ? "Book private session" : "Join this session"}
-                </p>
-                <div className="flex items-end gap-1 mb-3">
-                  {offer && discountedPrice !== null && (
-                    <span className="text-muted-foreground line-through mr-1">${session.pricePerPlayer}</span>
-                  )}
-                  <span className="font-extrabold text-2xl" style={{ color: discountedPrice === 0 ? "#059669" : "#0F3154" }}>
-                    {discountedPrice === 0 ? "FREE" : `$${displayPrice}`}
-                  </span>
-                  <span className="text-muted-foreground text-sm mb-0.5">{isPrivate ? "/ session" : "/ player"}</span>
+              {/* Private booking — secondary */}
+              {isPrivate && (
+                <div className="rounded-2xl border p-5" style={{ backgroundColor: "#f4f6f9" }}>
+                  <p className="text-xs text-muted-foreground mb-2">Prefer 1-on-1?</p>
+                  <div className="flex items-end gap-1 mb-3">
+                    {offer && discountedPrice !== null && (
+                      <span className="text-muted-foreground line-through mr-1 text-sm">${session.pricePerPlayer}</span>
+                    )}
+                    <span className="font-bold text-lg" style={{ color: "#0F3154" }}>
+                      {discountedPrice === 0 ? "FREE" : `$${displayPrice}`}
+                    </span>
+                    <span className="text-muted-foreground text-xs mb-0.5">/ session</span>
+                  </div>
+                  <Button variant="outline" className="w-full mb-2 bg-white" disabled={session.spotsLeft === 0}>
+                    Book Private Session
+                  </Button>
+                  <Button variant="ghost" className="w-full text-sm text-muted-foreground">Message Trainer</Button>
                 </div>
-                <Button
-                  className="w-full text-white font-bold mb-2"
-                  style={{ backgroundColor: "#DC373E" }}
-                  disabled={session.spotsLeft === 0}
-                >
-                  {isPrivate ? "Book Session" : session.spotsLeft === 0 ? "Session Full" : "Join Session"}
-                </Button>
-                <Button variant="outline" className="w-full text-sm">Message Trainer</Button>
-                <p className="text-xs text-center text-muted-foreground mt-3">No payment charged until confirmed</p>
-              </div>
+              )}
 
             </div>
           </div>
