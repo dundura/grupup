@@ -13,6 +13,7 @@ export function Navbar() {
     { href: "/groups", label: "Find Groups" },
     { href: "/free-play", label: "Free Play" },
     { href: "/connect", label: "Connect" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/for-trainers", label: "For Trainers" },
   ];
 
