@@ -7,62 +7,60 @@ const SESSION_CONFIGS = [
   {
     type: "semi-private" as const,
     icon: "👥",
+    range: "$40–$50",
     description: "2–3 players training together. Split the cost, keep quality high.",
     highlight: false,
     perks: [
       "Split cost with 1–2 friends",
-      "Same trainer quality as private",
+      "Same trainer as private",
       "Great for pairs or siblings",
-      "Save ~50% vs private",
+      "~45% less than private",
     ],
-    savingsLabel: "~50% less than private",
+    savingsLabel: "~45% less than private",
   },
   {
     type: "small-group" as const,
     icon: "⚽",
-    description: "4–6 players. The sweet spot — competitive reps and affordable.",
+    range: "$25–$35",
+    description: "4–6 players. The sweet spot — competitive reps, coach attention, affordable.",
     highlight: true,
     perks: [
       "Most popular format",
       "Competitive team environment",
-      "Great for club teammates",
-      "Save ~65% vs private",
+      "NC market sweet spot: $30/player",
+      "~65% less than private",
     ],
     savingsLabel: "~65% less than private",
   },
   {
     type: "clinic" as const,
     icon: "🏟️",
-    description: "7+ players. Maximum reach for the lowest per-player cost.",
+    range: "$15–$25",
+    description: "7+ players. Academy-style training at the lowest per-player cost.",
     highlight: false,
     perks: [
       "Best value per player",
-      "Ideal for team groups",
-      "Coach-run structured session",
-      "Save ~75% vs private",
+      "Ideal for team or club groups",
+      "Structured, coach-run session",
+      "~75% less than private",
     ],
     savingsLabel: "~75% less than private",
   },
 ];
 
-// Savings calculator examples
+// Savings table examples
 const EXAMPLES = [
-  { size: 1, type: "private" as const, label: "1 player (private)" },
-  { size: 2, type: "semi-private" as const, label: "2 players (semi-private)" },
-  { size: 4, type: "small-group" as const, label: "4 players (small group)" },
-  { size: 6, type: "small-group" as const, label: "6 players (small group)" },
-  { size: 8, type: "clinic" as const, label: "8 players (clinic)" },
+  { size: 1,  type: "private" as const,      label: "1 player (private)" },
+  { size: 2,  type: "semi-private" as const, label: "2 players (semi-private)" },
+  { size: 3,  type: "semi-private" as const, label: "3 players (semi-private)" },
+  { size: 4,  type: "small-group" as const,  label: "4 players (small group)" },
+  { size: 6,  type: "small-group" as const,  label: "6 players (small group)" },
+  { size: 10, type: "clinic" as const,       label: "10 players (clinic)" },
 ];
 
-const TRAINER_EXAMPLES = [
-  { sessions: 2, type: "small-group" as const, size: 5, label: "2× small group/week" },
-  { sessions: 3, type: "small-group" as const, size: 5, label: "3× small group/week" },
-  { sessions: 4, type: "small-group" as const, size: 6, label: "4× small group/week" },
-  { sessions: 5, type: "clinic" as const, size: 8, label: "5× clinic/week" },
-];
 
 export default function PricingPage() {
-  const privateRate = 85; // standard private reference rate
+  const privateRate = 85;
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,8 +74,8 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Platform-set rates on every group session. The more players in a session,
-            the less each person pays — without sacrificing quality.
+            Platform-set rates on every group session. The more players, the less each person pays —
+            without sacrificing trainer quality.
           </p>
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff" }}>
             <Zap className="h-4 w-4" style={{ color: "#DC373E" }} />
@@ -88,16 +86,15 @@ export default function PricingPage() {
 
       {/* Session type cards */}
       <div className="container py-16 md:py-20">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {SESSION_CONFIGS.map((config) => {
             const price = STANDARD_PRICES[config.type];
-            const isPrivate = config.type === "private";
             return (
               <div
                 key={config.type}
-                className="relative rounded-2xl overflow-hidden flex flex-col shadow-xl"
+                className="relative rounded-2xl overflow-hidden flex flex-col"
                 style={config.highlight
-                  ? { border: "2px solid #DC373E" }
+                  ? { border: "2px solid #DC373E", boxShadow: "0 10px 40px rgba(220,55,62,0.15)" }
                   : { border: "1px solid hsl(var(--border))" }
                 }
               >
@@ -115,16 +112,20 @@ export default function PricingPage() {
                   <p className={`text-xs mb-4 ${config.highlight ? "text-white/60" : "text-muted-foreground"}`}>
                     {SESSION_TYPE_SPOTS[config.type]}
                   </p>
-                  <div className="flex items-end gap-1">
+                  {/* Price display */}
+                  <div className="flex items-end gap-1 mb-1">
                     <span className={`text-4xl font-extrabold ${config.highlight ? "text-white" : ""}`}>
                       ${price}
                     </span>
                     <span className={`text-sm mb-1.5 ${config.highlight ? "text-white/60" : "text-muted-foreground"}`}>
-                      {isPrivate ? "/ session" : "/ player"}
+                      / player
                     </span>
                   </div>
+                  <p className={`text-xs ${config.highlight ? "text-white/40" : "text-muted-foreground"}`}>
+                    Market range: {config.range}
+                  </p>
                   {config.savingsLabel && (
-                    <p className="text-xs font-semibold mt-1" style={{ color: config.highlight ? "#FCA5A5" : "#DC373E" }}>
+                    <p className="text-xs font-semibold mt-2" style={{ color: config.highlight ? "#FCA5A5" : "#DC373E" }}>
                       {config.savingsLabel}
                     </p>
                   )}
@@ -150,16 +151,29 @@ export default function PricingPage() {
             );
           })}
         </div>
+
+        {/* NC market callout */}
+        <div className="max-w-4xl mx-auto mt-8 rounded-2xl border px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4" style={{ backgroundColor: "#f4f6f9" }}>
+          <span className="text-2xl">📍</span>
+          <div>
+            <p className="font-semibold text-sm mb-1">Calibrated for the Cary / Raleigh market</p>
+            <p className="text-sm text-muted-foreground">
+              Standard group rate: <strong>$30/player</strong> for small groups · <strong>$20/player</strong> for clinics ·
+              Elite-level (ECNL / MLS Next): <strong>$45/player</strong> semi-private.
+              Rates are based on NC youth soccer market data.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Cost comparison table */}
+      {/* Savings table */}
       <div className="border-t border-b" style={{ backgroundColor: "#f4f6f9" }}>
         <div className="container py-16 md:py-20">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-3">How the savings add up</h2>
               <p className="text-muted-foreground text-lg">
-                Same trainer. Same hour. More players = less cost per person.
+                Same trainer. Same hour. More players = less per person.
               </p>
             </div>
 
@@ -170,14 +184,13 @@ export default function PricingPage() {
                     <th className="text-left px-6 py-4 text-sm font-semibold text-white/70">Session</th>
                     <th className="text-right px-6 py-4 text-sm font-semibold text-white/70">Per player</th>
                     <th className="text-right px-6 py-4 text-sm font-semibold text-white/70">Total collected</th>
-                    <th className="text-right px-6 py-4 text-sm font-semibold text-white/70">vs. private</th>
+                    <th className="text-right px-6 py-4 text-sm font-semibold text-white/70">Saving vs. private</th>
                   </tr>
                 </thead>
                 <tbody>
                   {EXAMPLES.map((ex, i) => {
                     const price = STANDARD_PRICES[ex.type];
                     const total = price * ex.size;
-                    const privateTotal = privateRate;
                     const saving = ex.type === "private" ? 0 : Math.round((1 - price / privateRate) * 100);
                     return (
                       <tr key={i} className={`border-b last:border-0 ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
@@ -188,7 +201,7 @@ export default function PricingPage() {
                         <td className="px-6 py-4 text-sm text-right text-muted-foreground">${total}</td>
                         <td className="px-6 py-4 text-sm text-right font-semibold">
                           {saving === 0 ? (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">baseline</span>
                           ) : (
                             <span style={{ color: "#DC373E" }}>−{saving}%</span>
                           )}
@@ -200,50 +213,29 @@ export default function PricingPage() {
               </table>
             </div>
             <p className="text-xs text-center text-muted-foreground mt-3">
-              Private rate shown at $85. Actual private rates set by trainer and vary.
+              Private baseline at $85. Actual private rates are set by each trainer and vary.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Trainer earnings section */}
+      {/* Trainer earnings */}
       <div className="container py-16 md:py-20">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Trainers keep 85%</h2>
             <p className="text-muted-foreground text-lg">
-              No bidding. No negotiating. Set your schedule, we handle the rest.
+              No bidding. No rate negotiation. Set your schedule — we handle the rest.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mb-10">
-            {TRAINER_EXAMPLES.map((ex, i) => {
-              const price = STANDARD_PRICES[ex.type];
-              const grossPerSession = price * ex.size;
-              const trainerPerSession = Math.round(grossPerSession * TRAINER_SHARE);
-              const weeklyGross = grossPerSession * ex.sessions;
-              const trainerWeekly = Math.round(weeklyGross * TRAINER_SHARE);
-              const trainerMonthly = trainerWeekly * 4;
-              return (
-                <div key={i} className="bg-card border rounded-2xl p-5">
-                  <p className="text-sm font-semibold text-muted-foreground mb-3">{ex.label}</p>
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Per session ({ex.size} players)</span>
-                      <span className="font-semibold">${trainerPerSession}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Weekly</span>
-                      <span className="font-semibold">${trainerWeekly}</span>
-                    </div>
-                    <div className="flex justify-between text-sm border-t pt-1.5 mt-1.5">
-                      <span className="font-bold">Monthly estimate</span>
-                      <span className="font-bold text-lg" style={{ color: "#0F3154" }}>${trainerMonthly.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Trainer tip callout */}
+          <div className="rounded-2xl border px-6 py-5 mb-10" style={{ backgroundColor: "#f4f6f9" }}>
+            <p className="font-semibold text-sm mb-2">💡 Pro tip: require a minimum to confirm</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Set a minimum player count — e.g. "session runs with 4+ players" — to protect your earnings.
+              Package pricing (8-week programs) locks in revenue and builds community. Both are supported on the platform.
+            </p>
           </div>
 
           {/* Trainer CTA */}
@@ -269,7 +261,7 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* FAQ-style trust section */}
+      {/* FAQ */}
       <div className="border-t" style={{ backgroundColor: "#f4f6f9" }}>
         <div className="container py-16 md:py-20">
           <div className="max-w-2xl mx-auto">
@@ -285,8 +277,12 @@ export default function PricingPage() {
                   a: "No. The price you see is what you pay. No booking fees, no surprise charges at checkout.",
                 },
                 {
-                  q: "Why are prices standard across trainers?",
+                  q: "Why are group prices the same across all trainers?",
                   a: "It removes friction for players and fairness concerns between trainers. Everyone on the platform competes on quality, not price — which is better for everyone.",
+                },
+                {
+                  q: "Do you offer package or season pricing?",
+                  a: "Yes. Trainers can offer 8–12 week packages at a 10–15% discount vs per-session rates. Packages lock in revenue for trainers and build consistency for players.",
                 },
                 {
                   q: "How do trainers get paid?",
