@@ -17,13 +17,13 @@ const sports = [
 ];
 
 const shortcuts = [
-  { label: "⚽ Soccer", href: "/trainers?sport=soccer" },
-  { label: "🏀 Basketball", href: "/trainers?sport=basketball" },
-  { label: "👥 Group Sessions", href: "/trainers?type=group" },
-  { label: "🔒 Private Sessions", href: "/trainers?type=private" },
+  { label: "⚽ Soccer", href: "/groups?sport=soccer" },
+  { label: "🏀 Basketball", href: "/groups?sport=basketball" },
+  { label: "👥 Group Sessions", href: "/groups?type=group" },
+  { label: "🔒 Private Sessions", href: "/groups?type=private" },
   { label: "🎮 Free Play", href: "/free-play" },
-  { label: "👶 Youth", href: "/trainers?level=beginner" },
-  { label: "🏆 Competitive", href: "/trainers?level=advanced" },
+  { label: "👶 Youth", href: "/groups?level=beginner" },
+  { label: "🏆 Competitive", href: "/groups?level=advanced" },
 ];
 
 export function Hero() {
@@ -49,7 +49,7 @@ export function Hero() {
     const params = new URLSearchParams();
     if (query.trim()) params.set("search", query.trim());
     if (sport) params.set("sport", sport);
-    router.push(`/trainers${params.toString() ? `?${params}` : ""}`);
+    router.push(`/groups${params.toString() ? `?${params}` : ""}`);
   }
 
   return (

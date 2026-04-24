@@ -19,7 +19,7 @@ export default function TrainerDetailPage({ params }: { params: { id: string } }
     <div>
       <div className="container pt-6">
         <Link
-          href="/trainers"
+          href="/groups"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />

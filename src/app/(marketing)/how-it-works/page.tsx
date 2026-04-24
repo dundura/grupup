@@ -127,7 +127,7 @@ export default function HowItWorksPage() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to get started?</h2>
           <p className="text-lg text-muted-foreground mb-8">Find a group session near you and join today.</p>
           <Button size="lg" asChild>
-            <Link href="/trainers">Find a Group Session</Link>
+            <Link href="/groups">Find a Group Session</Link>
           </Button>
         </div>
       </section>

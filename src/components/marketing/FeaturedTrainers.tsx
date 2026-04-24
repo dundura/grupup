@@ -18,7 +18,7 @@ export function FeaturedTrainers() {
             </p>
           </div>
           <Button variant="outline" asChild className="self-start">
-            <Link href="/trainers">
+            <Link href="/groups">
               Browse all sessions
               <ArrowRight className="h-4 w-4" />
             </Link>
