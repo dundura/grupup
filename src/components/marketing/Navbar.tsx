@@ -38,10 +38,12 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">
-            Sign In
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/profile/create">Sign In</Link>
           </Button>
-          <Button size="sm">Get Started</Button>
+          <Button size="sm" asChild style={{ backgroundColor: "#DC373E" }}>
+            <Link href="/profile/create">Get Started</Link>
+          </Button>
         </div>
 
         <button
@@ -71,11 +73,11 @@ export function Navbar() {
             </Link>
           ))}
           <div className="flex flex-col gap-2 pt-3 border-t mt-2">
-            <Button variant="outline" size="lg" className="w-full">
-              Sign In
+            <Button variant="outline" size="lg" className="w-full" asChild>
+              <Link href="/profile/create" onClick={() => setOpen(false)}>Sign In</Link>
             </Button>
-            <Button size="lg" className="w-full">
-              Get Started
+            <Button size="lg" className="w-full" asChild style={{ backgroundColor: "#DC373E" }}>
+              <Link href="/profile/create" onClick={() => setOpen(false)}>Get Started</Link>
             </Button>
           </div>
         </div>

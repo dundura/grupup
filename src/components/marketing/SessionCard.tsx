@@ -1,6 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Clock, Users, Star } from "lucide-react";
+import { MapPin, Clock, Users, Star, Bell, Share2, Check } from "lucide-react";
 import type { GroupSession } from "@/lib/types";
 import { SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS } from "@/lib/types";
 
@@ -16,6 +19,23 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session }: SessionCardProps) {
+  const [following, setFollowing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function handleFollow(e: React.MouseEvent) {
+    e.preventDefault();
+    setFollowing((f) => !f);
+  }
+
+  function handleShare(e: React.MouseEvent) {
+    e.preventDefault();
+    const url = `${window.location.origin}/sessions/${session.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   const spotsFilled = session.totalSpots - session.spotsLeft;
   const fillPct = Math.round((spotsFilled / session.totalSpots) * 100);
   const almostFull = session.spotsLeft <= 2;
@@ -122,14 +142,34 @@ export function SessionCard({ session }: SessionCardProps) {
         </div>
       </div>
 
-      {/* CTA */}
-      <div className="px-5 pb-5">
+      {/* CTA row */}
+      <div className="px-5 pb-5 flex gap-2">
         <div
-          className="w-full py-2.5 rounded-xl text-center text-sm font-semibold text-white transition-opacity group-hover:opacity-90"
+          className="flex-1 py-2.5 rounded-xl text-center text-sm font-semibold text-white transition-opacity group-hover:opacity-90"
           style={{ backgroundColor: "#DC373E" }}
         >
-          Join This Group
+          Join Session
         </div>
+        <button
+          onClick={handleFollow}
+          title={following ? "Following this trainer" : "Follow trainer for updates"}
+          className="flex items-center justify-center w-10 h-10 rounded-xl border transition-colors shrink-0"
+          style={following
+            ? { backgroundColor: "#0F3154", borderColor: "#0F3154" }
+            : { borderColor: "#e2e8f0" }}
+        >
+          <Bell className="h-4 w-4" style={{ color: following ? "white" : "#94a3b8" }} />
+        </button>
+        <button
+          onClick={handleShare}
+          title="Copy invite link"
+          className="flex items-center justify-center w-10 h-10 rounded-xl border transition-colors shrink-0"
+          style={{ borderColor: "#e2e8f0" }}
+        >
+          {copied
+            ? <Check className="h-4 w-4 text-green-500" />
+            : <Share2 className="h-4 w-4 text-muted-foreground" />}
+        </button>
       </div>
     </Link>
   );
