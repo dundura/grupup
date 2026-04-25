@@ -13,8 +13,9 @@ const skillColors: Record<string, string> = {
   Elite:        "bg-purple-100 text-purple-700",
 };
 
-export default function SessionPage({ params }: { params: { id: string } }) {
-  const session = groupSessions.find((s) => s.id === params.id);
+export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = groupSessions.find((s) => s.id === id);
   if (!session) notFound();
 
   const trainer = trainers.find((t) => t.id === session.trainer.id);

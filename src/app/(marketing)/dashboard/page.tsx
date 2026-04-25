@@ -3,31 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Bell, Star, MapPin, Clock, ChevronRight, Search, Plus, Users } from "lucide-react";
 import { groupSessions, trainers } from "@/lib/mock-data";
 
-interface Profile {
-  role: string;
-  firstName: string;
-  lastName: string;
-  city: string;
-  sport: string;
-  level: string;
-  playerName?: string;
-  playerAge?: string;
-}
-
 export default function DashboardPage() {
-  const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, isLoaded } = useUser();
   const [followed, setFollowed] = useState<string[]>([]);
 
   useEffect(() => {
-    const p = localStorage.getItem("grupup_profile");
     const f = localStorage.getItem("grupup_followed");
-    if (p) setProfile(JSON.parse(p));
     if (f) setFollowed(JSON.parse(f));
   }, []);
 
@@ -41,34 +27,29 @@ export default function DashboardPage() {
     });
   }
 
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
+  }
+
+  const meta = (user?.publicMetadata ?? {}) as {
+    role?: string; city?: string; sport?: string; level?: string; playerName?: string;
+  };
+  const role = meta.role ?? "player";
+  const city = meta.city ?? "";
+  const sport = meta.sport ?? "";
+  const level = meta.level ?? "";
+  const firstName = user?.firstName ?? "";
+
+  const name = role === "parent" && meta.playerName ? meta.playerName : firstName;
+
   // Recommended sessions based on profile sport + city
   const recommended = groupSessions.filter((s) => {
-    if (!profile) return true;
-    const sportMatch = !profile.sport || s.sport.toLowerCase() === profile.sport.toLowerCase();
-    const cityMatch = !profile.city || s.city === profile.city.split(",")[0];
+    const sportMatch = !sport || s.sport.toLowerCase() === sport.toLowerCase();
+    const cityMatch = !city || s.city === city.split(",")[0];
     return sportMatch || cityMatch;
   }).slice(0, 4);
 
   const followedTrainers = trainers.filter((t) => followed.includes(t.id));
-
-  const name = profile
-    ? profile.role === "parent" && profile.playerName
-      ? profile.playerName
-      : profile.firstName
-    : null;
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">No profile found.</p>
-          <Button style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/profile/create")}>
-            Create your profile
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
@@ -80,9 +61,9 @@ export default function DashboardPage() {
             {name ? `Hey, ${name} 👋` : "Your Dashboard"}
           </h1>
           <p className="text-white/50 text-sm">
-            {profile.role === "trainer" && <span className="inline-block bg-white/10 text-white/80 text-xs font-semibold px-2 py-0.5 rounded-full mr-2">Coach</span>}
-            {profile.sport && `${profile.sport} · `}{profile.city}
-            {profile.level && ` · ${profile.level}`}
+            {role === "trainer" && <span className="inline-block bg-white/10 text-white/80 text-xs font-semibold px-2 py-0.5 rounded-full mr-2">Coach</span>}
+            {sport && `${sport} · `}{city}
+            {level && ` · ${level}`}
           </p>
         </div>
       </div>
@@ -90,7 +71,7 @@ export default function DashboardPage() {
       <div className="container max-w-5xl py-10 space-y-10">
 
         {/* Trainer view */}
-        {profile.role === "trainer" ? (
+        {role === "trainer" ? (
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">My sessions</h2>
@@ -145,7 +126,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">
                 Recommended for you
-                {profile.city && <span className="text-muted-foreground font-normal text-base ml-2">· {profile.city.split(",")[0]}</span>}
+                {city && <span className="text-muted-foreground font-normal text-base ml-2">· {city.split(",")[0]}</span>}
               </h2>
               <Link href="/groups" className="text-sm font-medium text-[#DC373E] flex items-center gap-1 hover:underline">
                 See all <ChevronRight className="h-4 w-4" />
@@ -190,7 +171,7 @@ export default function DashboardPage() {
         )}
 
         {/* Following — players/parents only */}
-        {profile.role !== "trainer" && <section>
+        {role !== "trainer" && <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Trainers you follow</h2>
           </div>

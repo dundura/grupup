@@ -5,9 +5,16 @@ import { useState } from "react";
 import { Menu, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useAuth,
+} from "@clerk/nextjs";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { isSignedIn } = useAuth();
 
   const links = [
     { href: "/groups", label: "Find Groups" },
@@ -40,12 +47,23 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/profile/create">Sign In</Link>
-          </Button>
-          <Button size="sm" asChild style={{ backgroundColor: "#DC373E" }}>
-            <Link href="/profile/create">Get Started</Link>
-          </Button>
+          {!isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button size="sm" style={{ backgroundColor: "#DC373E" }}>Get Started</Button>
+              </SignUpButton>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <UserButton />
+            </>
+          )}
         </div>
 
         <button
@@ -75,12 +93,29 @@ export function Navbar() {
             </Link>
           ))}
           <div className="flex flex-col gap-2 pt-3 border-t mt-2">
-            <Button variant="outline" size="lg" className="w-full" asChild>
-              <Link href="/profile/create" onClick={() => setOpen(false)}>Sign In</Link>
-            </Button>
-            <Button size="lg" className="w-full" asChild style={{ backgroundColor: "#DC373E" }}>
-              <Link href="/profile/create" onClick={() => setOpen(false)}>Get Started</Link>
-            </Button>
+            {!isSignedIn ? (
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="lg" className="w-full" onClick={() => setOpen(false)}>
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => setOpen(false)}>
+                    Get Started
+                  </Button>
+                </SignUpButton>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="lg" className="w-full" asChild>
+                  <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
+                </Button>
+                <div className="flex justify-center pt-1">
+                  <UserButton />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

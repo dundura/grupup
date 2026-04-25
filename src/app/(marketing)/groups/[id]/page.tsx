@@ -11,8 +11,9 @@ export function generateStaticParams() {
   return trainers.map((t) => ({ id: t.id }));
 }
 
-export default function TrainerDetailPage({ params }: { params: { id: string } }) {
-  const trainer = trainers.find((t) => t.id === params.id);
+export default async function TrainerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const trainer = trainers.find((t) => t.id === id);
   if (!trainer) notFound();
 
   return (
