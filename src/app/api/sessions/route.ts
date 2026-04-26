@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result);
   } catch (err) {
     console.error("[GET /api/sessions]", err);
-    return NextResponse.json({ error: "Failed to fetch sessions" }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 

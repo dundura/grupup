@@ -116,8 +116,8 @@ export default function FreePlayPage() {
   useEffect(() => {
     fetch("/api/free-play")
       .then((r) => r.json())
-      .then((data) => { setEvents(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((data) => { setEvents(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setEvents([]); setLoading(false); });
   }, []);
 
   const allCities = useMemo(() => ["All Cities", ...Array.from(new Set(events.map((e) => e.city).filter(Boolean))).sort()], [events]);

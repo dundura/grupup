@@ -42,8 +42,8 @@ function SessionsPageInner() {
   useEffect(() => {
     fetch("/api/sessions")
       .then((r) => r.json())
-      .then((data) => { setAllSessions(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((data) => { setAllSessions(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setAllSessions([]); setLoading(false); });
   }, []);
 
   const filtered = useMemo(() => {

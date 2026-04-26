@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json(events);
   } catch (err) {
     console.error("[GET /api/free-play]", err);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 
