@@ -28,13 +28,14 @@ export default function ProfilePage() {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
     bio?: string; yearsExperience?: string;
     specialties?: string[]; certifications?: string[];
-    playerName?: string; playerAge?: string;
+    playerName?: string; playerAge?: string; isHidden?: boolean;
   };
 
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
     customSpecialty: "",
     lastName: user?.lastName ?? "",
+    isHidden: meta.isHidden ?? false,
     country: meta.country ?? "",
     city: meta.city ?? "",
     sport: meta.sport ?? "",
@@ -253,6 +254,43 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Visibility toggle — players/parents only */}
+        {role !== "trainer" && (
+          <div className="bg-card border rounded-2xl p-5">
+            <button type="button"
+              onClick={() => setForm((f) => ({ ...f, isHidden: !f.isHidden }))}
+              className="flex items-center justify-between w-full">
+              <div className="text-left">
+                <p className="font-semibold text-sm">Hide my profile from Connect</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {form.isHidden ? "Your profile is hidden — only you can see it" : "Your profile is visible to other players and trainers"}
+                </p>
+              </div>
+              <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isHidden ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isHidden ? "translate-x-4" : "translate-x-0"}`} />
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Archive toggle — trainers only */}
+        {role === "trainer" && (
+          <div className="bg-card border rounded-2xl p-5 border-amber-200" style={{ backgroundColor: "#fffbeb" }}>
+            <p className="text-sm font-semibold mb-1">Archive your profile</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Archiving hides your profile and sessions from all listings. You can un-archive at any time.
+            </p>
+            <Button variant="outline" size="sm" className="border-amber-400 text-amber-700 hover:bg-amber-50"
+              onClick={async () => {
+                if (!confirm("Archive your trainer profile? Players won't be able to find you until you un-archive.")) return;
+                await fetch("/api/trainer/profile/archive", { method: "POST" });
+                alert("Profile archived.");
+              }}>
+              Archive profile
+            </Button>
           </div>
         )}
 

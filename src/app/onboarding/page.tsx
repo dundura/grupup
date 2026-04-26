@@ -62,7 +62,7 @@ export default function OnboardingPage() {
       const result = await completeOnboarding({ role, ...form });
       if (result?.success) {
         await user?.reload();
-        router.push("/dashboard");
+        router.push(role === "trainer" ? "/trainer/setup" : "/dashboard");
       } else {
         alert(result?.error ?? "Something went wrong saving your profile.");
         setSaving(false);

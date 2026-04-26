@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, Star, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { trainers as mockTrainers } from "@/lib/mock-data";
 
 interface TrainerRow {
   id: string;
@@ -34,8 +33,8 @@ export default function TrainersPage() {
   useEffect(() => {
     fetch("/api/trainers")
       .then((r) => r.json())
-      .then((data) => { setAllTrainers(Array.isArray(data) ? data : mockTrainers as TrainerRow[]); setLoading(false); })
-      .catch(() => { setAllTrainers(mockTrainers as TrainerRow[]); setLoading(false); });
+      .then((data) => { setAllTrainers(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setAllTrainers([]); setLoading(false); });
   }, []);
 
   const cities = useMemo(() =>

@@ -18,6 +18,7 @@ export async function completeOnboarding(formData: {
   playerName?: string;
   playerAge?: string;
   customCert?: string;
+  isHidden?: boolean;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { userId } = await auth();
@@ -32,6 +33,7 @@ export async function completeOnboarding(formData: {
         city: formData.city,
         sport: formData.role === "trainer" ? formData.selectedSports?.[0] : formData.sport,
         onboardingComplete: true,
+        isHidden: formData.isHidden ?? false,
         ...(formData.role === "trainer" && {
           bio: formData.bio,
           yearsExperience: formData.yearsExperience,

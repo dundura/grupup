@@ -12,6 +12,8 @@ export const trainers = pgTable("trainers", {
   hourlyRate: integer("hourly_rate").default(85),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 10 }),
+  sport: varchar("sport", { length: 100 }),
+  sports: json("sports").$type<string[]>().default([]),
   certifications: json("certifications").$type<string[]>().default([]),
   specialties: json("specialties").$type<string[]>().default([]),
   skillLevels: json("skill_levels").$type<string[]>().default([]),
@@ -21,6 +23,7 @@ export const trainers = pgTable("trainers", {
   videoUrl: text("video_url"),
   stripeAccountId: varchar("stripe_account_id", { length: 255 }),
   isApproved: boolean("is_approved").default(true),
+  isArchived: boolean("is_archived").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
