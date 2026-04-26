@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Star, MapPin, Award, CalendarDays, ChevronLeft, Clock, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  MapPin, CalendarDays, Users, ShieldCheck,
+  Star, ChevronLeft, Award, Minus, Plus,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { trainers, trainerSessions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { PackageBooking } from "@/components/trainers/PackageBooking";
 
 export const dynamic = "force-dynamic";
 
@@ -28,168 +31,192 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
+  const sports       = (trainer.sports as string[] | null) ?? (trainer.sport ? [trainer.sport] : []);
+  const specialties  = (trainer.certifications as string[] | null) ?? [];
+  const location     = [trainer.city, trainer.state].filter(Boolean).join(", ");
+  const bioText      = trainer.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
+  const skillLevels  = (trainer.skillLevels as string[] | null) ?? [];
+
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
-      <div className="container max-w-3xl py-8 px-4">
+      <div className="container max-w-5xl py-8 px-4">
 
-        {/* Back */}
+        {/* Back link */}
         <Link href="/trainers"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
-          <ChevronLeft className="h-4 w-4" /> All trainers
+          <ChevronLeft className="h-4 w-4" /> Back to search results
         </Link>
 
-        {/* Profile card */}
-        <div className="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-8 items-start">
 
-          {/* Header strip */}
-          <div className="h-20 w-full" style={{ backgroundColor: "#0F3154" }} />
+          {/* ── LEFT COLUMN ── */}
+          <div className="space-y-6">
 
-          {/* Avatar + name */}
-          <div className="px-6 pb-6">
-            <div className="flex items-end gap-4 -mt-10 mb-4">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-4 border-white shadow-md shrink-0">
+            {/* Hero text */}
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold leading-snug mb-2">
+                Book {sports[0] ?? "Sports"} Sessions with {trainer.name}
+              </h1>
+              {sports.length > 0 && (
+                <p className="text-muted-foreground text-base">
+                  {sports.join(" · ")} Coach{location ? ` · ${location}` : ""}
+                  {trainer.yearsExperience ? ` · ${trainer.yearsExperience} years experience` : ""}
+                </p>
+              )}
+              {trainer.rating != null && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`h-4 w-4 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                    ))}
+                  </div>
+                  <span className="font-bold text-sm">{trainer.rating?.toFixed(1)}</span>
+                  <span className="text-muted-foreground text-sm">({trainer.reviewCount} reviews)</span>
+                </div>
+              )}
+            </div>
+
+            {/* Bio */}
+            {bioText && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <h2 className="font-bold text-base mb-3">About {trainer.name.split(" ")[0]}</h2>
+                <p className="text-muted-foreground leading-relaxed text-sm">{bioText}</p>
+              </div>
+            )}
+
+            {/* 4-column overview */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {location && (
+                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
+                  <MapPin className="h-5 w-5" style={{ color: "#0F3154" }} />
+                  <p className="text-xs font-medium leading-snug">{location}</p>
+                  <p className="text-[11px] text-muted-foreground">Training location</p>
+                </div>
+              )}
+              {sessions.length > 0 && (
+                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
+                  <CalendarDays className="h-5 w-5" style={{ color: "#0F3154" }} />
+                  <p className="text-xs font-medium">{sessions.length} session{sessions.length === 1 ? "" : "s"}</p>
+                  <p className="text-[11px] text-muted-foreground">Available now</p>
+                </div>
+              )}
+              {skillLevels.length > 0 && (
+                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
+                  <Users className="h-5 w-5" style={{ color: "#0F3154" }} />
+                  <p className="text-xs font-medium leading-snug">{skillLevels.slice(0, 2).join(", ")}</p>
+                  <p className="text-[11px] text-muted-foreground">Skill levels</p>
+                </div>
+              )}
+              <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-green-600" />
+                <p className="text-xs font-medium">Verified</p>
+                <p className="text-[11px] text-muted-foreground">Grupup trainer</p>
+              </div>
+            </div>
+
+            {/* Package booking — client component */}
+            <PackageBooking
+              trainerId={trainer.id}
+              trainerName={trainer.name}
+              sessions={sessions.map((s) => ({
+                id: s.id,
+                title: s.title,
+                pricePerPlayer: s.pricePerPlayer,
+                sessionType: s.sessionType,
+                dayOfWeek: s.dayOfWeek ?? "",
+                time: s.time ?? "",
+                duration: s.duration ?? 60,
+                city: s.city ?? "",
+                spotsLeft: s.spotsLeft,
+                spotsTotal: s.spotsTotal,
+              }))}
+            />
+
+            {/* Specialties & certs */}
+            {((trainer.specialties as string[] | null) ?? []).length > 0 && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <h2 className="font-bold text-base mb-3 flex items-center gap-2">
+                  <Award className="h-4 w-4" style={{ color: "#0F3154" }} /> Specialties & Certifications
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {((trainer.specialties as string[] | null) ?? []).map((s) => (
+                    <Badge key={s} variant="outline">{s}</Badge>
+                  ))}
+                  {((trainer.certifications as string[] | null) ?? []).map((c) => (
+                    <Badge key={c} variant="secondary">{c}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── RIGHT COLUMN (sidebar) ── */}
+          <div className="space-y-5 lg:sticky lg:top-24">
+
+            {/* Trainer photo */}
+            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="relative h-64 w-full">
                 {trainer.photo ? (
-                  <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="80px" unoptimized />
+                  <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="320px" unoptimized />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
+                  <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white"
                     style={{ backgroundColor: "#0F3154" }}>
                     {trainer.name?.[0] ?? "T"}
                   </div>
                 )}
               </div>
-              <div className="pb-1 min-w-0">
-                <h1 className="text-xl font-bold leading-tight">{trainer.name}</h1>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5 flex-wrap">
-                  {(trainer.city || trainer.state) && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {[trainer.city, trainer.state].filter(Boolean).join(", ")}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    <span className="font-semibold">{trainer.rating?.toFixed(1)}</span>
-                    <span>({trainer.reviewCount} reviews)</span>
-                  </span>
-                </div>
+              <div className="p-4">
+                <p className="font-bold text-base">{trainer.name}</p>
+                {location && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="h-3.5 w-3.5" />{location}</p>}
+                {trainer.hourlyRate && (
+                  <p className="text-sm font-semibold mt-2" style={{ color: "#DC373E" }}>From ${trainer.hourlyRate}/session</p>
+                )}
               </div>
             </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
-              {trainer.yearsExperience ? (
-                <div className="text-center bg-[#f7f8fa] rounded-xl p-3">
-                  <p className="text-lg font-bold">{trainer.yearsExperience}</p>
-                  <p className="text-xs text-muted-foreground">Years exp</p>
+            {/* Training location card */}
+            {location && (
+              <div className="bg-white rounded-2xl border shadow-sm p-5">
+                <p className="font-bold text-sm mb-3">Training Locations</p>
+                {/* Map placeholder — swap with embedded Google Map iframe when you have API key */}
+                <div className="h-36 rounded-xl overflow-hidden bg-[#f0f4f9] flex items-center justify-center mb-3 border">
+                  <div className="text-center">
+                    <MapPin className="h-8 w-8 mx-auto mb-1" style={{ color: "#0F3154" }} />
+                    <p className="text-xs text-muted-foreground">{location}</p>
+                  </div>
                 </div>
-              ) : null}
-              {trainer.hourlyRate ? (
-                <div className="text-center bg-[#f7f8fa] rounded-xl p-3">
-                  <p className="text-lg font-bold">${trainer.hourlyRate}</p>
-                  <p className="text-xs text-muted-foreground">Private /hr</p>
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 mt-0.5"
+                    style={{ backgroundColor: "#0F3154" }}>1</span>
+                  <div>
+                    <p className="font-medium">{trainer.city}</p>
+                    {trainer.state && <p className="text-xs text-muted-foreground">{trainer.state}</p>}
+                  </div>
                 </div>
-              ) : null}
-              <div className="text-center bg-[#f7f8fa] rounded-xl p-3">
-                <p className="text-lg font-bold">{sessions.length}</p>
-                <p className="text-xs text-muted-foreground">Active sessions</p>
-              </div>
-            </div>
-
-            {/* Sports */}
-            {(trainer.sports ?? []).length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {(trainer.sports ?? []).map((s) => (
-                  <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ backgroundColor: "#0F3154", color: "white" }}>{s}</span>
-                ))}
-              </div>
-            )}
-
-            {/* Bio */}
-            {trainer.bio && (
-              <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: trainer.bio }} />
-            )}
-          </div>
-        </div>
-
-        {/* Specialties + certs */}
-        {((trainer.specialties ?? []).length > 0 || (trainer.certifications ?? []).length > 0) && (
-          <div className="bg-white rounded-2xl border shadow-sm p-6 mb-5 space-y-4">
-            {(trainer.specialties ?? []).length > 0 && (
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Specialties</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(trainer.specialties ?? []).map((s) => (
-                    <Badge key={s} variant="outline" className="text-sm">{s}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {(trainer.certifications ?? []).length > 0 && (
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                  <Award className="h-3.5 w-3.5" /> Certifications
+                {sessions[0]?.venue && (
+                  <div className="flex items-start gap-2 text-sm mt-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 mt-0.5"
+                      style={{ backgroundColor: "#0F3154" }}>2</span>
+                    <p className="font-medium">{sessions[0].venue}</p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-3">
+                  Trainer may travel within the local area. Contact for specific field locations.
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(trainer.certifications ?? []).map((c) => (
-                    <Badge key={c} variant="secondary" className="text-sm">{c}</Badge>
-                  ))}
-                </div>
               </div>
             )}
+
+            {/* Guarantee */}
+            <div className="bg-white rounded-2xl border shadow-sm p-5 text-sm text-center">
+              <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <p className="font-bold mb-1">Grupup Guarantee</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                If your first session doesn't meet expectations, we'll help you find a better match or refund your booking.
+              </p>
+            </div>
+
           </div>
-        )}
-
-        {/* Sessions */}
-        <div className="bg-white rounded-2xl border shadow-sm p-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-1">
-            <CalendarDays className="h-3.5 w-3.5" /> Available Sessions
-          </p>
-
-          {sessions.length === 0 ? (
-            <div className="text-center py-8">
-              <CalendarDays className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="font-semibold mb-1">No sessions posted yet</p>
-              <p className="text-sm text-muted-foreground">Check back soon or browse other coaches.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sessions.map((s) => (
-                <div key={s.id} className="border rounded-xl p-4">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div>
-                      <p className="font-semibold text-sm">{s.title}</p>
-                      <p className="text-xs text-muted-foreground">{s.sessionType.replace("-", " ")} · {s.sport}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-bold">${s.pricePerPlayer}</p>
-                      <p className="text-xs text-muted-foreground">per player</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mb-3">
-                    {s.dayOfWeek && s.time && (
-                      <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{s.dayOfWeek} at {s.time}</span>
-                    )}
-                    {s.duration && (
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{s.duration} min</span>
-                    )}
-                    {s.city && (
-                      <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{s.city}</span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />{s.spotsLeft} of {s.spotsTotal} spots left
-                    </span>
-                  </div>
-                  <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
-                    <Link href="/groups">Book this session</Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-
       </div>
     </div>
   );
