@@ -1,6 +1,9 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) throw new Error("RESEND_API_KEY not set");
+  return new Resend(process.env.RESEND_API_KEY);
+}
 const FROM = "Grupup <bookings@grupup.com>";
 
 export async function sendBookingConfirmation({
@@ -26,7 +29,7 @@ export async function sendBookingConfirmation({
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: toEmail,
     subject: `Booking confirmed: ${sessionTitle}`,
@@ -75,7 +78,7 @@ export async function sendTrainerNewBooking({
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: trainerEmail,
     subject: `New booking: ${sessionTitle}`,
