@@ -33,7 +33,7 @@ export default function NewSessionPage() {
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25", notes: "",
+    spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false,
   });
 
   function baseHourlyRate(spots: number): number {
@@ -105,7 +105,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "" }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -221,6 +221,28 @@ export default function NewSessionPage() {
               <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
               <Input value={form.venue} onChange={(e) => set("venue", e.target.value)} placeholder="e.g. WakeMed Soccer Park Field 3" />
             </div>
+
+            {/* Recurring toggle */}
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
+              className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+              style={form.recurring
+                ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" }
+                : { borderColor: "#e2e8f0" }}
+            >
+              <div className="text-left">
+                <p className="font-semibold text-sm">Recurring session</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {form.recurring && form.dayOfWeek
+                    ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
+                    : "Runs every week on the selected day"}
+                </p>
+              </div>
+              <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
+              </div>
+            </button>
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
