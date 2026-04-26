@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   await resend.emails.send({
-    from: "Grupup Contact <bookings@grupup.com>",
+    from: "GrupUp Contact <onboarding@resend.dev>",
     to: "info@anytime-soccer.com",
     replyTo: email,
     subject: subject ? `[Contact] ${subject}` : `[Contact] Message from ${firstName} ${lastName}`,
