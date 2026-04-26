@@ -10,6 +10,7 @@ const testimonials = [
     city: "Cary, NC",
     rating: 5,
     img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecnl_girls.jpg",
+    imgPosition: "object-center",
   },
   {
     id: 2,
@@ -18,7 +19,8 @@ const testimonials = [
     role: "U16 Player",
     city: "Charlotte, NC",
     rating: 5,
-    img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
+    img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/news_soccer08_16-9-ratio.webp",
+    imgPosition: "object-top",
   },
   {
     id: 3,
@@ -28,6 +30,7 @@ const testimonials = [
     city: "Durham, NC",
     rating: 5,
     img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/futsal-scaled.jpg",
+    imgPosition: "object-top",
   },
 ];
 
@@ -49,12 +52,11 @@ export function Testimonials() {
                   src={t.img}
                   alt={t.name}
                   fill
-                  className="object-cover"
+                  className={`object-cover ${t.imgPosition}`}
                   sizes="(max-width: 768px) 100vw, 33vw"
                   unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                {/* Stars overlaid */}
                 <div className="absolute bottom-3 left-4 flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
