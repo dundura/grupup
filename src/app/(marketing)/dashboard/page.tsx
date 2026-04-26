@@ -120,8 +120,8 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* Recommended sessions */}
-        {recommended.length > 0 && (
+        {/* Recommended sessions — players/parents only */}
+        {role !== "trainer" && recommended.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">

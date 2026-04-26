@@ -9,7 +9,7 @@ import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 
 const findLinks = [
   { href: "/groups",    label: "Group Sessions", desc: "Browse trainer-led group sessions near you" },
-  { href: "/groups",    label: "Trainers",        desc: "Find and connect with coaches in your area" },
+  { href: "/trainers",  label: "Trainers",        desc: "Find and connect with coaches in your area" },
   { href: "/free-play", label: "Free Play",        desc: "Join pickup games and scrimmages"           },
 ];
 
