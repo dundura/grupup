@@ -22,6 +22,7 @@ interface TrainerRow {
   sports: string[];
   sport: string;
   hourlyRate: number;
+  hasActiveSessions: boolean;
 }
 
 const SPECIALTIES = ["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
@@ -327,27 +328,27 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
   const bioText = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-gray-200 transition-all flex items-start gap-4">
+    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden">
+      <div className="flex items-stretch">
 
-      {/* Photo */}
-      <div className="relative w-16 h-16 md:w-[72px] md:h-[72px] rounded-xl overflow-hidden bg-gray-50 shrink-0">
-        {t.photo ? (
-          <Image src={t.photo} alt={t.name} fill className="object-cover" sizes="72px" unoptimized />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#0F3154" }}>
-            <span className="text-xl font-bold text-white">{t.name?.[0] ?? "?"}</span>
-          </div>
-        )}
-      </div>
+        {/* Photo — full height left strip */}
+        <div className="relative w-24 md:w-32 shrink-0">
+          {t.photo ? (
+            <Image src={t.photo} alt={t.name} fill className="object-cover" sizes="128px" unoptimized />
+          ) : (
+            <div className="w-full h-full min-h-[120px] flex items-center justify-center" style={{ backgroundColor: "#0F3154" }}>
+              <span className="text-3xl font-bold text-white">{t.name?.[0] ?? "?"}</span>
+            </div>
+          )}
+        </div>
 
-      {/* Details */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {/* Name + rating */}
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 className="font-semibold text-[15px] leading-tight">{t.name}</h3>
-              <div className="flex items-center gap-0.5 text-sm">
+        {/* Content */}
+        <div className="flex-1 min-w-0 p-4 md:p-5 flex flex-col justify-between">
+          <div>
+            {/* Name + rating row */}
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <h3 className="font-bold text-base leading-tight">{t.name}</h3>
+              <div className="flex items-center gap-0.5 shrink-0">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 <span className="font-semibold text-sm">{t.rating?.toFixed(1) ?? "5.0"}</span>
                 {t.reviewCount > 0 && (
@@ -356,8 +357,8 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
               </div>
             </div>
 
-            {/* Meta row */}
-            <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mb-2.5">
+            {/* Meta */}
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mb-2">
               {t.city && (
                 <span className="flex items-center gap-0.5">
                   <MapPin className="h-3 w-3" />
@@ -365,21 +366,17 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
                 </span>
               )}
               {t.yearsExperience > 0 && <span>{t.yearsExperience} yrs exp</span>}
-              {t.hourlyRate > 0 && (
-                <span className="font-semibold text-foreground">${t.hourlyRate}/hr</span>
-              )}
+              {t.hourlyRate > 0 && <span className="font-medium text-foreground">${t.hourlyRate}/hr</span>}
             </div>
 
             {/* Bio */}
             {bioText && (
-              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-1 mb-2.5">
-                {bioText}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-2.5">{bioText}</p>
             )}
 
             {/* Tags */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 mb-3">
                 {tags.map((tag) => (
                   <span key={tag} className="text-xs px-2 py-0.5 rounded-full font-medium"
                     style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
@@ -390,23 +387,24 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
             )}
           </div>
 
-          {/* CTA */}
-          <Link
-            href={`/groups/${t.id}`}
-            className="hidden sm:flex shrink-0 items-center gap-1.5 self-center px-4 py-2 rounded-lg text-sm font-semibold border transition-colors hover:bg-[#DC373E] hover:text-white hover:border-[#DC373E]"
-            style={{ borderColor: "#DC373E", color: "#DC373E" }}
-          >
-            View profile
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          {/* Footer row */}
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-gray-100">
+            {t.hasActiveSessions ? (
+              <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                ✓ Group sessions available
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">Private training only</span>
+            )}
+            <Link
+              href={`/groups/${t.id}`}
+              className="flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
+              style={{ color: "#DC373E" }}
+            >
+              View profile <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
-
-        {/* Mobile CTA */}
-        <Link href={`/groups/${t.id}`}
-          className="sm:hidden mt-3 inline-flex items-center gap-1 text-sm font-semibold"
-          style={{ color: "#DC373E" }}>
-          View profile & sessions <ChevronRight className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   );
