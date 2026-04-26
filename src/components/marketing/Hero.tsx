@@ -71,7 +71,7 @@ export function Hero() {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search by city, sport, or coach name..."
+                    placeholder="Search by sport..."
                     className="flex-1 py-3 text-gray-800 text-base placeholder:text-gray-400 focus:outline-none bg-transparent"
                   />
                 </div>
