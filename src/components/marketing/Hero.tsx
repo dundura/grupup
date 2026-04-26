@@ -100,7 +100,6 @@ export function Hero() {
                   { label: "⚽ Soccer",           href: "/groups?sport=soccer" },
                   { label: "🏀 Basketball",        href: "/groups?sport=basketball" },
                   { label: "👥 Group Sessions",    href: "/groups?type=group" },
-                  { label: "🔒 Private Sessions",  href: "/groups?type=private" },
                   { label: "🎮 Free Play",         href: "/free-play" },
                 ].map((s) => (
                   <a key={s.href} href={s.href}
