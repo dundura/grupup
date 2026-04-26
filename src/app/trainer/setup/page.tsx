@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -21,14 +21,17 @@ export default function TrainerSetupPage() {
   const { user, isLoaded } = useUser();
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as { sports?: string[]; bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[]; city?: string; country?: string };
 
   const [form, setForm] = useState({
-    photo: user?.imageUrl ?? "",
+    photo: "",
     bio: meta.bio ?? "",
     country: meta.country ?? "",
     city: meta.city ?? "",
+    zipCode: "",
+    state: "",
     sports: meta.sports ?? [],
     specialties: meta.specialties ?? [],
     certifications: meta.certifications ?? [],
@@ -38,6 +41,39 @@ export default function TrainerSetupPage() {
     customSpecialty: "",
     customCert: "",
   });
+
+  // Pre-load existing trainer profile so photo + all fields persist
+  useEffect(() => {
+    if (!isLoaded) return;
+    fetch("/api/trainer/profile")
+      .then((r) => r.json())
+      .then((existing) => {
+        if (existing) {
+          setForm((f) => ({
+            ...f,
+            photo: existing.photo || user?.imageUrl || "",
+            bio: existing.bio || f.bio,
+            country: existing.state ? f.country : (f.country || ""),
+            city: existing.city || f.city,
+            zipCode: existing.zipCode || "",
+            state: existing.state || "",
+            sports: (existing.sports ?? []).length > 0 ? existing.sports : f.sports,
+            specialties: (existing.specialties ?? []).length > 0 ? existing.specialties : f.specialties,
+            certifications: (existing.certifications ?? []).length > 0 ? existing.certifications : f.certifications,
+            skillLevels: (existing.skillLevels ?? []).length > 0 ? existing.skillLevels : f.skillLevels,
+            yearsExperience: existing.yearsExperience > 0 ? String(existing.yearsExperience) : f.yearsExperience,
+            hourlyRate: existing.hourlyRate > 0 ? String(existing.hourlyRate) : f.hourlyRate,
+          }));
+        } else {
+          setForm((f) => ({ ...f, photo: user?.imageUrl ?? "" }));
+        }
+        setProfileLoaded(true);
+      })
+      .catch(() => {
+        setForm((f) => ({ ...f, photo: user?.imageUrl ?? "" }));
+        setProfileLoaded(true);
+      });
+  }, [isLoaded, user?.imageUrl]);
 
   function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
 
@@ -69,7 +105,9 @@ export default function TrainerSetupPage() {
     }
   }
 
-  if (!isLoaded) return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
+  if (!isLoaded || !profileLoaded) {
+    return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
+  }
 
   const step1Missing = [
     !form.city.trim() && "City",
@@ -87,7 +125,7 @@ export default function TrainerSetupPage() {
           <div className="flex items-center gap-3 mb-4">
             {user?.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.imageUrl} alt="You" className="w-14 h-14 rounded-full object-cover border-2 border-white shadow" />
+              <img src={form.photo || user.imageUrl} alt="You" className="w-14 h-14 rounded-full object-cover border-2 border-white shadow" />
             )}
             <div>
               <h1 className="text-2xl font-bold">Set up your coaching profile</h1>
@@ -128,7 +166,9 @@ export default function TrainerSetupPage() {
 
               {/* Bio */}
               <div className="bg-white rounded-2xl border p-6">
-                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Your Bio</label>
+                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">
+                  Your Bio <span className="text-muted-foreground font-normal normal-case tracking-normal">(optional — add later if you like)</span>
+                </label>
                 <RichTextEditor
                   value={form.bio}
                   onChange={(val) => set("bio", val)}
@@ -148,9 +188,19 @@ export default function TrainerSetupPage() {
                     {countries.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">City</label>
-                  <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">City</label>
+                    <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">State / Province</label>
+                    <Input value={form.state} onChange={(e) => set("state", e.target.value)} placeholder="e.g. NC" />
+                  </div>
+                </div>
+                <div className="max-w-[180px]">
+                  <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
+                  <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
                 </div>
               </div>
 
@@ -175,6 +225,7 @@ export default function TrainerSetupPage() {
                   Still needed: {step1Missing.join(", ")}
                 </p>
               )}
+
               <Button className="w-full" size="lg" disabled={!step1Valid}
                 style={step1Valid ? { backgroundColor: "#DC373E" } : undefined}
                 onClick={() => setStep(2)}>
@@ -288,7 +339,7 @@ export default function TrainerSetupPage() {
                 <Button variant="outline" size="lg" onClick={() => setStep(1)}>← Back</Button>
                 <Button className="flex-1" size="lg" disabled={saving}
                   style={{ backgroundColor: "#DC373E" }} onClick={handleSave}>
-                  {saving ? "Creating your profile…" : "Publish my profile"}
+                  {saving ? "Saving…" : "Publish my profile"}
                 </Button>
               </div>
             </>

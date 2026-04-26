@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
   const photo = trainerProfile?.photo || user?.imageUrl || "";
   const profileComplete = role === "trainer"
-    ? !!(trainerProfile?.bio && (trainerProfile?.sports ?? []).length > 0)
+    ? !!(trainerProfile && ((trainerProfile.sports ?? []).length > 0 || trainerProfile.sport))
     : !!(meta.city && meta.sport);
 
   return (
