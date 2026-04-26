@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
-  CalendarDays, Clock, Pencil as EditIcon, Trash2,
+  CalendarDays, Clock, Trash2, DollarSign,
 } from "lucide-react";
 
 interface TrainerProfile {
@@ -124,10 +124,18 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold">My Profile</h2>
-            <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
-              className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
-              <Pencil className="h-3.5 w-3.5" /> Edit
-            </Link>
+            <div className="flex items-center gap-3">
+              {role === "trainer" && (
+                <Link href="/trainer/payout"
+                  className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+                  <DollarSign className="h-3.5 w-3.5" /> Payout
+                </Link>
+              )}
+              <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
+                className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Link>
+            </div>
           </div>
 
           {role === "trainer" && trainerProfile ? (

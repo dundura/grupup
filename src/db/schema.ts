@@ -23,6 +23,8 @@ export const trainers = pgTable("trainers", {
   videoUrl: text("video_url"),
   zipCode: varchar("zip_code", { length: 20 }),
   stripeAccountId: varchar("stripe_account_id", { length: 255 }),
+  payoutMethod: varchar("payout_method", { length: 50 }),
+  payoutHandle: varchar("payout_handle", { length: 255 }),
   isApproved: boolean("is_approved").default(true),
   isArchived: boolean("is_archived").default(false),
   createdAt: timestamp("created_at").defaultNow(),
