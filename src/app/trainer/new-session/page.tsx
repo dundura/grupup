@@ -8,7 +8,6 @@ import { useAuth } from "@clerk/nextjs";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
-const cities = ["Cary", "Raleigh", "Durham", "Chapel Hill", "Apex", "Charlotte", "Wake Forest", "Morrisville"];
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
 
@@ -173,11 +172,7 @@ export default function NewSessionPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">City</label>
-                <select value={form.city} onChange={(e) => set("city", e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option value="">Select city</option>
-                  {cities.map((c) => <option key={c} value={c}>{c}, NC</option>)}
-                </select>
+                <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Duration (min)</label>
