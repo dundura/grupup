@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import { Plus, X } from "lucide-react";
 import { ChevronRight, User, Users, Shield } from "lucide-react";
 import { completeOnboarding } from "./_actions";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
-const specialties = ["Finishing", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
+const specialties = ["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
 const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
 const countries = [
   "United States", "Canada", "United Kingdom", "Australia", "Ireland",
@@ -31,7 +33,7 @@ export default function OnboardingPage() {
   const [form, setForm]     = useState({
     firstName: "", lastName: "", country: "", city: "", sport: "", selectedSports: [] as string[], level: "",
     playerName: "", playerAge: "",
-    bio: "", yearsExperience: "", selectedCerts: [] as string[], selectedSpecialties: [] as string[],
+    bio: "", yearsExperience: "", selectedCerts: [] as string[], selectedSpecialties: [] as string[], customCert: "",
   });
 
   function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
@@ -51,7 +53,16 @@ export default function OnboardingPage() {
   async function handleFinish() {
     if (!role) return;
     setSaving(true);
-    await completeOnboarding({ role, ...form });
+    try {
+      await completeOnboarding({ role, ...form });
+    } catch (err: unknown) {
+      // Next.js redirect() throws — that's expected and means success
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("NEXT_REDIRECT") || msg.includes("redirect")) return;
+      console.error("Onboarding error:", err);
+      alert("Something went wrong saving your profile. Please try again.");
+      setSaving(false);
+    }
   }
 
   return (
@@ -226,10 +237,11 @@ export default function OnboardingPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Bio</label>
-                  <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)}
-                    placeholder="Tell players about your background, coaching style, and what makes your sessions different..."
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                  <RichTextEditor
+                    value={form.bio}
+                    onChange={(val) => set("bio", val)}
+                    placeholder="Tell players about your background, coaching style, and what makes your sessions different…"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Years of experience</label>
@@ -251,8 +263,8 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Certifications <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="text-sm font-medium mb-2 block">Certifications <span className="text-muted-foreground font-normal">(select all that apply or write your own)</span></label>
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {certOptions.map((c) => (
                       <button key={c} type="button" onClick={() => toggleList("selectedCerts", c)}
                         className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
@@ -262,6 +274,41 @@ export default function OnboardingPage() {
                         {c}
                       </button>
                     ))}
+                    {form.selectedCerts.filter((c) => !certOptions.includes(c)).map((c) => (
+                      <span key={c} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+                        style={{ backgroundColor: "#0F3154" }}>
+                        {c}
+                        <button type="button" onClick={() => toggleList("selectedCerts", c)}>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={form.customCert}
+                      onChange={(e) => set("customCert", e.target.value)}
+                      placeholder="Add your own certification…"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && form.customCert.trim()) {
+                          e.preventDefault();
+                          if (!form.selectedCerts.includes(form.customCert.trim())) {
+                            toggleList("selectedCerts", form.customCert.trim());
+                          }
+                          set("customCert", "");
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm"
+                      disabled={!form.customCert.trim()}
+                      onClick={() => {
+                        if (form.customCert.trim() && !form.selectedCerts.includes(form.customCert.trim())) {
+                          toggleList("selectedCerts", form.customCert.trim());
+                        }
+                        set("customCert", "");
+                      }}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { completeOnboarding } from "@/app/onboarding/_actions";
 import { CheckCircle } from "lucide-react";
 
@@ -14,7 +15,7 @@ const countries = [
   "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa",
   "Nigeria", "Ghana", "Jamaica", "Trinidad & Tobago", "Other",
 ];
-const specialties = ["Finishing", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
+const specialties = ["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
 const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
 
 export default function ProfilePage() {
@@ -176,8 +177,11 @@ export default function ProfilePage() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Coaching Profile</h2>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Bio</label>
-              <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3}
-                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+              <RichTextEditor
+                value={form.bio}
+                onChange={(val) => set("bio", val)}
+                placeholder="Tell players about your background, coaching style, and what makes your sessions different…"
+              />
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Years of experience</label>

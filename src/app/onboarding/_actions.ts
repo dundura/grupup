@@ -18,6 +18,7 @@ export async function completeOnboarding(formData: {
   selectedSpecialties?: string[];
   playerName?: string;
   playerAge?: string;
+  customCert?: string; // UI-only, not saved
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
