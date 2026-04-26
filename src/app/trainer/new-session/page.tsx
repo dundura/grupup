@@ -36,12 +36,23 @@ export default function NewSessionPage() {
     spotsTotal: "6", pricePerPlayer: "25", notes: "",
   });
 
+  function priceForSpots(spots: number): number {
+    if (spots === 1) return 85;
+    if (spots <= 3) return 30;
+    if (spots <= 6) return 25;
+    return 20;
+  }
+
   function set(key: string, val: string) {
     setForm((f) => {
       const next = { ...f, [key]: val };
       if (key === "sessionType") {
         next.pricePerPlayer = String(defaultPrices[val] ?? 25);
         next.spotsTotal = String(sessionTypes.find((t) => t.value === val)?.spots ?? 6);
+      }
+      if (key === "spotsTotal") {
+        const spots = parseInt(val) || 1;
+        next.pricePerPlayer = String(priceForSpots(spots));
       }
       return next;
     });
@@ -175,8 +186,16 @@ export default function NewSessionPage() {
                 <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Duration (min)</label>
-                <Input type="number" min="30" max="180" step="15" value={form.duration} onChange={(e) => set("duration", e.target.value)} />
+                <label className="text-sm font-medium mb-1.5 block">Duration</label>
+                <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="30">30 min</option>
+                  <option value="60">1 hr</option>
+                  <option value="90">1 hr 30 min</option>
+                  <option value="120">2 hr</option>
+                  <option value="150">2 hr 30 min</option>
+                  <option value="180">3 hr</option>
+                </select>
               </div>
             </div>
             <div>
@@ -197,9 +216,31 @@ export default function NewSessionPage() {
                 <Input type="number" min="5" step="5" value={form.pricePerPlayer} onChange={(e) => set("pricePerPlayer", e.target.value)} />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              You keep 85% · Grupup fee 15% · You earn <strong>${Math.round(parseInt(form.pricePerPlayer || "0") * 0.85)}/player</strong>
-            </p>
+            {(() => {
+              const spots = parseInt(form.spotsTotal) || 1;
+              const price = parseInt(form.pricePerPlayer) || 0;
+              const trainerEarns = Math.round(price * 0.85);
+              const totalRevenue = Math.round(price * 0.85 * spots);
+              return (
+                <div className="rounded-xl p-3 space-y-1.5" style={{ backgroundColor: "#f0f4f9" }}>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Price per player</span>
+                    <span className="font-semibold">${price}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">You earn per player (85%)</span>
+                    <span className="font-semibold" style={{ color: "#0F3154" }}>${trainerEarns}</span>
+                  </div>
+                  <div className="flex justify-between text-xs border-t pt-1.5 mt-1.5">
+                    <span className="text-muted-foreground">If session fills ({spots} spots)</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalRevenue} total</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-0.5">
+                    Price is flat per session — set it based on duration and value, not minutes.
+                  </p>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="bg-white rounded-2xl border p-6">
