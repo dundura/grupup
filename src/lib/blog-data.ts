@@ -6,6 +6,7 @@ export interface BlogPost {
   date: string;
   readTime: string;
   coverImage: string;
+  coverImagePosition?: string;
   content: string;
 }
 
@@ -18,6 +19,7 @@ export const blogPosts: BlogPost[] = [
     date: "April 20, 2026",
     readTime: "5 min read",
     coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
+    coverImagePosition: "object-bottom",
     content: `
 <p>When parents start looking for coaching for their child, the first question is usually: <strong>private sessions or group training?</strong> The answer depends on your goals, budget, and what your child needs right now.</p>
 
@@ -196,7 +198,7 @@ export const blogPosts: BlogPost[] = [
     category: "Local Guides",
     date: "April 25, 2026",
     readTime: "4 min read",
-    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
+    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/01/idf.webp",
     content: `
 <p>The Raleigh-Durham Triangle is one of the most active youth soccer markets in the Southeast — but finding the right group training for your child can still feel like a chore. Club practice covers the team, but what about individual development? Here's what families in the area are doing.</p>
 
