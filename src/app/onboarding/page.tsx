@@ -36,7 +36,7 @@ export default function OnboardingPage() {
   const [form, setForm]     = useState({
     firstName: "", lastName: "", country: "", city: "", sport: "", selectedSports: [] as string[], level: "",
     playerName: "", playerAge: "",
-    bio: "", yearsExperience: "", selectedCerts: [] as string[], selectedSpecialties: [] as string[], customCert: "",
+    bio: "", yearsExperience: "", selectedCerts: [] as string[], selectedSpecialties: [] as string[], customCert: "", customSpecialty: "",
   });
 
   function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
@@ -56,11 +56,17 @@ export default function OnboardingPage() {
   async function handleFinish() {
     if (!role) return;
     setSaving(true);
-    const result = await completeOnboarding({ role, ...form });
-    if (result.success) {
-      router.push("/dashboard");
-    } else {
-      alert(result.error ?? "Something went wrong. Please try again.");
+    try {
+      const result = await completeOnboarding({ role, ...form });
+      if (result?.success) {
+        router.push("/dashboard");
+      } else {
+        alert(result?.error ?? "Something went wrong saving your profile.");
+        setSaving(false);
+      }
+    } catch (err) {
+      console.error("Onboarding submit error:", err);
+      alert("Something went wrong. Check the browser console for details.");
       setSaving(false);
     }
   }
@@ -249,8 +255,8 @@ export default function OnboardingPage() {
                     onChange={(e) => set("yearsExperience", e.target.value)} placeholder="e.g. 8" className="w-32" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Training specialties</label>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="text-sm font-medium mb-2 block">Training specialties <span className="text-muted-foreground font-normal">(select all that apply or add your own)</span></label>
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {specialties.map((s) => (
                       <button key={s} type="button" onClick={() => toggleList("selectedSpecialties", s)}
                         className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
@@ -260,6 +266,41 @@ export default function OnboardingPage() {
                         {s}
                       </button>
                     ))}
+                    {form.selectedSpecialties.filter((s) => !specialties.includes(s)).map((s) => (
+                      <span key={s} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+                        style={{ backgroundColor: "#0F3154" }}>
+                        {s}
+                        <button type="button" onClick={() => toggleList("selectedSpecialties", s)}>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={form.customSpecialty}
+                      onChange={(e) => set("customSpecialty", e.target.value)}
+                      placeholder="Add your own specialty…"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && form.customSpecialty.trim()) {
+                          e.preventDefault();
+                          if (!form.selectedSpecialties.includes(form.customSpecialty.trim())) {
+                            toggleList("selectedSpecialties", form.customSpecialty.trim());
+                          }
+                          set("customSpecialty", "");
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm"
+                      disabled={!form.customSpecialty.trim()}
+                      onClick={() => {
+                        if (form.customSpecialty.trim() && !form.selectedSpecialties.includes(form.customSpecialty.trim())) {
+                          toggleList("selectedSpecialties", form.customSpecialty.trim());
+                        }
+                        set("customSpecialty", "");
+                      }}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
                 <div>

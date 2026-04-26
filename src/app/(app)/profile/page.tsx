@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { completeOnboarding } from "@/app/onboarding/_actions";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Plus, X } from "lucide-react";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
@@ -33,6 +33,7 @@ export default function ProfilePage() {
 
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
+    customSpecialty: "",
     lastName: user?.lastName ?? "",
     country: meta.country ?? "",
     city: meta.city ?? "",
@@ -190,8 +191,8 @@ export default function ProfilePage() {
                 onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Specialties</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="text-sm font-medium mb-2 block">Specialties <span className="text-muted-foreground font-normal">(select all that apply or add your own)</span></label>
+              <div className="flex flex-wrap gap-2 mb-3">
                 {specialties.map((s) => (
                   <button key={s} type="button" onClick={() => toggleList("selectedSpecialties", s)}
                     className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
@@ -201,6 +202,41 @@ export default function ProfilePage() {
                     {s}
                   </button>
                 ))}
+                {form.selectedSpecialties.filter((s) => !specialties.includes(s)).map((s) => (
+                  <span key={s} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+                    style={{ backgroundColor: "#0F3154" }}>
+                    {s}
+                    <button type="button" onClick={() => toggleList("selectedSpecialties", s)}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={form.customSpecialty}
+                  onChange={(e) => set("customSpecialty", e.target.value)}
+                  placeholder="Add your own specialty…"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && form.customSpecialty.trim()) {
+                      e.preventDefault();
+                      if (!form.selectedSpecialties.includes(form.customSpecialty.trim())) {
+                        toggleList("selectedSpecialties", form.customSpecialty.trim());
+                      }
+                      set("customSpecialty", "");
+                    }
+                  }}
+                />
+                <Button type="button" variant="outline" size="sm"
+                  disabled={!form.customSpecialty.trim()}
+                  onClick={() => {
+                    if (form.customSpecialty.trim() && !form.selectedSpecialties.includes(form.customSpecialty.trim())) {
+                      toggleList("selectedSpecialties", form.customSpecialty.trim());
+                    }
+                    set("customSpecialty", "");
+                  }}>
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
             </div>
             <div>
