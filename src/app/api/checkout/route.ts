@@ -1,38 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { sessions } from "@/db/schema";
+import { trainerSessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 function getStripe() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("STRIPE_SECRET_KEY not configured");
+  return new Stripe(key, { apiVersion: "2026-04-22.dahlia" });
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!userId) return NextResponse.json({ error: "Sign in to book a session" }, { status: 401 });
 
-    const user = await currentUser();
-    const { sessionId } = await req.json();
+    const body = await req.json();
+    const { sessionId, athleteName, contactName, email, notes } = body;
 
-    const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
-    if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-    if (session.spotsLeft <= 0) return NextResponse.json({ error: "Session is full" }, { status: 400 });
+    const [session] = await db
+      .select()
+      .from(trainerSessions)
+      .where(eq(trainerSessions.id, parseInt(sessionId)));
 
-    const origin = req.headers.get("origin") ?? "https://grupup.com";
+    if (!session || !session.isActive) {
+      return NextResponse.json({ error: "Session not found or no longer available" }, { status: 404 });
+    }
+    if (session.spotsLeft <= 0) {
+      return NextResponse.json({ error: "This session is full" }, { status: 400 });
+    }
 
-    const checkoutSession = await getStripe().checkout.sessions.create({
+    const origin = req.headers.get("origin") ?? "https://www.grupup.app";
+    const stripe = getStripe();
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
       mode: "payment",
-      customer_email: user?.emailAddresses[0]?.emailAddress,
+      customer_email: email || undefined,
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
               name: session.title,
-              description: `${session.sessionType} · ${session.dayOfWeek}s ${session.time} · ${session.city}`,
+              description: [
+                session.sessionType.replace(/-/g, " "),
+                session.city,
+                session.dayOfWeek && session.time ? `${session.dayOfWeek}s at ${session.time}` : null,
+              ].filter(Boolean).join(" · "),
             },
             unit_amount: session.pricePerPlayer * 100,
           },
@@ -40,18 +56,23 @@ export async function POST(req: NextRequest) {
         },
       ],
       metadata: {
-        sessionId: session.id,
-        clerkUserId: userId,
-        userName: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim(),
-        userEmail: user?.emailAddresses[0]?.emailAddress ?? "",
+        sessionId: String(session.id),
+        userId,
+        athleteName: athleteName ?? "",
+        contactName: contactName ?? "",
+        notes: notes ?? "",
       },
-      success_url: `${origin}/bookings?success=1&session=${session.id}`,
-      cancel_url: `${origin}/sessions/${session.id}`,
+      success_url: `${origin}/sessions/${session.id}/book/success?checkout_session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/sessions/${session.id}/book`,
     });
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("[POST /api/checkout]", err);
-    return NextResponse.json({ error: "Checkout failed" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("STRIPE_SECRET_KEY")) {
+      return NextResponse.json({ error: "Payments not configured yet. Please contact support@grupup.app." }, { status: 503 });
+    }
+    return NextResponse.json({ error: "Failed to create checkout. Please try again." }, { status: 500 });
   }
 }

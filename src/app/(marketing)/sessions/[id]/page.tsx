@@ -236,10 +236,18 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   {session.dayOfWeek && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{session.dayOfWeek}s at {session.time}</p>}
                   {session.city && <p className="flex items-center gap-2"><MapPin className="h-4 w-4" />{session.city}</p>}
                 </div>
-                <div className={`w-full py-3 rounded-xl text-center text-sm font-semibold text-white ${isFull ? "opacity-60 cursor-not-allowed" : ""}`}
-                  style={{ backgroundColor: "#DC373E" }}>
-                  {isFull ? "Session Full" : "Reserve My Spot"}
-                </div>
+                {isFull ? (
+                  <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Session Full
+                  </div>
+                ) : (
+                  <Link href={`/sessions/${session.id}/book`}
+                    className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Reserve My Spot
+                  </Link>
+                )}
                 <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
                   <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
                 </p>
