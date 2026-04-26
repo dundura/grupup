@@ -8,17 +8,6 @@ export async function completeOnboarding(formData: {
   lastName: string;
   country: string;
   city: string;
-  sport?: string;
-  selectedSports?: string[];
-  level?: string;
-  bio?: string;
-  yearsExperience?: string;
-  selectedCerts?: string[];
-  selectedSpecialties?: string[];
-  playerName?: string;
-  playerAge?: string;
-  customCert?: string;
-  isHidden?: boolean;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { userId } = await auth();
@@ -26,28 +15,22 @@ export async function completeOnboarding(formData: {
 
     const client = await clerkClient();
 
+    // Get existing metadata to preserve any previously set roles
+    const user = await client.users.getUser(userId);
+    const existing = (user.publicMetadata ?? {}) as Record<string, unknown>;
+    const existingRoles = Array.isArray(existing.roles) ? (existing.roles as string[]) : [];
+    const roles = existingRoles.includes(formData.role)
+      ? existingRoles
+      : [...existingRoles, formData.role];
+
     await client.users.updateUser(userId, {
       publicMetadata: {
+        ...existing,
+        roles,
         role: formData.role,
         country: formData.country,
         city: formData.city,
-        sport: formData.role === "trainer" ? formData.selectedSports?.[0] : formData.sport,
         onboardingComplete: true,
-        isHidden: formData.isHidden ?? false,
-        ...(formData.role === "trainer" && {
-          bio: formData.bio,
-          yearsExperience: formData.yearsExperience,
-          sports: formData.selectedSports,
-          specialties: formData.selectedSpecialties,
-          certifications: formData.selectedCerts,
-        }),
-        ...(formData.role === "parent" && {
-          playerName: formData.playerName,
-          playerAge: formData.playerAge,
-        }),
-        ...(formData.role === "player" && {
-          level: formData.level,
-        }),
       },
       firstName: formData.firstName,
       lastName: formData.lastName,
