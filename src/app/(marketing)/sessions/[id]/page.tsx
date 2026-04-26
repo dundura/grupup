@@ -1,11 +1,16 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Star, Clock, Shield, Users, Calendar, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { groupSessions, trainers } from "@/lib/mock-data";
-import { SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS } from "@/lib/types";
-import { BookButton } from "@/components/BookButton";
+import {
+  ArrowLeft, MapPin, Star, Clock, Users, CalendarDays,
+  Award, Shield, ChevronRight,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { db } from "@/db";
+import { trainerSessions, trainers } from "@/db/schema";
+import { eq, and, ne } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 
 const skillColors: Record<string, string> = {
   Beginner:     "bg-green-100 text-green-700",
@@ -16,28 +21,44 @@ const skillColors: Record<string, string> = {
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = groupSessions.find((s) => s.id === id);
-  if (!session) notFound();
+  const sessionId = parseInt(id);
+  if (isNaN(sessionId)) notFound();
 
-  const trainer = trainers.find((t) => t.id === session.trainer.id);
-  const trainerSessions = groupSessions.filter(
-    (s) => s.trainer.id === session.trainer.id && s.id !== session.id
-  );
+  let session;
+  let trainer;
+  let otherSessions: typeof trainerSessions.$inferSelect[] = [];
 
-  const offer = session.specialOffer;
-  const discountedPrice = offer
-    ? offer.discountPct === 100 ? 0 : Math.round(session.pricePerPlayer * (1 - offer.discountPct / 100))
-    : null;
+  try {
+    const [row] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionId));
+    if (!row || !row.isActive) notFound();
+    session = row;
 
-  const displayPrice = discountedPrice !== null ? discountedPrice : session.pricePerPlayer;
-  const isPrivate = session.sessionType === "private";
-  const spotsFilled = session.totalSpots - session.spotsLeft;
-  const fillPct = Math.round((spotsFilled / session.totalSpots) * 100);
-  const almostFull = session.spotsLeft <= 2;
+    const [trainerRow] = await db.select().from(trainers).where(eq(trainers.clerkId, session.trainerClerkId));
+    trainer = trainerRow ?? null;
+
+    otherSessions = await db
+      .select()
+      .from(trainerSessions)
+      .where(
+        and(
+          eq(trainerSessions.trainerClerkId, session.trainerClerkId),
+          eq(trainerSessions.isActive, true),
+          ne(trainerSessions.id, sessionId)
+        )
+      );
+  } catch {
+    notFound();
+  }
+
+  const almostFull = session.spotsLeft <= 2 && session.spotsLeft > 0;
+  const isFull = session.spotsLeft === 0;
+  const fillPct = Math.round(((session.spotsTotal - session.spotsLeft) / session.spotsTotal) * 100);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b bg-background sticky top-16 z-10">
+    <div className="min-h-screen bg-[#f7f8fa]">
+
+      {/* Back */}
+      <div className="bg-white border-b sticky top-16 z-10">
         <div className="container py-3">
           <Link href="/groups" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to sessions
@@ -45,129 +66,155 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <div className="container py-8 md:py-12">
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="container max-w-5xl py-8 px-4">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
 
-          <div className="lg:col-span-2 space-y-8">
-            <div className="rounded-2xl overflow-hidden border shadow-sm">
-              <div className="px-6 pt-6 pb-6" style={{ backgroundColor: "#0F3154" }}>
-                <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4">
-                  {session.sport} · {session.city}, {session.state}
+          {/* Left column */}
+          <div className="space-y-5">
+
+            {/* Session card */}
+            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="px-6 py-5" style={{ backgroundColor: "#0F3154" }}>
+                <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-3">
+                  {session.sport} · {session.sessionType.replace("-", " ")} · {session.city}
                 </p>
-                <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 flex-shrink-0 border-white/30">
-                    <Image src={session.trainer.photo} alt={session.trainer.name} fill className="object-cover" sizes="64px" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">{session.trainer.name}</h1>
-                    {trainer && (
-                      <div className="flex items-center gap-2 mt-1.5 text-white/70 text-sm">
-                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        <span className="font-semibold text-white">{trainer.rating}</span>
-                        <span>· {trainer.reviewCount} reviews · {trainer.yearsExperience} yrs experience</span>
+                <h1 className="text-xl md:text-2xl font-bold text-white leading-snug mb-4">{session.title}</h1>
+
+                {trainer && (
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
+                      {trainer.photo ? (
+                        <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="48px" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-lg font-bold text-white"
+                          style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+                          {trainer.name?.[0] ?? "T"}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{trainer.name}</p>
+                      <div className="flex items-center gap-1.5 text-white/70 text-xs">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="font-semibold text-white/90">{trainer.rating?.toFixed(1)}</span>
+                        <span>· {trainer.reviewCount} reviews</span>
+                        {(trainer.yearsExperience ?? 0) > 0 && <span>· {trainer.yearsExperience} yrs exp</span>}
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
-              <div className="relative px-6 pb-6 pt-5 border-t">
-                <div className="grid sm:grid-cols-2 gap-3 mb-5">
-                  {[
-                    { icon: Calendar, text: `${session.dayOfWeek}s · ${session.time}` },
-                    { icon: Clock, text: `${session.duration} min · ${session.date}` },
-                    { icon: MapPin, text: `${session.venue}, ${session.city}` },
-                    { icon: Users, text: `Ages ${session.ageRange} · ${SESSION_TYPE_SPOTS[session.sessionType]}` },
-                  ].map(({ icon: Icon, text }) => (
-                    <div key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Icon className="h-4 w-4 shrink-0" />{text}
+              <div className="p-6 space-y-4">
+                {/* Details grid */}
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {session.dayOfWeek && session.time && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CalendarDays className="h-4 w-4 shrink-0" />
+                      <span>{session.dayOfWeek}s at {session.time}</span>
                     </div>
-                  ))}
+                  )}
+                  {session.duration && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4 shrink-0" />
+                      <span>{session.duration} min</span>
+                    </div>
+                  )}
+                  {session.city && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span>{session.venue ? `${session.venue}, ` : ""}{session.city}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 shrink-0" />
+                    <span>{session.spotsTotal} spots total{session.ageRange ? ` · Ages ${session.ageRange}` : ""}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 mb-5">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel]}`}>
+                {/* Skill level */}
+                {session.skillLevel && (
+                  <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>
                     {session.skillLevel}
                   </span>
-                  {session.recurring && <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full">Weekly</span>}
+                )}
+
+                {/* Spots bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
+                      {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
+                    </span>
+                    <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all"
+                      style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
+                  </div>
                 </div>
 
-                {!isPrivate && (
-                  <div className="space-y-1.5 mb-2">
-                    <div className="flex justify-between text-xs">
-                      <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
-                        {almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.totalSpots} spots open`}
-                      </span>
-                      <span className="text-muted-foreground">{spotsFilled}/{session.totalSpots} joined</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
-                    </div>
+                {/* Notes */}
+                {session.notes && (
+                  <div className="bg-muted/40 rounded-xl p-4 text-sm text-muted-foreground">
+                    <p className="font-semibold text-foreground mb-1 text-xs uppercase tracking-wider">Notes from the coach</p>
+                    {session.notes}
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Trainer bio */}
             {trainer && (
-              <div className="rounded-2xl border p-6">
-                <h3 className="font-bold text-lg mb-3">About {trainer.name}</h3>
-                <p className="text-muted-foreground leading-relaxed">{trainer.bio}</p>
-                {trainer.certifications.length > 0 && (
-                  <div className="mt-5">
-                    <p className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                      <Shield className="h-4 w-4" style={{ color: "#0F3154" }} />Certifications
+              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
+                <h2 className="font-bold text-base">About {trainer.name}</h2>
+                {trainer.bio && (
+                  <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: trainer.bio }} />
+                )}
+                {(trainer.specialties ?? []).length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Specialties</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(trainer.specialties ?? []).map((s) => (
+                        <Badge key={s} variant="outline">{s}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(trainer.certifications ?? []).length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+                      <Award className="h-3.5 w-3.5" /> Certifications
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {trainer.certifications.map((c) => (
-                        <span key={c} className="text-xs px-3 py-1 rounded-full border font-medium">{c}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(trainer.certifications ?? []).map((c) => (
+                        <Badge key={c} variant="secondary">{c}</Badge>
                       ))}
                     </div>
                   </div>
                 )}
-                {trainer.specialties.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm font-semibold mb-2">Specialties</p>
-                    <div className="flex flex-wrap gap-2">
-                      {trainer.specialties.map((s) => (
-                        <span key={s} className="text-xs px-3 py-1 rounded-full font-medium text-white" style={{ backgroundColor: "#0F3154" }}>{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <Link href={`/groups/${trainer.id}`}
+                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                  style={{ color: "#DC373E" }}>
+                  View full trainer profile <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             )}
 
-            {trainer?.videoUrl && (() => {
-              const ytMatch = trainer.videoUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
-              const videoId = ytMatch?.[1];
-              if (!videoId) return null;
-              return (
-                <div className="rounded-2xl border overflow-hidden">
-                  <div className="aspect-video w-full">
-                    <iframe src={`https://www.youtube.com/embed/${videoId}`} title={`${trainer.name} training video`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen className="w-full h-full" />
-                  </div>
-                </div>
-              );
-            })()}
-
-            {trainerSessions.length > 0 && (
-              <div>
-                <h3 className="font-bold text-lg mb-4">More sessions by {session.trainer.name}</h3>
-                <div className="space-y-3">
-                  {trainerSessions.slice(0, 4).map((s) => (
+            {/* Other sessions by this trainer */}
+            {otherSessions.length > 0 && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <h2 className="font-bold text-base mb-4">More sessions by {trainer?.name?.split(" ")[0] ?? "this coach"}</h2>
+                <div className="space-y-2">
+                  {otherSessions.slice(0, 3).map((s) => (
                     <Link key={s.id} href={`/sessions/${s.id}`}
-                      className="flex items-center justify-between gap-4 p-4 rounded-xl border hover:border-primary/30 hover:shadow-sm transition-all">
+                      className="flex items-center justify-between gap-3 p-3 rounded-xl border hover:border-primary/30 hover:bg-muted/30 transition-all">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{s.title}</p>
-                        <p className="text-xs text-muted-foreground">{SESSION_TYPE_LABELS[s.sessionType]} · {s.dayOfWeek}s {s.time} · {s.city}</p>
+                        <p className="text-xs text-muted-foreground">{s.sessionType.replace("-", " ")} · {s.city}</p>
                       </div>
                       <div className="text-right shrink-0 flex items-center gap-2">
-                        <div>
-                          <p className="font-bold text-sm" style={{ color: "#0F3154" }}>${s.pricePerPlayer}</p>
-                          <p className="text-xs text-muted-foreground">{s.sessionType === "private" ? "/ session" : "/ player"}</p>
-                        </div>
+                        <span className="font-bold text-sm" style={{ color: "#0F3154" }}>${s.pricePerPlayer}/player</span>
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </Link>
@@ -175,115 +222,28 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
             )}
-
-            {trainer && trainer.reviews.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-5">
-                  <h3 className="font-bold text-lg">Reviews</h3>
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    <span className="font-bold">{trainer.rating}</span>
-                    <span className="text-muted-foreground">({trainer.reviewCount})</span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {trainer.reviews.map((r) => (
-                    <div key={r.id} className="rounded-2xl border p-5">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                          <p className="font-semibold text-sm">{r.parentName}</p>
-                          <p className="text-xs text-muted-foreground">for {r.kidName}, age {r.kidAge}</p>
-                        </div>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          {Array.from({ length: r.rating }).map((_, i) => (
-                            <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{r.comment}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{r.date}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Booking sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-28 space-y-4">
-              <div className="rounded-2xl overflow-hidden border shadow-sm">
-                <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
-                  <p className="text-white font-bold text-lg">
-                    {offer && discountedPrice !== null ? (
-                      <>
-                        <span className="line-through text-white/50 text-sm mr-2">${session.pricePerPlayer}</span>
-                        {discountedPrice === 0 ? "FREE" : `$${discountedPrice}`}
-                      </>
-                    ) : `$${session.pricePerPlayer}`}
-                  </p>
-                  <p className="text-white/60 text-xs">
-                    {isPrivate ? "per session" : "per player"} · {SESSION_TYPE_LABELS[session.sessionType]}
-                  </p>
-                </div>
-
-                <div className="p-5 space-y-3">
-                  {offer && (
-                    <div className="flex items-center gap-2 p-3 rounded-xl text-sm font-semibold text-white"
-                      style={{ backgroundColor: "#DC373E" }}>
-                      🏷️ {offer.label}
-                    </div>
-                  )}
-
-                  {!isPrivate && (
-                    <div className="text-sm text-muted-foreground">
-                      <span className={`font-semibold ${almostFull ? "text-[#DC373E]" : ""}`}>
-                        {almostFull ? `⚡ ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left` : `${session.spotsLeft} of ${session.totalSpots} spots open`}
-                      </span>
-                    </div>
-                  )}
-
-                  <BookButton
-                    sessionId={session.id}
-                    disabled={session.spotsLeft === 0}
-                    label={session.spotsLeft === 0 ? "Session Full" : isPrivate ? "Book Private Session" : "Reserve My Spot"}
-                  />
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    Secure checkout · Cancel up to 24h before
-                  </p>
-                </div>
+          {/* Right: booking sidebar */}
+          <div>
+            <div className="sticky top-28 bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
+                <p className="text-3xl font-bold text-white">${session.pricePerPlayer}</p>
+                <p className="text-white/60 text-sm">per player · {session.sessionType.replace("-", " ")}</p>
               </div>
-
-              {(() => {
-                const groupOfferings = groupSessions.filter(
-                  (s) => s.trainer.id === session.trainer.id && s.sessionType !== "private" && s.id !== session.id
-                );
-                if (groupOfferings.length === 0) return null;
-                return (
-                  <div className="rounded-2xl overflow-hidden border shadow-sm">
-                    <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
-                      <p className="text-white font-bold text-sm">More by {session.trainer.name.split(" ")[0]}</p>
-                      <p className="text-white/60 text-xs mt-0.5">Split the cost · same quality</p>
-                    </div>
-                    <div className="divide-y">
-                      {groupOfferings.slice(0, 3).map((s) => (
-                        <Link key={s.id} href={`/sessions/${s.id}`}
-                          className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-accent/5 transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm leading-snug">{s.title}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{SESSION_TYPE_LABELS[s.sessionType]} · {s.dayOfWeek}s {s.time}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="font-bold text-sm" style={{ color: "#0F3154" }}>${s.pricePerPlayer}</p>
-                            <p className="text-xs text-muted-foreground">/ player</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
+              <div className="p-5 space-y-3">
+                <div className="text-sm space-y-1.5 text-muted-foreground">
+                  {session.dayOfWeek && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{session.dayOfWeek}s at {session.time}</p>}
+                  {session.city && <p className="flex items-center gap-2"><MapPin className="h-4 w-4" />{session.city}</p>}
+                </div>
+                <div className={`w-full py-3 rounded-xl text-center text-sm font-semibold text-white ${isFull ? "opacity-60 cursor-not-allowed" : ""}`}
+                  style={{ backgroundColor: "#DC373E" }}>
+                  {isFull ? "Session Full" : "Reserve My Spot"}
+                </div>
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
+                </p>
+              </div>
             </div>
           </div>
 
