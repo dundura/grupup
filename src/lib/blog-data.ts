@@ -191,6 +191,97 @@ export const blogPosts: BlogPost[] = [
   },
 ];
 
+  {
+    slug: "how-to-find-a-soccer-group-raleigh",
+    title: "How to Find a Soccer Group Near Raleigh, NC",
+    excerpt: "From Cary to Durham to Wake Forest — here's how families in the Triangle are finding affordable small-group soccer training for their kids.",
+    category: "Local Guides",
+    date: "April 25, 2026",
+    readTime: "4 min read",
+    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
+    content: `
+<p>The Raleigh-Durham Triangle is one of the most active youth soccer markets in the Southeast — but finding the right group training for your child can still feel like a chore. Club practice covers the team, but what about individual development? Here's what families in the area are doing.</p>
+
+<h2>Why group training in the Triangle is growing</h2>
+<p>The Triangle has a dense concentration of youth soccer clubs — from Wake FC and Capital Area Soccer League to NCFC Youth and PDA South. Most kids are in club programs, but those programs don't always have time for individual skill work. That's where small-group training fills the gap.</p>
+<p>Small-group sessions (2–6 players) with a local trainer cover the technical work that club coaches don't have time for: finishing, 1v1, ball mastery, goalkeeping. Parents split the cost, kids train with peers at the same level, and the coach can actually watch each player.</p>
+
+<h2>What to look for in a local trainer</h2>
+<p>Not every trainer who posts on social media is the right fit. When evaluating options in the Raleigh area, look for:</p>
+<ul>
+  <li><strong>Real coaching experience</strong> — not just playing experience. Ask how long they've been coaching youth athletes specifically.</li>
+  <li><strong>Structured sessions</strong> — a good trainer will tell you exactly what a session looks like before you book.</li>
+  <li><strong>Small group caps</strong> — anything over 8 players stops being a small group and starts being a mini-clinic. Look for trainers who cap at 4–6.</li>
+  <li><strong>References or reviews</strong> — ask for them if they're not visible online.</li>
+</ul>
+
+<h2>Where sessions happen in the Triangle</h2>
+<p>Most group training in the area takes place at:</p>
+<ul>
+  <li><strong>Cary</strong> — WakeMed Soccer Park fields, Cary Soccer Park, and local school turf fields</li>
+  <li><strong>Durham</strong> — Eno River fields, Southpoint area parks</li>
+  <li><strong>Wake Forest / Rolesville</strong> — Heritage High School turf, local recreation fields</li>
+  <li><strong>Morrisville</strong> — Morrisville Community Park, Crabtree Creek fields</li>
+</ul>
+<p>Always confirm the specific field with your trainer before the first session — addresses can vary from the general area listed in a profile.</p>
+
+<h2>How much should group training cost?</h2>
+<p>In the Triangle market, expect to pay:</p>
+<ul>
+  <li><strong>$20–$30/player/session</strong> for a small group (3–6 players, 60–90 min)</li>
+  <li><strong>$35–$50/player/session</strong> for a semi-private session (2–3 players)</li>
+  <li><strong>$75–$120/session</strong> for private 1-on-1 training</li>
+</ul>
+<p>Training plans (4–8 sessions booked upfront) typically come with a 10–20% discount and guarantee your spot each week.</p>
+
+<h2>Finding sessions on Grupup</h2>
+<p>Grupup lists local trainers and their available group sessions across the Triangle. Search by city (Cary, Durham, Raleigh, Morrisville) to find coaches near you, see their reviews, and book directly without any back-and-forth. Sessions are posted with specific day/time/location so you know exactly what you're getting before you pay.</p>
+    `.trim(),
+  },
+];
+
+  {
+    slug: "what-to-look-for-in-a-youth-coach",
+    title: "What to Look for in a Youth Sports Coach",
+    excerpt: "Credentials matter, but they're only part of the picture. Here's how to evaluate a youth coach before you book a single session.",
+    category: "For Parents",
+    date: "April 22, 2026",
+    readTime: "4 min read",
+    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecnl_girls.jpg",
+    content: `
+<p>Booking a youth sports coach is a bigger decision than it looks. You're trusting someone with your child's development — and the wrong fit can set them back more than no coaching at all. Here's what to actually look for.</p>
+
+<h2>1. Coaching experience over playing experience</h2>
+<p>A former college or professional player doesn't automatically make a great youth coach. The skills required to play at a high level are very different from the skills required to teach a 10-year-old. When reviewing a coach's profile, look specifically at how many years they've been <em>coaching</em> youth athletes — not just how impressive their playing career was.</p>
+<p>The best youth coaches are patient, adaptable, and skilled at breaking down complex movements into steps that young athletes can absorb. That's a teaching skill, not a playing skill.</p>
+
+<h2>2. Communication style matters as much as technical knowledge</h2>
+<p>Watch how a coach gives feedback in the first session. Do they:</p>
+<ul>
+  <li>Give specific, actionable corrections ("plant your non-kicking foot next to the ball") rather than vague encouragement ("good effort")?</li>
+  <li>Stay positive after mistakes without ignoring them?</li>
+  <li>Adjust their approach when a player isn't getting it?</li>
+</ul>
+<p>A technically brilliant coach who can't communicate at a child's level is not an effective youth coach. A good communicator with solid fundamentals will outperform them every time.</p>
+
+<h2>3. Session structure tells you everything</h2>
+<p>Ask the coach: "What does a typical session look like?" A good answer includes a warm-up, focused technical work on a specific skill, a small-sided game or competitive exercise to apply the skill, and a debrief. A vague answer ("we just work on what they need") is a yellow flag — it suggests sessions are improvised rather than planned.</p>
+
+<h2>4. Group size is a proxy for attention</h2>
+<p>A coach running sessions with 10+ players without assistants cannot give your child meaningful individual feedback. For genuine development, look for groups of 2–6. This is the sweet spot where athletes get real reps, real competition, and real coaching attention in every session.</p>
+
+<h2>5. Reviews that mention specifics</h2>
+<p>Generic five-star reviews ("great coach, highly recommend!") tell you very little. Look for reviews that mention specific improvements: "My daughter's weak foot improved noticeably after 4 sessions" or "Coach Marcus noticed her hip alignment was off and fixed it in the first week." Specific feedback in reviews signals that the coach is actually watching and coaching — not just running drills.</p>
+
+<h2>6. The first session is a tryout — for both sides</h2>
+<p>A confident, quality coach welcomes parents watching the first session. After it's done, ask your child two questions: "Did you have fun?" and "Did you learn something specific today?" Both should be yes. If the answer to either is no, try a different coach before committing to a plan.</p>
+
+<h2>The bottom line</h2>
+<p>The right youth coach makes your child better <em>and</em> makes them want to come back. Skill development without enjoyment rarely sticks. If you're in the process of evaluating coaches, Grupup lets you browse trainer profiles with real reviews, session details, and direct booking — no back-and-forth required.</p>
+    `.trim(),
+  },
+];
+
 export function getBlogPost(slug: string): BlogPost | undefined {
   return blogPosts.find((p) => p.slug === slug);
 }
