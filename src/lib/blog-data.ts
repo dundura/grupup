@@ -189,8 +189,6 @@ export const blogPosts: BlogPost[] = [
 <p>One thing worth knowing: when coaches post a session price on Grupup, they're committing to that price regardless of how many players show up. If a session has 6 spots but only 2 players book, the coach still runs the session at the posted per-player price. That means some sessions become unexpectedly intimate — more like a semi-private session at a group price. Not a bad deal.</p>
     `.trim(),
   },
-];
-
   {
     slug: "how-to-find-a-soccer-group-raleigh",
     title: "How to Find a Soccer Group Near Raleigh, NC",
@@ -238,8 +236,6 @@ export const blogPosts: BlogPost[] = [
 <p>Grupup lists local trainers and their available group sessions across the Triangle. Search by city (Cary, Durham, Raleigh, Morrisville) to find coaches near you, see their reviews, and book directly without any back-and-forth. Sessions are posted with specific day/time/location so you know exactly what you're getting before you pay.</p>
     `.trim(),
   },
-];
-
   {
     slug: "what-to-look-for-in-a-youth-coach",
     title: "What to Look for in a Youth Sports Coach",
