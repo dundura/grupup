@@ -143,8 +143,8 @@ export default function ContactPage() {
 
             <p className="text-center text-sm text-muted-foreground pt-1">
               Or email us directly at{" "}
-              <a href="mailto:info@anytime-soccer.com" className="font-semibold underline" style={{ color: "#0F3154" }}>
-                info@anytime-soccer.com
+              <a href="mailto:neil@anytime-soccer.com" className="font-semibold underline" style={{ color: "#0F3154" }}>
+                neil@anytime-soccer.com
               </a>
             </p>
 

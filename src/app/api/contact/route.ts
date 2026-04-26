@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   await resend.emails.send({
     from: "Grupup Contact <bookings@grupup.com>",
-    to: "info@anytime-soccer.com",
+    to: "neil@anytime-soccer.com",
     replyTo: email,
     subject: subject ? `[Contact] ${subject}` : `[Contact] Message from ${firstName} ${lastName}`,
     html: `
