@@ -1,55 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { sessions, trainers } from "@/db/schema";
-import { eq, and, ilike, or } from "drizzle-orm";
+import { sessions, trainers, trainerSessions } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const sport = searchParams.get("sport");
-  const city = searchParams.get("city");
-  const type = searchParams.get("type");
-  const day = searchParams.get("day");
-  const level = searchParams.get("level");
-
+export async function GET() {
   try {
-    const rows = await db
-      .select({
-        session: sessions,
-        trainer: {
-          id: trainers.id,
-          name: trainers.name,
-          photo: trainers.photo,
-          rating: trainers.rating,
-        },
-      })
-      .from(sessions)
-      .leftJoin(trainers, eq(sessions.trainerId, trainers.id))
-      .where(eq(sessions.isActive, true));
+    const trainerRows = await db.select().from(trainerSessions).where(eq(trainerSessions.isActive, true));
+    if (trainerRows.length === 0) return NextResponse.json([]);
 
-    const result = rows.map(({ session, trainer }) => ({
-      id: session.id,
-      title: session.title,
-      sport: session.sport,
-      sportEmoji: session.sportEmoji,
-      focus: session.focus,
-      sessionType: session.sessionType,
-      city: session.city,
-      state: session.state,
-      venue: session.venue,
-      dayOfWeek: session.dayOfWeek,
-      time: session.time,
-      duration: session.duration,
-      date: session.date,
-      totalSpots: session.totalSpots,
-      spotsLeft: session.spotsLeft,
-      pricePerPlayer: session.pricePerPlayer,
-      skillLevel: session.skillLevel,
-      ageRange: session.ageRange,
-      recurring: session.recurring,
-      specialOffer: session.specialOfferLabel
-        ? { label: session.specialOfferLabel, discountPct: session.specialOfferDiscountPct ?? 0 }
-        : undefined,
-      trainer: trainer ?? { id: "", name: "Unknown Trainer", photo: "", rating: 5.0 },
+    // Fetch trainer names from Clerk
+    const client = await clerkClient();
+    const clerkIds = [...new Set(trainerRows.map((s) => s.trainerClerkId))];
+    const clerkUsers: Record<string, { name: string; photo: string }> = {};
+    for (const id of clerkIds) {
+      try {
+        const u = await client.users.getUser(id);
+        clerkUsers[id] = {
+          name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "Trainer",
+          photo: u.imageUrl ?? "",
+        };
+      } catch {}
+    }
+
+    const result = trainerRows.map((s) => ({
+      id: String(s.id),
+      title: s.title,
+      sport: s.sport,
+      sportEmoji: "⚽",
+      focus: "",
+      sessionType: s.sessionType,
+      city: s.city ?? "",
+      state: "",
+      venue: s.venue ?? "",
+      dayOfWeek: s.dayOfWeek ?? "",
+      time: s.time ?? "",
+      duration: s.duration ?? 60,
+      date: "",
+      totalSpots: s.spotsTotal,
+      spotsLeft: s.spotsLeft,
+      pricePerPlayer: s.pricePerPlayer,
+      skillLevel: s.skillLevel ?? "",
+      ageRange: s.ageRange ?? "",
+      recurring: false,
+      specialOffer: undefined,
+      trainer: {
+        id: s.trainerClerkId,
+        name: clerkUsers[s.trainerClerkId]?.name ?? "Trainer",
+        photo: clerkUsers[s.trainerClerkId]?.photo ?? "",
+        rating: 5.0,
+      },
     }));
 
     return NextResponse.json(result);
@@ -61,12 +61,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { auth } = await import("@clerk/nextjs/server");
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const body = await req.json();
     const id = `s-${Date.now()}`;
+
     await db.insert(sessions).values({
       id,
       trainerId: body.trainerId,
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       focus: body.focus,
       sessionType: body.sessionType,
       city: body.city,
-      state: body.state ?? "NC",
+      state: body.state ?? "",
       venue: body.venue,
       dayOfWeek: body.dayOfWeek,
       time: body.time,

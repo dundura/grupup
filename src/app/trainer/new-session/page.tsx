@@ -151,6 +151,30 @@ export default function NewSessionPage() {
               ))}
             </div>
 
+            {/* Recurring toggle — shown under session type, hidden when plan */}
+            {form.sessionType && !form.isPlan && (
+              <div className="pt-2 border-t">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
+                  className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                  style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}
+                >
+                  <div className="text-left">
+                    <p className="font-semibold text-sm">Recurring session</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {form.recurring && form.dayOfWeek
+                        ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
+                        : "Runs every week on the selected day"}
+                    </p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
+                  </div>
+                </button>
+              </div>
+            )}
+
             {/* Training Plan toggle */}
             {form.sessionType && (
               <div className="pt-2 border-t">
@@ -301,29 +325,6 @@ export default function NewSessionPage() {
               <Input value={form.venue} onChange={(e) => set("venue", e.target.value)} placeholder="e.g. WakeMed Soccer Park Field 3" />
             </div>
 
-            {/* Recurring toggle — hidden when it's a plan */}
-            {!form.isPlan && (
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
-                className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-                style={form.recurring
-                  ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" }
-                  : { borderColor: "#e2e8f0" }}
-              >
-                <div className="text-left">
-                  <p className="font-semibold text-sm">Recurring session</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {form.recurring && form.dayOfWeek
-                      ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
-                      : "Runs every week on the selected day"}
-                  </p>
-                </div>
-                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
-                </div>
-              </button>
-            )}
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
