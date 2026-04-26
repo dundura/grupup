@@ -12,23 +12,11 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims } = await auth();
-  const path = req.nextUrl.pathname;
+  const { userId } = await auth();
 
   if (isProtectedRoute(req) && !userId) {
     const { redirectToSignIn } = await auth();
     return redirectToSignIn({ returnBackUrl: req.url });
-  }
-
-  // Redirect signed-in users who haven't finished onboarding
-  if (
-    userId &&
-    !(sessionClaims?.metadata as Record<string, unknown>)?.onboardingComplete &&
-    !path.startsWith("/onboarding") &&
-    !path.startsWith("/api") &&
-    !path.startsWith("/_next")
-  ) {
-    return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
   return NextResponse.next();
