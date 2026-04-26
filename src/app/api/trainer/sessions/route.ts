@@ -58,6 +58,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(session, { status: 201 });
   } catch (err) {
     console.error("[POST /api/trainer/sessions]", err);
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("DATABASE_URL")) {
+      return NextResponse.json({ error: "Database not configured yet. Add DATABASE_URL to Vercel environment variables." }, { status: 500 });
+    }
+    return NextResponse.json({ error: "Failed to create session. Please try again." }, { status: 500 });
   }
 }

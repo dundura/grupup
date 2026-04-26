@@ -58,7 +58,16 @@ export default function NewSessionPage() {
     });
   }
 
-  const isValid = form.title.trim() && form.sport && form.sessionType && form.city && form.dayOfWeek && form.time;
+  const missing = [
+    !form.title.trim()   && "Session title",
+    !form.sessionType    && "Session type",
+    !form.sport          && "Sport",
+    !form.city.trim()    && "City",
+    !form.dayOfWeek      && "Day of week",
+    !form.time           && "Start time",
+  ].filter(Boolean) as string[];
+
+  const isValid = missing.length === 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -205,38 +214,41 @@ export default function NewSessionPage() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Pricing</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Total spots</label>
-                <Input type="number" min="1" max="30" value={form.spotsTotal} onChange={(e) => set("spotsTotal", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Price per player ($)</label>
-                <Input type="number" min="5" step="5" value={form.pricePerPlayer} onChange={(e) => set("pricePerPlayer", e.target.value)} />
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots</label>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
+              </label>
+              <input type="range" min="1" max="20" value={form.spotsTotal}
+                onChange={(e) => set("spotsTotal", e.target.value)}
+                className="w-full accent-[#0F3154]" />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>1 (private)</span>
+                <span>20 (clinic)</span>
               </div>
             </div>
+
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
               const price = parseInt(form.pricePerPlayer) || 0;
               const trainerEarns = Math.round(price * 0.85);
-              const totalRevenue = Math.round(price * 0.85 * spots);
+              const totalIfFull = trainerEarns * spots;
               return (
-                <div className="rounded-xl p-3 space-y-1.5" style={{ backgroundColor: "#f0f4f9" }}>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Price per player</span>
-                    <span className="font-semibold">${price}</span>
+                <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Players pay</span>
+                    <span className="font-semibold">${price}/player</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">You earn per player (85%)</span>
-                    <span className="font-semibold" style={{ color: "#0F3154" }}>${trainerEarns}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">You earn (85%)</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span>
                   </div>
-                  <div className="flex justify-between text-xs border-t pt-1.5 mt-1.5">
+                  <div className="flex justify-between text-sm border-t pt-2">
                     <span className="text-muted-foreground">If session fills ({spots} spots)</span>
-                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalRevenue} total</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span>
                   </div>
-                  <p className="text-xs text-muted-foreground pt-0.5">
-                    Price is flat per session — set it based on duration and value, not minutes.
+                  <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">
+                    ⚠️ You must honor this price and run the session even if not all spots fill.
                   </p>
                 </div>
               );
@@ -254,6 +266,11 @@ export default function NewSessionPage() {
             style={{ backgroundColor: "#DC373E" }}>
             {saving ? "Creating session…" : "Publish session"}
           </Button>
+          {missing.length > 0 && (
+            <p className="text-xs text-muted-foreground text-center">
+              Still needed: {missing.join(", ")}
+            </p>
+          )}
         </form>
       </div>
     </div>
