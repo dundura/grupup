@@ -427,26 +427,45 @@ export default function NewSessionPage() {
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
               const duration = parseInt(form.duration) || 60;
-              const price = parseInt(form.pricePerPlayer) || 0;
+              const basePrice = parseInt(form.pricePerPlayer) || 0;
               const hourlyRate = baseHourlyRate(spots);
-              const trainerEarns = Math.round(price * 0.85);
-              const totalIfFull = trainerEarns * spots;
+
+              // When a training plan is active, apply the discount to the per-session price
+              const disc = form.isPlan ? planDiscount(parseInt(form.planWeeks) || 4) : 0;
+              const planSessions = parseInt(form.planWeeks) || 4;
+              const effectivePrice = form.isPlan
+                ? Math.round(basePrice * (1 - disc / 100))
+                : basePrice;
+
+              const trainerEarnsPerSession = Math.round(effectivePrice * 0.85);
+              const totalIfFull = trainerEarnsPerSession * spots;
+
               return (
                 <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
+                    <span>
+                      Base rate: ${hourlyRate}/player/hr × {duration} min
+                      {form.isPlan && <span className="ml-1 font-semibold" style={{ color: "#DC373E" }}>({disc}% plan discount applied)</span>}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Players pay</span>
-                    <span className="font-semibold">${price}/player</span>
+                    <span className="text-muted-foreground">
+                      {form.isPlan ? `Players pay per session (${planSessions}-session plan)` : "Players pay"}
+                    </span>
+                    <span className="font-semibold">
+                      {form.isPlan && basePrice !== effectivePrice && (
+                        <span className="line-through text-muted-foreground mr-1.5">${basePrice}</span>
+                      )}
+                      ${effectivePrice}/player
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">You earn (85%)</span>
-                    <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarnsPerSession}/player</span>
                   </div>
                   <div className="flex justify-between text-sm border-t pt-2">
                     <span className="text-muted-foreground">If session fills ({spots} spots)</span>
-                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull}/session</span>
                   </div>
                   <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">
                     ⚠️ You must honor this price and run the session even if not all spots fill.
