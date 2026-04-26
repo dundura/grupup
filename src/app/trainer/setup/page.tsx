@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 import { Plus, X, CheckCircle } from "lucide-react";
 const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const specialtyOptions = ["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
@@ -24,6 +25,7 @@ export default function TrainerSetupPage() {
   const meta = (user?.publicMetadata ?? {}) as { sports?: string[]; bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[]; city?: string; country?: string };
 
   const [form, setForm] = useState({
+    photo: user?.imageUrl ?? "",
     bio: meta.bio ?? "",
     country: meta.country ?? "",
     city: meta.city ?? "",
@@ -109,6 +111,16 @@ export default function TrainerSetupPage() {
 
           {step === 1 && (
             <>
+              {/* Photo */}
+              <div className="bg-white rounded-2xl border p-6">
+                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Profile Photo</label>
+                <ImageUpload
+                  currentUrl={form.photo}
+                  onUploaded={(url) => setForm((f) => ({ ...f, photo: url }))}
+                  label="Upload your coaching photo"
+                />
+              </div>
+
               {/* Bio */}
               <div className="bg-white rounded-2xl border p-6">
                 <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Your Bio</label>

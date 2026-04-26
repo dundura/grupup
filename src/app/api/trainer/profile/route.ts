@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         yearsExperience: parseInt(body.yearsExperience) || 0,
         hourlyRate: parseInt(body.hourlyRate) || 85,
         skillLevels: body.skillLevels ?? [],
-        photo: user?.imageUrl ?? "",
+        photo: body.photo || user?.imageUrl || "",
       }).where(eq(trainers.clerkId, userId));
       return NextResponse.json({ id: existing.id });
     }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       id,
       clerkId: userId,
       name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || body.name || "Trainer",
-      photo: user?.imageUrl ?? "",
+      photo: body.photo || user?.imageUrl || "",
       bio: body.bio ?? "",
       city: body.city ?? "",
       state: body.state ?? "",
