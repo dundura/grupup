@@ -71,7 +71,7 @@ export function TrustSection() {
                 How Grupup Works
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6 text-base">
-                Whether your child wants to make the academy, earn a starting spot, or just fall in love with the game — Grupup connects you with the right trainer and the right group to make every session count.
+                Find a vetted local trainer, book a spot in minutes, and train with friends who push you to get better — every session, every week.
               </p>
               <Link href="/trainers"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm"
