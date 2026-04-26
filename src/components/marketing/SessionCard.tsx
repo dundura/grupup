@@ -97,13 +97,21 @@ export function SessionCard({ session }: SessionCardProps) {
         {/* Trainer row */}
         <div className="flex items-center gap-2.5 mb-4">
           <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
-            <Image
-              src={session.trainer.photo}
-              alt={session.trainer.name}
-              fill
-              className="object-cover"
-              sizes="32px"
-            />
+            {session.trainer.photo ? (
+              <Image
+                src={session.trainer.photo}
+                alt={session.trainer.name}
+                fill
+                className="object-cover"
+                sizes="32px"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white"
+                style={{ backgroundColor: "#0F3154" }}>
+                {session.trainer.name?.[0] ?? "T"}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{session.trainer.name}</p>

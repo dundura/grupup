@@ -9,48 +9,65 @@ export async function GET() {
     const trainerRows = await db.select().from(trainerSessions).where(eq(trainerSessions.isActive, true));
     if (trainerRows.length === 0) return NextResponse.json([]);
 
-    // Fetch trainer names from Clerk
-    const client = await clerkClient();
     const clerkIds = [...new Set(trainerRows.map((s) => s.trainerClerkId))];
+
+    // Fetch trainer DB profiles (has the uploaded S3 photo + name)
+    const trainerProfiles = await db
+      .select()
+      .from(trainers)
+      .then((rows) => {
+        const map: Record<string, typeof rows[number]> = {};
+        for (const r of rows) { if (r.clerkId) map[r.clerkId] = r; }
+        return map;
+      });
+
+    // Fall back to Clerk for name/photo if DB profile not yet created
+    const client = await clerkClient();
     const clerkUsers: Record<string, { name: string; photo: string }> = {};
     for (const id of clerkIds) {
-      try {
-        const u = await client.users.getUser(id);
-        clerkUsers[id] = {
-          name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "Trainer",
-          photo: u.imageUrl ?? "",
-        };
-      } catch {}
+      if (!trainerProfiles[id]) {
+        try {
+          const u = await client.users.getUser(id);
+          clerkUsers[id] = {
+            name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "Trainer",
+            photo: u.imageUrl ?? "",
+          };
+        } catch {}
+      }
     }
 
-    const result = trainerRows.map((s) => ({
-      id: String(s.id),
-      title: s.title,
-      sport: s.sport,
-      sportEmoji: "⚽",
-      focus: "",
-      sessionType: s.sessionType,
-      city: s.city ?? "",
-      state: "",
-      venue: s.venue ?? "",
-      dayOfWeek: s.dayOfWeek ?? "",
-      time: s.time ?? "",
-      duration: s.duration ?? 60,
-      date: "",
-      totalSpots: s.spotsTotal,
-      spotsLeft: s.spotsLeft,
-      pricePerPlayer: s.pricePerPlayer,
-      skillLevel: s.skillLevel ?? "",
-      ageRange: s.ageRange ?? "",
-      recurring: false,
-      specialOffer: undefined,
-      trainer: {
-        id: s.trainerClerkId,
-        name: clerkUsers[s.trainerClerkId]?.name ?? "Trainer",
-        photo: clerkUsers[s.trainerClerkId]?.photo ?? "",
-        rating: 5.0,
-      },
-    }));
+    const result = trainerRows.map((s) => {
+      const dbProfile = trainerProfiles[s.trainerClerkId];
+      const clerkFallback = clerkUsers[s.trainerClerkId];
+      return {
+        id: String(s.id),
+        title: s.title,
+        sport: s.sport,
+        sportEmoji: "⚽",
+        focus: "",
+        sessionType: s.sessionType,
+        city: s.city ?? "",
+        state: "",
+        venue: s.venue ?? "",
+        dayOfWeek: s.dayOfWeek ?? "",
+        time: s.time ?? "",
+        duration: s.duration ?? 60,
+        date: "",
+        totalSpots: s.spotsTotal,
+        spotsLeft: s.spotsLeft,
+        pricePerPlayer: s.pricePerPlayer,
+        skillLevel: s.skillLevel ?? "",
+        ageRange: s.ageRange ?? "",
+        recurring: false,
+        specialOffer: undefined,
+        trainer: {
+          id: s.trainerClerkId,
+          name: dbProfile?.name ?? clerkFallback?.name ?? "Trainer",
+          photo: dbProfile?.photo || clerkFallback?.photo || "",
+          rating: dbProfile?.rating ?? 5.0,
+        },
+      };
+    });
 
     return NextResponse.json(result);
   } catch (err) {
