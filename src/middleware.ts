@@ -7,27 +7,15 @@ const isProtectedRoute = createRouteMatcher([
   "/profile(.*)",
   "/groups/create(.*)",
   "/free-play/create(.*)",
+  "/trainer(.*)",
 ]);
 
-const isOnboardingRoute = createRouteMatcher(["/onboarding(.*)"]);
-
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
 
-  // Redirect unauthenticated users trying to access protected routes
   if (isProtectedRoute(req) && !userId) {
     const { redirectToSignIn } = await auth();
     return redirectToSignIn({ returnBackUrl: req.url });
-  }
-
-  // Redirect authenticated users who haven't completed onboarding
-  if (
-    userId &&
-    !isOnboardingRoute(req) &&
-    isProtectedRoute(req) &&
-    !(sessionClaims?.metadata as { role?: string })?.role
-  ) {
-    return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
   return NextResponse.next();

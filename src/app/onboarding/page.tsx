@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
@@ -30,6 +31,7 @@ const roles: { value: Role; label: string; desc: string; icon: typeof User }[] =
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user } = useUser();
   const [step, setStep]     = useState(1);
   const [role, setRole]     = useState<Role | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,6 +61,7 @@ export default function OnboardingPage() {
     try {
       const result = await completeOnboarding({ role, ...form });
       if (result?.success) {
+        await user?.reload();
         router.push("/dashboard");
       } else {
         alert(result?.error ?? "Something went wrong saving your profile.");
