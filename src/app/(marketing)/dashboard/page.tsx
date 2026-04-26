@@ -76,7 +76,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">My sessions</h2>
               <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
-                <Link href="/groups/create">
+                <Link href="/trainer/new-session">
                   <Plus className="h-4 w-4 mr-1" /> New session
                 </Link>
               </Button>
@@ -88,9 +88,9 @@ export default function DashboardPage() {
                 Create your first group session and start filling spots.
               </p>
               <Button style={{ backgroundColor: "#DC373E" }} asChild>
-                <Link href="/groups/create">
+                <Link href="/trainer/new-session">
                   <Users className="h-4 w-4 mr-2" />
-                  Create a group session
+                  Create a training session
                 </Link>
               </Button>
             </div>

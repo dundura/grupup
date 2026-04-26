@@ -1,8 +1,194 @@
+"use client";
+
+import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { completeOnboarding } from "@/app/onboarding/_actions";
+import { CheckCircle } from "lucide-react";
+
+const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
+const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
+const cities = ["Cary", "Raleigh", "Durham", "Chapel Hill", "Apex", "Charlotte", "Wake Forest", "Morrisville"];
+const specialties = ["Finishing", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
+const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
+
 export default function ProfilePage() {
+  const { user, isLoaded } = useUser();
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const meta = (user?.publicMetadata ?? {}) as {
+    role?: string; city?: string; sport?: string; level?: string;
+    bio?: string; yearsExperience?: string;
+    specialties?: string[]; certifications?: string[];
+    playerName?: string; playerAge?: string;
+  };
+
+  const [form, setForm] = useState({
+    firstName: user?.firstName ?? "",
+    lastName: user?.lastName ?? "",
+    city: meta.city ?? "",
+    sport: meta.sport ?? "",
+    level: meta.level ?? "",
+    bio: meta.bio ?? "",
+    yearsExperience: meta.yearsExperience ?? "",
+    selectedSpecialties: meta.specialties ?? [],
+    selectedCerts: meta.certifications ?? [],
+    playerName: meta.playerName ?? "",
+    playerAge: meta.playerAge ?? "",
+  });
+
+  function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
+
+  function toggleList(key: "selectedCerts" | "selectedSpecialties", val: string) {
+    setForm((f) => ({
+      ...f,
+      [key]: f[key].includes(val) ? f[key].filter((v) => v !== val) : [...f[key], val],
+    }));
+  }
+
+  async function handleSave() {
+    if (!meta.role) return;
+    setSaving(true);
+    await completeOnboarding({ role: meta.role, ...form });
+    setSaved(true);
+    setSaving(false);
+  }
+
+  if (!isLoaded) return <div className="py-12 text-muted-foreground">Loading…</div>;
+
+  const role = meta.role ?? "player";
+
   return (
-    <div className="py-12">
-      <h1 className="text-3xl font-bold mb-4">Profile</h1>
-      <p className="text-muted-foreground">Coming soon - manage your account and preferences.</p>
+    <div className="max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">My Profile</h1>
+        {saved && (
+          <div className="flex items-center gap-1.5 text-green-700 text-sm font-medium">
+            <CheckCircle className="h-4 w-4" /> Saved
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        <div className="bg-card border rounded-2xl p-6">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Basic Info</h2>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">First name</label>
+              <Input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Last name</label>
+              <Input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} />
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-1.5 block">City</label>
+            <select value={form.city} onChange={(e) => set("city", e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="">Select city</option>
+              {cities.map((c) => <option key={c} value={`${c}, NC`}>{c}, NC</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Sport</label>
+            <div className="flex flex-wrap gap-2">
+              {sports.map((s) => (
+                <button key={s} type="button" onClick={() => set("sport", s)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.sport === s
+                    ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                    : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {role === "player" && (
+          <div className="bg-card border rounded-2xl p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Skill Level</h2>
+            <div className="grid grid-cols-4 gap-2">
+              {levels.map((l) => (
+                <button key={l} type="button" onClick={() => set("level", l)}
+                  className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.level === l
+                    ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                    : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {role === "parent" && (
+          <div className="bg-card border rounded-2xl p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Player Details</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Player name</label>
+                <Input value={form.playerName} onChange={(e) => set("playerName", e.target.value)} />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Age</label>
+                <Input type="number" min="4" max="18" value={form.playerAge} onChange={(e) => set("playerAge", e.target.value)} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {role === "trainer" && (
+          <div className="bg-card border rounded-2xl p-6 space-y-5">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Coaching Profile</h2>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Bio</label>
+              <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3}
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Years of experience</label>
+              <Input type="number" min="0" max="40" value={form.yearsExperience}
+                onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Specialties</label>
+              <div className="flex flex-wrap gap-2">
+                {specialties.map((s) => (
+                  <button key={s} type="button" onClick={() => toggleList("selectedSpecialties", s)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.selectedSpecialties.includes(s)
+                      ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                      : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Certifications</label>
+              <div className="flex flex-wrap gap-2">
+                {certOptions.map((c) => (
+                  <button key={c} type="button" onClick={() => toggleList("selectedCerts", c)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.selectedCerts.includes(c)
+                      ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                      : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Button className="w-full" style={{ backgroundColor: "#DC373E" }} disabled={saving} onClick={handleSave}>
+          {saving ? "Saving…" : "Save changes"}
+        </Button>
+      </div>
     </div>
   );
 }
