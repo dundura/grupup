@@ -90,7 +90,7 @@ export function TrustSection() {
                 src="https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg"
                 alt="Youth soccer group training session"
                 fill
-                className="object-cover"
+                className="object-cover object-top"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 unoptimized
               />
