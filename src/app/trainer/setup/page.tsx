@@ -71,7 +71,12 @@ export default function TrainerSetupPage() {
 
   if (!isLoaded) return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
 
-  const step1Valid = form.bio.replace(/<[^>]*>/g, "").trim().length > 20 && form.city.trim() && form.country && form.sports.length > 0;
+  const step1Missing = [
+    !form.city.trim() && "City",
+    !form.country && "Country",
+    form.sports.length === 0 && "at least one sport",
+  ].filter(Boolean) as string[];
+  const step1Valid = form.city.trim() && form.country && form.sports.length > 0;
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
@@ -165,8 +170,14 @@ export default function TrainerSetupPage() {
                 </div>
               </div>
 
+              {step1Missing.length > 0 && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-center">
+                  Still needed: {step1Missing.join(", ")}
+                </p>
+              )}
               <Button className="w-full" size="lg" disabled={!step1Valid}
-                style={{ backgroundColor: "#DC373E" }} onClick={() => setStep(2)}>
+                style={step1Valid ? { backgroundColor: "#DC373E" } : undefined}
+                onClick={() => setStep(2)}>
                 Continue →
               </Button>
             </>
