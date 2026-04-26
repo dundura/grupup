@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "drizzle-kit push",
-    "db:seed": "npx tsx src/db/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:push": "dotenv -e .env.local drizzle-kit push",
+    "db:seed": "dotenv -e .env.local npx tsx src/db/seed.ts",
+    "db:studio": "dotenv -e .env.local drizzle-kit studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.2.7",
@@ -44,6 +44,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^8",
     "eslint-config-next": "14.2.18",
