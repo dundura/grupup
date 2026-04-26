@@ -241,30 +241,6 @@ export default function NewSessionPage() {
                       })}
                     </div>
 
-                    {(() => {
-                      const weeks = parseInt(form.planWeeks) || 4;
-                      const pricePerSession = parseInt(form.pricePerPlayer) || 0;
-                      const disc = planDiscount(weeks);
-                      const fullPrice = pricePerSession * weeks;
-                      const discountedTotal = Math.round(fullPrice * (1 - disc / 100));
-                      const trainerEarns = Math.round(discountedTotal * 0.85);
-                      return (
-                        <div className="rounded-xl p-3 space-y-1.5 text-sm" style={{ backgroundColor: "#fff5f5" }}>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Without plan ({weeks} sessions)</span>
-                            <span className="line-through text-muted-foreground">${fullPrice}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Plan price ({disc}% off)</span>
-                            <span className="font-bold" style={{ color: "#DC373E" }}>${discountedTotal} upfront</span>
-                          </div>
-                          <div className="flex justify-between border-t pt-1.5">
-                            <span className="text-muted-foreground">You earn (85%)</span>
-                            <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}</span>
-                          </div>
-                        </div>
-                      );
-                    })()}
                   </div>
                 )}
               </div>
