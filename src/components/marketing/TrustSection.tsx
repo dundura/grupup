@@ -13,7 +13,7 @@ const benefits = [
     icon: Zap,
     title: "Easy Group Booking",
     href: "/groups",
-    text: "Book group sessions in minutes. Split the cost with other families and get elite training at a fraction of the price.",
+    text: "Book group sessions in minutes. Split the cost with other families and get great training at a fraction of the price.",
   },
   {
     icon: Medal,
@@ -27,10 +27,10 @@ export function TrustSection() {
   return (
     <>
       {/* ── Trust columns ── */}
-      <section className="bg-white py-16 md:py-20 border-b">
+      <section className="py-16 md:py-24" style={{ backgroundColor: "#f7f8fa" }}>
         <div className="container max-w-5xl">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3">
+            <h2 className="text-2xl md:text-4xl font-extrabold mb-3 tracking-tight">
               Train Together. Grow Together.
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -38,14 +38,16 @@ export function TrustSection() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {benefits.map(({ icon: Icon, title, href, text }) => (
-              <div key={title} className="flex flex-col items-center text-center md:items-start md:text-left">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4"
-                  style={{ backgroundColor: "#f0f4f9" }}>
-                  <Icon className="h-7 w-7" style={{ color: "#0F3154" }} />
+              <div key={title} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 flex flex-col items-start hover:shadow-md transition-shadow">
+                {/* Navy top accent */}
+                <div className="w-full h-1 rounded-full mb-6" style={{ backgroundColor: "#0F3154" }} />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-5"
+                  style={{ backgroundColor: "#0F3154" }}>
+                  <Icon className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="font-bold text-base mb-2">
+                <h3 className="font-bold text-lg mb-2">
                   <Link href={href} className="hover:underline" style={{ color: "#0F3154" }}>
                     {title}
                   </Link>
@@ -58,34 +60,36 @@ export function TrustSection() {
       </section>
 
       {/* ── How Grupup Works split ── */}
-      <section className="bg-[#f7f8fa] py-16 md:py-20">
+      <section className="bg-white py-16 md:py-24">
         <div className="container max-w-5xl">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
 
             {/* Text */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "#DC373E" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#DC373E" }}>
                 How It Works
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold mb-5 leading-snug">
+              <h2 className="text-2xl md:text-4xl font-extrabold mb-5 leading-tight tracking-tight">
                 How Grupup Works
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-6 text-base">
+              <p className="text-muted-foreground leading-relaxed mb-8 text-base">
                 Find a vetted local trainer, book a spot in minutes, and train with friends who push you to get better — every session, every week.
               </p>
-              <Link href="/trainers"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm"
-                style={{ backgroundColor: "#DC373E" }}>
-                Find a Trainer
-              </Link>
-              <Link href="/how-it-works"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border font-semibold text-sm ml-3 hover:bg-muted transition-colors">
-                Learn more →
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/trainers"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  Find a Trainer
+                </Link>
+                <Link href="/how-it-works"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-200 font-semibold text-sm hover:bg-gray-50 transition-colors">
+                  Learn more →
+                </Link>
+              </div>
             </div>
 
             {/* Image */}
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
               <Image
                 src="https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg"
                 alt="Youth soccer group training session"
@@ -97,7 +101,9 @@ export function TrustSection() {
               {/* Overlay badge */}
               <div className="absolute bottom-4 left-4 bg-white rounded-xl px-4 py-2.5 shadow-md">
                 <p className="text-xs text-muted-foreground">Sessions from</p>
-                <p className="text-xl font-extrabold leading-none" style={{ color: "#0F3154" }}>$20<span className="text-sm font-semibold text-muted-foreground">/player</span></p>
+                <p className="text-xl font-extrabold leading-none" style={{ color: "#0F3154" }}>
+                  $20<span className="text-sm font-semibold text-muted-foreground">/player</span>
+                </p>
               </div>
             </div>
 
