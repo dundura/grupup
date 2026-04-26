@@ -15,6 +15,7 @@ const findLinks = [
 
 const otherLinks = [
   { href: "/how-it-works",label: "How It Works" },
+  { href: "/about",       label: "About"        },
   { href: "/connect",     label: "Connect"      },
   { href: "/pricing",     label: "Group Pricing" },
   { href: "/for-trainers",label: "For Trainers" },
