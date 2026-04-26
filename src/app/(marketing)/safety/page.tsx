@@ -45,7 +45,7 @@ export default function SafetyPage() {
       <div style={{ backgroundColor: "#0F3154" }} className="px-4 py-14">
         <div className="container max-w-3xl">
           <p className="text-white/50 text-sm mb-2">Trust & Safety</p>
-          <h1 className="text-4xl font-bold text-white mb-3">Safety on Grupup</h1>
+          <h1 className="text-4xl font-bold text-white mb-3">Safety on Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span></h1>
           <p className="text-white/70 text-lg max-w-xl">
             Every coach is vetted. Every session is verified. Your family's safety is our first priority.
           </p>
@@ -60,7 +60,7 @@ export default function SafetyPage() {
             <Shield className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="font-bold text-lg mb-3">Every Grupup coach has:</h2>
+            <h2 className="font-bold text-lg mb-3">Every Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> coach has:</h2>
             <ul className="space-y-2">
               {standards.map((s) => (
                 <li key={s} className="flex items-center gap-2.5 text-sm">

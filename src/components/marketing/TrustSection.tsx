@@ -70,7 +70,7 @@ export function TrustSection() {
                 How It Works
               </p>
               <h2 className="text-2xl md:text-4xl font-extrabold mb-5 leading-tight tracking-tight">
-                How Grupup Works
+                How Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> Works
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8 text-base">
                 Find a vetted local trainer, book a spot in minutes, and train with friends who push you to get better — every session, every week.

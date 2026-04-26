@@ -24,7 +24,7 @@ export default function BlogPage() {
       {/* Header */}
       <div className="border-b" style={{ backgroundColor: "#0F3154" }}>
         <div className="container py-12 md:py-16 text-white text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">Grupup Blog</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> Blog</h1>
           <p className="text-white/70 text-lg max-w-xl mx-auto">
             Tips, guides, and insights for players, parents, and coaches.
           </p>

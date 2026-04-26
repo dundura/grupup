@@ -11,7 +11,7 @@ export function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Zap className="h-5 w-5" />
               </div>
-              <span>Grupup</span>
+              <span>Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span></span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               The only platform built for group sports training sessions. Find coaches near you.

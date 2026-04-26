@@ -69,7 +69,7 @@ export default function HowItWorksPage() {
 
       {/* Hero */}
       <div className="text-white text-center py-16 md:py-24 px-4" style={{ backgroundColor: "#0F3154" }}>
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">How Grupup Works</h1>
+        <h1 className="text-3xl md:text-5xl font-bold mb-4">How Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> Works</h1>
         <p className="text-white/70 text-lg max-w-2xl mx-auto mb-8">
           The easiest way to find vetted local coaches running small-group sessions — affordable, flexible, and built around your schedule.
         </p>
@@ -168,7 +168,7 @@ export default function HowItWorksPage() {
       {/* Benefits */}
       <div className="py-16 md:py-20 px-4 bg-[#f7f8fa]">
         <div className="container max-w-5xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Why Grupup</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Why Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {benefits.map((b) => (
               <div key={b.title} className="bg-white rounded-2xl border p-5 shadow-sm flex gap-4">
