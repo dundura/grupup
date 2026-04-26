@@ -30,12 +30,12 @@ export function Hero() {
   return (
     <section className="bg-[#f4f6f9] px-4 sm:px-6 lg:px-8 pt-6 pb-0">
       <div
-        className="relative rounded-[20px] overflow-hidden max-w-7xl mx-auto"
+        className="relative rounded-[20px] max-w-7xl mx-auto"
         style={{ backgroundColor: "#0F3154" }}
       >
         {/* Dot grid overlay */}
         <div
-          className="absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-5 rounded-[20px] overflow-hidden"
           style={{
             backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
             backgroundSize: "40px 40px",
@@ -118,8 +118,11 @@ export function Hero() {
                 alt="Kids training together in a group sports session"
                 className="w-full h-[480px] object-cover rounded-2xl"
               />
-              {/* Floating card — top left */}
-              <div className="absolute -top-4 -left-8 rounded-xl shadow-xl p-4 w-52" style={{ backgroundColor: "#0F3154" }}>
+              {/* Floating card — top right */}
+              <div
+                className="absolute -top-4 right-4 rounded-xl shadow-xl p-4 w-52"
+                style={{ backgroundColor: "#0F3154", animation: "heroFloat 4s ease-in-out infinite" }}
+              >
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <p className="text-xs font-bold text-white/60 uppercase tracking-wide">Session booked</p>
@@ -128,7 +131,10 @@ export function Hero() {
                 <p className="text-xs text-white/60 mt-1">Marcus Johnson · Soccer · Cary, NC</p>
               </div>
               {/* Floating card — bottom left */}
-              <div className="absolute -bottom-4 -left-8 bg-white rounded-xl shadow-xl p-4 w-56">
+              <div
+                className="absolute -bottom-4 left-4 bg-white rounded-xl shadow-xl p-4 w-56"
+                style={{ animation: "heroFloat 4s ease-in-out 2s infinite" }}
+              >
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Why group?</p>
                 <p className="text-sm font-semibold text-gray-800">Up to 60% less than private training</p>
                 <p className="text-xs text-gray-500 mt-1">Split the cost, keep the quality</p>

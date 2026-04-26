@@ -18,8 +18,8 @@ export const blogPosts: BlogPost[] = [
     category: "Training Tips",
     date: "April 20, 2026",
     readTime: "5 min read",
-    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
-    coverImagePosition: "object-bottom",
+    coverImage: "https://www.soccer-near-me.com/news_soccer08_16-9-ratio.webp",
+    coverImagePosition: "object-center",
     content: `
 <p>When parents start looking for coaching for their child, the first question is usually: <strong>private sessions or group training?</strong> The answer depends on your goals, budget, and what your child needs right now.</p>
 
@@ -42,9 +42,9 @@ export const blogPosts: BlogPost[] = [
 <h2>Which format is right at which age?</h2>
 <p>A rough guide:</p>
 <ul>
-  <li><strong>Ages 6–10</strong>: Small groups of 3–4 are ideal. Kids learn from watching peers and benefit from the social environment. Keep it fun.</li>
-  <li><strong>Ages 10–14</strong>: A mix of both works well. Group sessions for most technical skills; occasional private work to address specific gaps before tryouts or tournaments.</li>
-  <li><strong>Ages 14+</strong>: Players start to know their weaknesses. Private sessions for targeted improvement, group for tactical and competitive development.</li>
+  <li><strong>Ages 6–10:</strong> Small groups of 3–4 are ideal. Kids learn from watching peers and benefit from the social environment. Keep it fun.</li>
+  <li><strong>Ages 10–14:</strong> A mix of both works well. Group sessions for most technical skills; occasional private work to address specific gaps before tryouts or tournaments.</li>
+  <li><strong>Ages 14+:</strong> Players start to know their weaknesses. Private sessions for targeted improvement, group for tactical and competitive development.</li>
 </ul>
 
 <h2>The bottom line</h2>

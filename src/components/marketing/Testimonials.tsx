@@ -36,7 +36,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="pt-8 pb-16 md:pt-10 md:pb-20 bg-white">
+    <section className="pt-4 pb-16 md:pt-6 md:pb-20 bg-white">
       <div className="container max-w-5xl">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold mb-2">Parents love the results</h2>

@@ -1,6 +1,15 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const categoryColors: Record<string, string> = {
+  "Training Tips":   "#0F3154",
+  "For Parents":     "#DC373E",
+  "Getting Started": "#16a34a",
+  "Coaching":        "#7c3aed",
+  "Local Guide":     "#0F3154",
+};
 
 const posts = [
   {
@@ -10,7 +19,7 @@ const posts = [
     excerpt: "Private training gets all the attention, but research shows group environments accelerate learning faster. Here's when each makes sense.",
     date: "Apr 18, 2026",
     readTime: "4 min read",
-    emoji: "⚽",
+    image: "https://www.soccer-near-me.com/news_soccer08_16-9-ratio.webp",
   },
   {
     slug: "how-to-find-a-soccer-group-raleigh",
@@ -19,7 +28,7 @@ const posts = [
     excerpt: "A practical guide for NC parents navigating clinics, academies, and group training options — and how to tell which ones are worth it.",
     date: "Apr 12, 2026",
     readTime: "5 min read",
-    emoji: "📍",
+    image: "https://www.soccer-near-me.com/idf.webp",
   },
   {
     slug: "what-to-look-for-in-a-youth-coach",
@@ -28,7 +37,7 @@ const posts = [
     excerpt: "Beyond certifications — what really matters when choosing someone to develop your child's game and confidence.",
     date: "Apr 5, 2026",
     readTime: "3 min read",
-    emoji: "🏆",
+    image: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecnl_girls.jpg",
   },
 ];
 
@@ -58,29 +67,34 @@ export function BlogPreview() {
               href={`/blog/${post.slug}`}
               className="group bg-card border rounded-2xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all"
             >
-              {/* Color band top */}
-              <div
-                className="h-2"
-                style={{ backgroundColor: "#0F3154" }}
-              />
+              {/* Cover image */}
+              <div className="relative aspect-video overflow-hidden">
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  unoptimized
+                />
+                <span
+                  className="absolute top-3 left-3 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full text-white"
+                  style={{ backgroundColor: categoryColors[post.category] ?? "#0F3154" }}
+                >
+                  {post.category}
+                </span>
+              </div>
 
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">{post.emoji}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {post.category}
-                  </span>
-                </div>
-
-                <h3 className="font-bold text-lg leading-snug mb-3 group-hover:text-primary transition-colors">
+              <div className="p-5">
+                <h3 className="font-bold text-base leading-snug mb-2 group-hover:text-primary transition-colors">
                   {post.title}
                 </h3>
 
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 line-clamp-3">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">
                   {post.excerpt}
                 </p>
 
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t">
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
                   <span>{post.date}</span>
                   <span>{post.readTime}</span>
                 </div>

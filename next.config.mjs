@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: "https", hostname: "img.clerk.com" },
       { protocol: "https", hostname: "images.clerk.dev" },
       { protocol: "https", hostname: "media.anytime-soccer.com" },
+      { protocol: "https", hostname: "www.soccer-near-me.com" },
     ],
   },
 };

@@ -85,7 +85,7 @@ export default function SafetyPage() {
             <h2 className="text-xl font-bold mb-3">Contact our safety team</h2>
             <p className="text-muted-foreground leading-relaxed">
               For urgent safety concerns, email{" "}
-              <a href="mailto:safety@grupup.com" className="text-foreground font-medium underline">safety@grupup.com</a>.
+              <a href="mailto:info@anytime-soccer.com" className="text-foreground font-medium underline">info@anytime-soccer.com</a>.
               {" "}For non-urgent questions, visit our{" "}
               <Link href="/how-it-works" className="text-foreground font-medium underline">How It Works</Link> page or reach out through the Help Center.
             </p>
