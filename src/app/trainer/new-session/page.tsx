@@ -90,12 +90,13 @@ export default function NewSessionPage() {
   }
 
   const missing = [
-    !form.title.trim()   && "Session title",
-    !form.sessionType    && "Session type",
-    !form.sport          && "Sport",
-    !form.city.trim()    && "City",
-    !form.dayOfWeek      && "Day of week",
-    !form.time           && "Start time",
+    !form.title.trim()  && "Session title",
+    !form.sessionType   && "Session type",
+    !form.sport         && "Sport",
+    !form.city.trim()   && "City",
+    // Plan mode uses per-session dates; standard mode needs day + time
+    !form.isPlan && !form.dayOfWeek && "Day of week",
+    !form.isPlan && !form.time      && "Start time",
   ].filter(Boolean) as string[];
 
   const isValid = missing.length === 0;
