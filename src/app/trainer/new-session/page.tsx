@@ -34,6 +34,7 @@ export default function NewSessionPage() {
     title: "", sport: "", sessionType: "", city: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false,
+    isPlan: false, planWeeks: "4",
   });
 
   function baseHourlyRate(spots: number): number {
@@ -41,6 +42,13 @@ export default function NewSessionPage() {
     if (spots <= 3) return 30;
     if (spots <= 6) return 25;
     return 20;
+  }
+
+  function planDiscount(weeks: number): number {
+    if (weeks >= 8) return 20;
+    if (weeks >= 6) return 15;
+    if (weeks >= 4) return 10;
+    return 5;
   }
 
   function calcPrice(spots: number, durationMin: number): number {
@@ -105,7 +113,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4" }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -128,8 +136,8 @@ export default function NewSessionPage() {
               placeholder="e.g. Tuesday Finishing Clinic – Cary" className="text-base" />
           </div>
 
-          <div className="bg-white rounded-2xl border p-6">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Session Type</label>
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Type</label>
             <div className="space-y-3">
               {sessionTypes.map((t) => (
                 <button key={t.value} type="button" onClick={() => set("sessionType", t.value)}
@@ -142,6 +150,77 @@ export default function NewSessionPage() {
                 </button>
               ))}
             </div>
+
+            {/* Training Plan toggle */}
+            {form.sessionType && (
+              <div className="pt-2 border-t">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, isPlan: !f.isPlan }))}
+                  className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                  style={form.isPlan
+                    ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" }
+                    : { borderColor: "#e2e8f0" }}
+                >
+                  <div className="text-left">
+                    <p className="font-semibold text-sm">Make this a Training Plan</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Player pays upfront for multiple weeks · discount applied automatically
+                    </p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
+                  </div>
+                </button>
+
+                {form.isPlan && (
+                  <div className="mt-3 space-y-3">
+                    <label className="text-sm font-medium block">Number of weeks</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[2, 3, 4, 5, 6, 7, 8].map((w) => {
+                        const disc = planDiscount(w);
+                        return (
+                          <button key={w} type="button"
+                            onClick={() => setForm((f) => ({ ...f, planWeeks: String(w) }))}
+                            className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
+                            style={form.planWeeks === String(w)
+                              ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" }
+                              : { borderColor: "#e2e8f0" }}>
+                            <span className="font-bold text-sm">{w}wk</span>
+                            <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {(() => {
+                      const weeks = parseInt(form.planWeeks) || 4;
+                      const pricePerSession = parseInt(form.pricePerPlayer) || 0;
+                      const disc = planDiscount(weeks);
+                      const fullPrice = pricePerSession * weeks;
+                      const discountedTotal = Math.round(fullPrice * (1 - disc / 100));
+                      const trainerEarns = Math.round(discountedTotal * 0.85);
+                      return (
+                        <div className="rounded-xl p-3 space-y-1.5 text-sm" style={{ backgroundColor: "#fff5f5" }}>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Without plan ({weeks} sessions)</span>
+                            <span className="line-through text-muted-foreground">${fullPrice}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Plan price ({disc}% off)</span>
+                            <span className="font-bold" style={{ color: "#DC373E" }}>${discountedTotal} upfront</span>
+                          </div>
+                          <div className="flex justify-between border-t pt-1.5">
+                            <span className="text-muted-foreground">You earn (85%)</span>
+                            <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-5">
