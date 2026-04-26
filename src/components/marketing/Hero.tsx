@@ -94,6 +94,22 @@ export function Hero() {
                 </button>
               </form>
 
+              {/* Shortcut pills */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "⚽ Soccer",           href: "/groups?sport=soccer" },
+                  { label: "🏀 Basketball",        href: "/groups?sport=basketball" },
+                  { label: "👥 Group Sessions",    href: "/groups?type=group" },
+                  { label: "🔒 Private Sessions",  href: "/groups?type=private" },
+                  { label: "🎮 Free Play",         href: "/free-play" },
+                ].map((s) => (
+                  <a key={s.href} href={s.href}
+                    className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 text-white font-medium text-sm hover:bg-white/20 transition-all">
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+
             </div>
 
             {/* Right column — image */}
