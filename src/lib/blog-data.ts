@@ -18,7 +18,7 @@ export const blogPosts: BlogPost[] = [
     category: "Training Tips",
     date: "April 20, 2026",
     readTime: "5 min read",
-    coverImage: "https://www.soccer-near-me.com/news_soccer08_16-9-ratio.webp",
+    coverImage: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/news_soccer08_16-9-ratio.webp",
     coverImagePosition: "object-center",
     content: `
 <p>When parents start looking for coaching for their child, the first question is usually: <strong>private sessions or group training?</strong> The answer depends on your goals, budget, and what your child needs right now.</p>

@@ -19,7 +19,7 @@ const posts = [
     excerpt: "Private training gets all the attention, but research shows group environments accelerate learning faster. Here's when each makes sense.",
     date: "Apr 18, 2026",
     readTime: "4 min read",
-    image: "https://www.soccer-near-me.com/news_soccer08_16-9-ratio.webp",
+    image: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/news_soccer08_16-9-ratio.webp",
   },
   {
     slug: "how-to-find-a-soccer-group-raleigh",
@@ -28,7 +28,7 @@ const posts = [
     excerpt: "A practical guide for NC parents navigating clinics, academies, and group training options — and how to tell which ones are worth it.",
     date: "Apr 12, 2026",
     readTime: "5 min read",
-    image: "https://www.soccer-near-me.com/idf.webp",
+    image: "https://media.anytime-soccer.com/wp-content/uploads/2026/01/idf.webp",
   },
   {
     slug: "what-to-look-for-in-a-youth-coach",
