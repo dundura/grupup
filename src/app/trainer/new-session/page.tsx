@@ -36,11 +36,15 @@ export default function NewSessionPage() {
     spotsTotal: "6", pricePerPlayer: "25", notes: "",
   });
 
-  function priceForSpots(spots: number): number {
+  function baseHourlyRate(spots: number): number {
     if (spots === 1) return 85;
     if (spots <= 3) return 30;
     if (spots <= 6) return 25;
     return 20;
+  }
+
+  function calcPrice(spots: number, durationMin: number): number {
+    return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
   }
 
   function set(key: string, val: string) {
@@ -52,7 +56,13 @@ export default function NewSessionPage() {
       }
       if (key === "spotsTotal") {
         const spots = parseInt(val) || 1;
-        next.pricePerPlayer = String(priceForSpots(spots));
+        const duration = parseInt(f.duration) || 60;
+        next.pricePerPlayer = String(calcPrice(spots, duration));
+      }
+      if (key === "duration") {
+        const spots = parseInt(f.spotsTotal) || 1;
+        const duration = parseInt(val) || 60;
+        next.pricePerPlayer = String(calcPrice(spots, duration));
       }
       return next;
     });
@@ -230,11 +240,16 @@ export default function NewSessionPage() {
 
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
+              const duration = parseInt(form.duration) || 60;
               const price = parseInt(form.pricePerPlayer) || 0;
+              const hourlyRate = baseHourlyRate(spots);
               const trainerEarns = Math.round(price * 0.85);
               const totalIfFull = trainerEarns * spots;
               return (
                 <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
+                  </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Players pay</span>
                     <span className="font-semibold">${price}/player</span>
