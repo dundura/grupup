@@ -33,7 +33,7 @@ const sections = [
   {
     title: "Good Fit Guarantee",
     body: [
-      "If after your first session the coach isn't the right fit, contact us at support@grupup.app. We'll apply that first session as a credit and help you find a better match.",
+      "If after your first session the coach isn't the right fit, contact us at info@anytime-soccer.com. We'll apply that first session as a credit and help you find a better match.",
     ],
     bullets: [],
   },
@@ -110,8 +110,8 @@ export default function RefundPolicyPage() {
           <p className="text-sm text-muted-foreground mb-1">
             We respond to all support requests within 24 hours.
           </p>
-          <a href="mailto:support@grupup.app" className="text-sm font-semibold hover:underline" style={{ color: "#DC373E" }}>
-            support@grupup.app
+          <a href="mailto:info@anytime-soccer.com" className="text-sm font-semibold hover:underline" style={{ color: "#DC373E" }}>
+            info@anytime-soccer.com
           </a>
           <div className="flex gap-4 mt-4 text-xs text-muted-foreground">
             <Link href="/terms" className="hover:underline">Terms of Service</Link>

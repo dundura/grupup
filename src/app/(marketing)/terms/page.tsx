@@ -1,72 +1,103 @@
-export const metadata = { title: "Terms of Service – Grupup" };
+import type { Metadata } from "next";
+import Link from "next/link";
 
-const sections = [
-  {
-    title: "Acceptance of terms",
-    body: `By creating a Grupup account or using the platform, you agree to these Terms of Service. If you do not agree, do not use the platform. We may update these terms from time to time — continued use of Grupup after changes are posted constitutes acceptance of the updated terms.`,
-  },
-  {
-    title: "Who can use Grupup",
-    body: `Grupup is available to individuals 18 and older. Parents or guardians may create accounts to book sessions on behalf of minors. By creating an account, you represent that the information you provide is accurate and that you have the legal authority to agree to these terms.`,
-  },
-  {
-    title: "Coaches and trainers",
-    body: `Coaches who create profiles and offer sessions on Grupup ("Trainers") are independent contractors, not employees or agents of Grupup. Grupup provides the platform for Trainers to list and manage group sessions, but does not employ, supervise, or control the training activities themselves.\n\nTrainers are responsible for:\n• The accuracy of their profile, certifications, and session descriptions\n• Conducting sessions in a safe, professional, and appropriate manner\n• Compliance with applicable laws and licensing requirements\n• Maintaining appropriate insurance`,
-  },
-  {
-    title: "Bookings and payments",
-    body: `When you book a session, you agree to pay the listed price per player. All payments are processed securely by Stripe. Grupup collects a 15% platform fee on all transactions; the remainder is paid to the Trainer.\n\nFor group sessions (semi-private, small group, clinic), pricing is set by the platform and is fixed. For private (1-on-1) sessions, pricing is set by the Trainer and displayed clearly before booking.`,
-  },
-  {
-    title: "Cancellations and refunds",
-    body: `You may cancel a booking free of charge up to 24 hours before the scheduled session start time. Cancellations made within 24 hours of the session may be subject to a fee of up to 50% of the session price, at the Trainer's discretion.\n\nIf a Trainer cancels a session, you will receive a full refund. Grupup reserves the right to issue refunds in cases of verified misconduct or platform error.`,
-  },
-  {
-    title: "Prohibited conduct",
-    body: `You agree not to:\n• Provide false information on your profile\n• Use the platform to harass, harm, or discriminate against any person\n• Circumvent Grupup's booking or payment system by arranging off-platform transactions\n• Scrape, reverse engineer, or misuse the platform\n• Post false or misleading reviews\n\nViolation of these rules may result in account suspension or termination.`,
-  },
-  {
-    title: "Limitation of liability",
-    body: `Grupup provides a technology platform to connect players and trainers. We are not responsible for the quality, safety, or outcomes of training sessions. To the maximum extent permitted by law, Grupup's liability for any claim arising from use of the platform is limited to the amount you paid for the session in question.`,
-  },
-  {
-    title: "Governing law",
-    body: `These Terms are governed by the laws of the State of North Carolina, without regard to its conflict-of-law provisions. Any disputes shall be resolved in the courts of Wake County, North Carolina.`,
-  },
-];
+export const metadata: Metadata = {
+  title: "Terms of Service | Grupup",
+  description: "Grupup site terms and conditions of use.",
+};
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-2xl border shadow-sm p-6">
+      <h2 className="font-bold text-base mb-3" style={{ color: "#0F3154" }}>{title}</h2>
+      {children}
+    </div>
+  );
+}
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#f4f6f9]">
-      <div style={{ backgroundColor: "#0F3154" }} className="px-4 py-14">
+    <div className="min-h-screen bg-[#f7f8fa]">
+      <div className="bg-white border-b py-10 px-4">
         <div className="container max-w-3xl">
-          <p className="text-white/50 text-sm mb-2">Legal</p>
-          <h1 className="text-4xl font-bold text-white mb-2">Terms of Service</h1>
-          <p className="text-white/60 text-sm">Last updated April 23, 2026</p>
+          <h1 className="text-3xl font-bold mb-1">Site Terms</h1>
+          <p className="text-sm text-muted-foreground">Grupup, Inc. · Last Modified: April 26, 2026</p>
         </div>
       </div>
 
-      <div className="container max-w-3xl py-14">
-        <div className="bg-white rounded-2xl border p-8 md:p-12 space-y-10">
-          <p className="text-muted-foreground leading-relaxed">
-            These Terms of Service govern your use of the Grupup platform. Please read them carefully before creating an account or booking a session.
+      <div className="container max-w-3xl py-10 px-4 space-y-5 text-sm leading-relaxed text-muted-foreground">
+
+        <Section title="Section A — Terms of Use">
+          <p>Grupup provides an online platform that connects athletes and families with independent sports coaches and trainers ("Platform"). These Terms of Use ("Terms") govern your access to and use of the Grupup Platform and any related content or services.</p>
+          <p className="mt-3 font-semibold text-foreground">PLEASE READ THESE TERMS CAREFULLY. THEY CONSTITUTE A LEGAL AGREEMENT BETWEEN YOU AND GRUPUP.</p>
+          <p className="mt-3">By registering for an account you confirm your agreement to be bound by these Terms. If you do not agree, you may not access or use the Platform. Grupup may terminate these Terms or your access at any time for any reason.</p>
+        </Section>
+
+        <Section title="The Platform & Services">
+          <p>Grupup operates an online technology platform that enables users to find, browse, and book independent sports coaching and training services. The Platform also includes supporting services such as payment processing and customer support.</p>
+          <p className="mt-3 font-semibold text-foreground">GRUPUP IS A TECHNOLOGY PLATFORM AND DOES NOT DIRECTLY PROVIDE COACHING OR TRAINING SERVICES. INDEPENDENT COACHES ARE NOT AGENTS OR EMPLOYEES OF GRUPUP.</p>
+        </Section>
+
+        <Section title="User Accounts">
+          <p>You must be at least 18 years of age to register for an account. You are responsible for all activity under your account and for maintaining the security of your login credentials. You may only hold one account at a time.</p>
+        </Section>
+
+        <Section title="Coach Accounts">
+          <p>Grupup reviews all coach applications and reserves the right to approve or deny access at its sole discretion. Coaches must be at least 18 years of age. Grupup may revoke platform access at any time if new information comes to light.</p>
+        </Section>
+
+        <Section title="Payment">
+          <p>There is no cost to sign up. Session fees are set by individual coaches. All transactions must be completed through the Grupup Platform — off-platform payments void your eligibility for refunds, credits, and our Good Fit Guarantee. Grupup retains a 15% platform fee from each booking, which is reflected in the price shown to users.</p>
+        </Section>
+
+        <Section title="Refund, Credit & Cancellation">
+          <p>See our full <Link href="/refund-policy" className="underline text-foreground">Refund & Cancellation Policy</Link>. Key terms:</p>
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>Coach no-shows: full credit or refund.</li>
+            <li>Cancellations with 4+ hours notice: reschedule at no cost.</li>
+            <li>Cancellations within 4 hours: session is non-refundable.</li>
+            <li>Good Fit Guarantee: if your first session isn't the right fit, we credit it and help you find a better match.</li>
+            <li>Full refunds within 24 hours of purchase. After 24 hours, payments convert to credits valid for 12 months.</li>
+          </ul>
+        </Section>
+
+        <Section title="Disclaimers">
+          <p className="font-semibold text-foreground">THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE." GRUPUP DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. GRUPUP DOES NOT GUARANTEE THE QUALITY, SAFETY, OR SUITABILITY OF ANY THIRD-PARTY COACH. USE OF THE PLATFORM IS AT YOUR OWN RISK.</p>
+        </Section>
+
+        <Section title="Limitation of Liability">
+          <p className="font-semibold text-foreground">GRUPUP SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OF THE PLATFORM. GRUPUP'S TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT PAID BY YOU THROUGH THE PLATFORM IN THE 12 MONTHS PRECEDING THE CLAIM.</p>
+        </Section>
+
+        <Section title="Indemnification">
+          <p>You agree to indemnify and hold Grupup and its officers, directors, and employees harmless from any claims, damages, or expenses arising from your use of the Platform, your breach of these Terms, or your violation of any third-party rights.</p>
+        </Section>
+
+        <Section title="Section B — Website Use">
+          <p>You may not use the Grupup website for any unlawful purpose, to distribute malware, to scrape content without written consent, to impersonate Grupup or other users, or in any way that violates applicable law. Grupup reserves the right to suspend or terminate your access for any violation of these Terms.</p>
+        </Section>
+
+        <Section title="Intellectual Property">
+          <p>All content, features, and functionality on the Grupup platform — including text, graphics, logos, and software — are owned by Grupup or its licensors. You may not reproduce, distribute, or create derivative works without prior written permission.</p>
+        </Section>
+
+        <Section title="Governing Law & Dispute Resolution">
+          <p>These Terms are governed by the laws of the State of North Carolina. Any disputes shall be resolved through binding arbitration on an individual basis in accordance with AAA rules. Class actions are not permitted.</p>
+        </Section>
+
+        <Section title="Changes to These Terms">
+          <p>Grupup may update these Terms at any time. Material changes will be communicated by email or through the Platform. Continued use after changes take effect constitutes acceptance of the revised Terms.</p>
+        </Section>
+
+        <Section title="Contact">
+          <p className="mb-2">For questions about these Terms:</p>
+          <a href="mailto:info@anytime-soccer.com" className="font-semibold underline text-foreground">info@anytime-soccer.com</a>
+          <p className="mt-4 flex gap-4">
+            <Link href="/privacy" className="underline">Privacy Policy</Link>
+            <Link href="/refund-policy" className="underline">Refund & Cancellation</Link>
           </p>
+        </Section>
 
-          {sections.map((s) => (
-            <section key={s.title}>
-              <h2 className="text-xl font-bold mb-3">{s.title}</h2>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{s.body}</p>
-            </section>
-          ))}
-
-          <section>
-            <h2 className="text-xl font-bold mb-3">Contact</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Questions about these terms? Email us at{" "}
-              <a href="mailto:legal@grupup.com" className="text-foreground font-medium underline">legal@grupup.com</a>.
-            </p>
-          </section>
-        </div>
       </div>
     </div>
   );
