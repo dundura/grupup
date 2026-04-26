@@ -5,15 +5,11 @@ import { useState } from "react";
 import { Menu, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  SignInButton,
-  SignUpButton,
-  UserButton,
-  Show,
-} from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { isSignedIn } = useAuth();
 
   const links = [
     { href: "/groups", label: "Find Group Sessions" },
@@ -43,20 +39,23 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button size="sm" style={{ backgroundColor: "#DC373E" }}>Get Started</Button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-            <UserButton />
-          </Show>
+          {!isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button size="sm" style={{ backgroundColor: "#DC373E" }}>Get Started</Button>
+              </SignUpButton>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <UserButton />
+            </>
+          )}
         </div>
 
         <button className="md:hidden flex h-10 w-10 items-center justify-center rounded-lg hover:bg-accent/10"
@@ -75,26 +74,29 @@ export function Navbar() {
             </Link>
           ))}
           <div className="flex flex-col gap-2 pt-3 border-t mt-2">
-            <Show when="signed-out">
-              <SignInButton mode="modal">
-                <Button variant="outline" size="lg" className="w-full" onClick={() => setOpen(false)}>
-                  Sign In
+            {!isSignedIn ? (
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="lg" className="w-full" onClick={() => setOpen(false)}>
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => setOpen(false)}>
+                    Get Started
+                  </Button>
+                </SignUpButton>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="lg" className="w-full" asChild>
+                  <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
                 </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button size="lg" className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => setOpen(false)}>
-                  Get Started
-                </Button>
-              </SignUpButton>
-            </Show>
-            <Show when="signed-in">
-              <Button variant="outline" size="lg" className="w-full" asChild>
-                <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
-              </Button>
-              <div className="flex justify-center pt-1">
-                <UserButton />
-              </div>
-            </Show>
+                <div className="flex justify-center pt-1">
+                  <UserButton />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
