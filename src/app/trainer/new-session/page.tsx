@@ -31,7 +31,7 @@ export default function NewSessionPage() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
-    title: "", sport: "", sessionType: "", city: "", venue: "",
+    title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false,
     isPlan: false, planWeeks: "4",
@@ -126,7 +126,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -276,11 +276,30 @@ export default function NewSessionPage() {
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Schedule & Location</label>
 
             {form.isPlan ? (
-              /* Plan mode: per-session date + time */
+              /* Plan mode: bulk time + per-session date pickers */
               <div className="space-y-3">
                 <p className="text-xs text-muted-foreground">
                   Dates default to weekly — change any session freely.
                 </p>
+
+                {/* Apply one time to all sessions */}
+                <div className="flex items-end gap-3 rounded-xl border border-dashed p-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Set time for all sessions</label>
+                    <Input type="time" value={form.time}
+                      onChange={(e) => set("time", e.target.value)} />
+                  </div>
+                  <button type="button"
+                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors hover:bg-[#0F3154] hover:text-white"
+                    style={{ borderColor: "#0F3154", color: "#0F3154" }}
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      planSessions: f.planSessions.map((s) => ({ ...s, time: f.time })),
+                    }))}>
+                    Apply to all
+                  </button>
+                </div>
+
                 {Array.from({ length: parseInt(form.planWeeks) || 4 }, (_, i) => {
                   const s = form.planSessions[i] ?? { date: "", time: form.time };
                   return (
@@ -328,20 +347,24 @@ export default function NewSessionPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">City</label>
-                <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+                <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Duration</label>
-                <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option value="30">30 min</option>
-                  <option value="60">1 hr</option>
-                  <option value="90">1 hr 30 min</option>
-                  <option value="120">2 hr</option>
-                  <option value="150">2 hr 30 min</option>
-                  <option value="180">3 hr</option>
-                </select>
+                <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
+                <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
               </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Duration</label>
+              <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="30">30 min</option>
+                <option value="60">1 hr</option>
+                <option value="90">1 hr 30 min</option>
+                <option value="120">2 hr</option>
+                <option value="150">2 hr 30 min</option>
+                <option value="180">3 hr</option>
+              </select>
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
@@ -353,7 +376,7 @@ export default function NewSessionPage() {
           <div className="bg-white rounded-2xl border p-6 space-y-5">
             <div>
               <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Sport</label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-3">
                 {sports.map((s) => (
                   <button key={s} type="button" onClick={() => set("sport", s)}
                     className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
@@ -361,6 +384,28 @@ export default function NewSessionPage() {
                     {s}
                   </button>
                 ))}
+                {form.sport && !sports.includes(form.sport) && (
+                  <span className="px-3 py-1.5 rounded-lg text-sm font-medium text-white" style={{ backgroundColor: "#0F3154" }}>
+                    {form.sport}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Don't see yours? Type it here…"
+                  className="text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val) { set("sport", val); (e.target as HTMLInputElement).value = ""; }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val) { set("sport", val); e.target.value = ""; }
+                  }}
+                />
               </div>
             </div>
             <div>

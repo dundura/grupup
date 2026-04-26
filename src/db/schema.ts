@@ -125,6 +125,7 @@ export const trainerSessions = pgTable("trainer_sessions", {
   sport: varchar("sport", { length: 100 }).notNull(),
   sessionType: varchar("session_type", { length: 50 }).notNull(),
   city: varchar("city", { length: 100 }),
+  zipCode: varchar("zip_code", { length: 20 }),
   venue: varchar("venue", { length: 255 }),
   dayOfWeek: varchar("day_of_week", { length: 20 }),
   time: varchar("time", { length: 20 }),

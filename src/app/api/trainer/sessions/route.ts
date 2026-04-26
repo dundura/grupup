@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       sport: body.sport,
       sessionType: body.sessionType,
       city: body.city,
+      zipCode: body.zipCode ?? "",
       venue: body.venue,
       dayOfWeek: body.dayOfWeek,
       time: body.time,
