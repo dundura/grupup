@@ -14,16 +14,6 @@ const sports = [
   { label: "🏊 Swimming", value: "swimming" },
 ];
 
-const shortcuts = [
-  { label: "⚽ Soccer", href: "/groups?sport=soccer" },
-  { label: "🏀 Basketball", href: "/groups?sport=basketball" },
-  { label: "👥 Group Sessions", href: "/groups?type=group" },
-  { label: "🔒 Private Sessions", href: "/groups?type=private" },
-  { label: "🎮 Free Play", href: "/free-play" },
-  { label: "🤝 Connect", href: "/connect" },
-  { label: "👶 Youth", href: "/groups?level=beginner" },
-  { label: "🏆 Competitive", href: "/groups?level=advanced" },
-];
 
 export function Hero() {
   const router = useRouter();
@@ -67,7 +57,6 @@ export function Hero() {
               </h1>
 
               <p className="text-white/70 text-lg md:text-xl mb-8 max-w-2xl">
-                Find and book group training sessions in soccer, basketball, and more.
                 Train with friends, split the cost, and level up together.
               </p>
 
@@ -105,26 +94,6 @@ export function Hero() {
                 </button>
               </form>
 
-              {/* Shortcut pills */}
-              <div className="flex flex-wrap gap-2 mb-8">
-                {shortcuts.map((s) => (
-                  <a
-                    key={s.href}
-                    href={s.href}
-                    className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 text-white font-medium text-sm hover:bg-white/20 transition-all"
-                  >
-                    {s.label}
-                  </a>
-                ))}
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-wrap gap-8 text-white/50 text-sm">
-                <div><span className="text-white font-bold text-xl">8</span> Coaches</div>
-                <div><span className="text-white font-bold text-xl">3–8</span> Players/session</div>
-                <div><span className="text-white font-bold text-xl">2</span> Sports</div>
-                <div><span className="text-white font-bold text-xl">8</span> Cities in NC</div>
-              </div>
             </div>
 
             {/* Right column — image */}
