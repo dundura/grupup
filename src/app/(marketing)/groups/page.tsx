@@ -160,18 +160,6 @@ function SessionsPageInner() {
         </div>
       </div>
 
-      {/* Day */}
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Day of Week</p>
-        <div className="space-y-1">
-          {days.map((d) => (
-            <button key={d} onClick={() => setSelectedDay(d)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedDay === d ? "text-white" : "text-foreground hover:bg-muted"}`}
-              style={selectedDay === d ? { backgroundColor: "#0F3154" } : undefined}>{d}</button>
-          ))}
-        </div>
-      </div>
-
       {/* Skill Level */}
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Skill Level</p>
