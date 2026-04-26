@@ -40,6 +40,40 @@
   }
 }
 
+/* ── TipTap / ProseMirror editor ───────────────────────────────────────────── */
+.ProseMirror {
+  outline: none;
+  min-height: 120px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.ProseMirror ul { list-style-type: disc; }
+.ProseMirror ol { list-style-type: decimal; }
+
+.ProseMirror li { margin: 0.15rem 0; }
+
+.ProseMirror strong { font-weight: 600; }
+.ProseMirror em { font-style: italic; }
+
+.ProseMirror p { margin: 0 0 0.25rem; }
+.ProseMirror p:last-child { margin-bottom: 0; }
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

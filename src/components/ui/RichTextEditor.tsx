@@ -57,7 +57,7 @@ export function RichTextEditor({ value, onChange, placeholder, maxLength = 600, 
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2.5 text-sm leading-relaxed",
+        class: "focus:outline-none",
       },
     },
     immediatelyRender: false,

@@ -1,7 +1,6 @@
 "use server";
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 export async function completeOnboarding(formData: {
   role: string;
@@ -18,38 +17,43 @@ export async function completeOnboarding(formData: {
   selectedSpecialties?: string[];
   playerName?: string;
   playerAge?: string;
-  customCert?: string; // UI-only, not saved
-}) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not authenticated");
+  customCert?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "Not authenticated" };
 
-  const client = await clerkClient();
+    const client = await clerkClient();
 
-  await client.users.updateUser(userId, {
-    publicMetadata: {
-      role: formData.role,
-      country: formData.country,
-      city: formData.city,
-      sport: formData.role === "trainer" ? formData.selectedSports?.[0] : formData.sport,
-      onboardingComplete: true,
-      ...(formData.role === "trainer" && {
-        bio: formData.bio,
-        yearsExperience: formData.yearsExperience,
-        sports: formData.selectedSports,
-        specialties: formData.selectedSpecialties,
-        certifications: formData.selectedCerts,
-      }),
-      ...(formData.role === "parent" && {
-        playerName: formData.playerName,
-        playerAge: formData.playerAge,
-      }),
-      ...(formData.role === "player" && {
-        level: formData.level,
-      }),
-    },
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-  });
+    await client.users.updateUser(userId, {
+      publicMetadata: {
+        role: formData.role,
+        country: formData.country,
+        city: formData.city,
+        sport: formData.role === "trainer" ? formData.selectedSports?.[0] : formData.sport,
+        onboardingComplete: true,
+        ...(formData.role === "trainer" && {
+          bio: formData.bio,
+          yearsExperience: formData.yearsExperience,
+          sports: formData.selectedSports,
+          specialties: formData.selectedSpecialties,
+          certifications: formData.selectedCerts,
+        }),
+        ...(formData.role === "parent" && {
+          playerName: formData.playerName,
+          playerAge: formData.playerAge,
+        }),
+        ...(formData.role === "player" && {
+          level: formData.level,
+        }),
+      },
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+    });
 
-  redirect("/dashboard");
+    return { success: true };
+  } catch (err) {
+    console.error("completeOnboarding error:", err);
+    return { success: false, error: "Failed to save profile. Please try again." };
+  }
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { Plus, X } from "lucide-react";
 import { ChevronRight, User, Users, Shield } from "lucide-react";
 import { completeOnboarding } from "./_actions";
@@ -27,6 +29,7 @@ const roles: { value: Role; label: string; desc: string; icon: typeof User }[] =
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep]     = useState(1);
   const [role, setRole]     = useState<Role | null>(null);
   const [saving, setSaving] = useState(false);
@@ -53,14 +56,11 @@ export default function OnboardingPage() {
   async function handleFinish() {
     if (!role) return;
     setSaving(true);
-    try {
-      await completeOnboarding({ role, ...form });
-    } catch (err: unknown) {
-      // Next.js redirect() throws — that's expected and means success
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("NEXT_REDIRECT") || msg.includes("redirect")) return;
-      console.error("Onboarding error:", err);
-      alert("Something went wrong saving your profile. Please try again.");
+    const result = await completeOnboarding({ role, ...form });
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      alert(result.error ?? "Something went wrong. Please try again.");
       setSaving(false);
     }
   }
