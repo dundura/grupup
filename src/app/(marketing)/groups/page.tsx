@@ -35,6 +35,7 @@ function SessionsPageInner() {
   const [selectedDay, setSelectedDay]         = useState("Any Day");
   const [selectedLevel, setSelectedLevel]     = useState("Any Level");
   const [filtersOpen, setFiltersOpen]         = useState(false);
+  const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/sessions")
@@ -115,16 +116,25 @@ function SessionsPageInner() {
         </div>
       </div>
 
-      {/* Session Type */}
+      {/* Session Type — collapsed by default */}
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Session Type</p>
-        <div className="space-y-1">
-          {sessionTypes.map((t) => (
-            <button key={t} onClick={() => setSelectedType(t)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedType === t ? "text-white" : "text-foreground hover:bg-muted"}`}
-              style={selectedType === t ? { backgroundColor: "#0F3154" } : undefined}>{t}</button>
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={() => setSessionTypeOpen((v) => !v)}
+          className="flex items-center justify-between w-full text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2"
+        >
+          Session Type
+          <span className="text-base leading-none">{sessionTypeOpen ? "−" : "+"}</span>
+        </button>
+        {sessionTypeOpen && (
+          <div className="space-y-1">
+            {sessionTypes.map((t) => (
+              <button key={t} onClick={() => setSelectedType(t)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedType === t ? "text-white" : "text-foreground hover:bg-muted"}`}
+                style={selectedType === t ? { backgroundColor: "#0F3154" } : undefined}>{t}</button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Location — cascading */}
