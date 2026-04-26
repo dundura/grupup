@@ -9,7 +9,11 @@ import { CheckCircle } from "lucide-react";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
-const cities = ["Cary", "Raleigh", "Durham", "Chapel Hill", "Apex", "Charlotte", "Wake Forest", "Morrisville"];
+const countries = [
+  "United States", "Canada", "United Kingdom", "Australia", "Ireland",
+  "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa",
+  "Nigeria", "Ghana", "Jamaica", "Trinidad & Tobago", "Other",
+];
 const specialties = ["Finishing", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
 const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
 
@@ -19,7 +23,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
-    role?: string; city?: string; sport?: string; level?: string;
+    role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
     bio?: string; yearsExperience?: string;
     specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string;
@@ -28,8 +32,10 @@ export default function ProfilePage() {
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
+    country: meta.country ?? "",
     city: meta.city ?? "",
     sport: meta.sport ?? "",
+    selectedSports: meta.sports ?? [],
     level: meta.level ?? "",
     bio: meta.bio ?? "",
     yearsExperience: meta.yearsExperience ?? "",
@@ -41,7 +47,7 @@ export default function ProfilePage() {
 
   function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
 
-  function toggleList(key: "selectedCerts" | "selectedSpecialties", val: string) {
+  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports", val: string) {
     setForm((f) => ({
       ...f,
       [key]: f[key].includes(val) ? f[key].filter((v) => v !== val) : [...f[key], val],
@@ -85,27 +91,51 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="mb-4">
-            <label className="text-sm font-medium mb-1.5 block">City</label>
-            <select value={form.city} onChange={(e) => set("city", e.target.value)}
+            <label className="text-sm font-medium mb-1.5 block">Country</label>
+            <select value={form.country} onChange={(e) => set("country", e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-              <option value="">Select city</option>
-              {cities.map((c) => <option key={c} value={`${c}, NC`}>{c}, NC</option>)}
+              <option value="">Select country</option>
+              {countries.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
-          <div>
-            <label className="text-sm font-medium mb-2 block">Sport</label>
-            <div className="flex flex-wrap gap-2">
-              {sports.map((s) => (
-                <button key={s} type="button" onClick={() => set("sport", s)}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                  style={form.sport === s
-                    ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
-                    : { borderColor: "#e2e8f0", color: "#475569" }}>
-                  {s}
-                </button>
-              ))}
-            </div>
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-1.5 block">City</label>
+            <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
           </div>
+          {role !== "trainer" ? (
+            <div>
+              <label className="text-sm font-medium mb-2 block">Sport</label>
+              <div className="flex flex-wrap gap-2">
+                {sports.map((s) => (
+                  <button key={s} type="button" onClick={() => set("sport", s)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.sport === s
+                      ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                      : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="text-sm font-medium mb-2 block">Sports you coach <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
+              <div className="flex flex-wrap gap-2">
+                {sports.map((s) => (
+                  <button key={s} type="button" onClick={() => toggleList("selectedSports", s)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.selectedSports.includes(s)
+                      ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                      : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {form.selectedSports.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1.5">Don't see your sport? Contact us to add it.</p>
+              )}
+            </div>
+          )}
         </div>
 
         {role === "player" && (

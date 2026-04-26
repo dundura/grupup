@@ -8,9 +8,13 @@ import { completeOnboarding } from "./_actions";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
-const cities = ["Cary", "Raleigh", "Durham", "Chapel Hill", "Apex", "Charlotte", "Wake Forest", "Morrisville"];
 const specialties = ["Finishing", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
 const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
+const countries = [
+  "United States", "Canada", "United Kingdom", "Australia", "Ireland",
+  "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa",
+  "Nigeria", "Ghana", "Jamaica", "Trinidad & Tobago", "Other",
+];
 
 type Role = "player" | "parent" | "trainer";
 
@@ -25,14 +29,14 @@ export default function OnboardingPage() {
   const [role, setRole]     = useState<Role | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm]     = useState({
-    firstName: "", lastName: "", city: "", sport: "", level: "",
+    firstName: "", lastName: "", country: "", city: "", sport: "", selectedSports: [] as string[], level: "",
     playerName: "", playerAge: "",
     bio: "", yearsExperience: "", selectedCerts: [] as string[], selectedSpecialties: [] as string[],
   });
 
   function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
 
-  function toggleList(key: "selectedCerts" | "selectedSpecialties", val: string) {
+  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports", val: string) {
     setForm((f) => ({
       ...f,
       [key]: f[key].includes(val) ? f[key].filter((v) => v !== val) : [...f[key], val],
@@ -40,8 +44,8 @@ export default function OnboardingPage() {
   }
 
   const step2Complete = role === "trainer"
-    ? form.firstName.trim() && form.city && form.sport && form.bio.trim()
-    : form.firstName.trim() && form.city && form.sport &&
+    ? form.firstName.trim() && form.country && form.city && form.selectedSports.length > 0 && form.bio.trim()
+    : form.firstName.trim() && form.country && form.city && form.sport &&
       (role !== "parent" || (form.playerName.trim() && form.playerAge));
 
   async function handleFinish() {
@@ -109,12 +113,16 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">City</label>
-                  <select value={form.city} onChange={(e) => set("city", e.target.value)}
+                  <label className="text-sm font-medium mb-1.5 block">Country</label>
+                  <select value={form.country} onChange={(e) => set("country", e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="">Select your city</option>
-                    {cities.map((c) => <option key={c}>{c}, NC</option>)}
+                    <option value="">Select your country</option>
+                    {countries.map((c) => <option key={c}>{c}</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">City</label>
+                  <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Sport</label>
@@ -188,26 +196,33 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">City</label>
-                  <select value={form.city} onChange={(e) => set("city", e.target.value)}
+                  <label className="text-sm font-medium mb-1.5 block">Country</label>
+                  <select value={form.country} onChange={(e) => set("country", e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="">Select your city</option>
-                    {cities.map((c) => <option key={c}>{c}, NC</option>)}
+                    <option value="">Select your country</option>
+                    {countries.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Sport you coach</label>
+                  <label className="text-sm font-medium mb-1.5 block">City</label>
+                  <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Sports you coach <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
                   <div className="flex flex-wrap gap-2">
                     {sports.map((s) => (
-                      <button key={s} type="button" onClick={() => set("sport", s)}
+                      <button key={s} type="button" onClick={() => toggleList("selectedSports", s)}
                         className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                        style={form.sport === s
+                        style={form.selectedSports.includes(s)
                           ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
                           : { borderColor: "#e2e8f0", color: "#475569" }}>
                         {s}
                       </button>
                     ))}
                   </div>
+                  {form.selectedSports.length === 0 && (
+                    <p className="text-xs text-muted-foreground mt-1.5">Don't see your sport? You can add more after signing up.</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Bio</label>

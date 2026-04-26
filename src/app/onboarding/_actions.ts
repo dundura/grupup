@@ -7,8 +7,10 @@ export async function completeOnboarding(formData: {
   role: string;
   firstName: string;
   lastName: string;
+  country: string;
   city: string;
-  sport: string;
+  sport?: string;
+  selectedSports?: string[];
   level?: string;
   bio?: string;
   yearsExperience?: string;
@@ -25,12 +27,14 @@ export async function completeOnboarding(formData: {
   await client.users.updateUser(userId, {
     publicMetadata: {
       role: formData.role,
+      country: formData.country,
       city: formData.city,
-      sport: formData.sport,
+      sport: formData.role === "trainer" ? formData.selectedSports?.[0] : formData.sport,
       onboardingComplete: true,
       ...(formData.role === "trainer" && {
         bio: formData.bio,
         yearsExperience: formData.yearsExperience,
+        sports: formData.selectedSports,
         specialties: formData.selectedSpecialties,
         certifications: formData.selectedCerts,
       }),
