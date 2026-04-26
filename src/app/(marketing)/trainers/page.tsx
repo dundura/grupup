@@ -251,107 +251,129 @@ export default function TrainersPage() {
   );
 }
 
+function tierBadge(exp: number): { label: string; bg: string; color: string } {
+  if (exp >= 7) return { label: "GOLD",   bg: "#FEF3C7", color: "#92400E" };
+  if (exp >= 3) return { label: "SILVER", bg: "#F1F5F9", color: "#475569" };
+  return              { label: "TRAINER", bg: "#EFF6FF", color: "#1D4ED8" };
+}
+
 function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
-  const sports = t.sports?.length ? t.sports : t.sport ? [t.sport] : [];
-  const specialties = t.specialties ?? [];
+  const sports      = t.sports?.length ? t.sports : t.sport ? [t.sport] : [];
   const primarySport = sports[0] ?? "";
-  const tags = [...specialties].slice(0, 3);
-  const bioText = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
-  const location = [t.city, t.state].filter(Boolean).join(", ");
+  const allSports   = sports.join(", ");
+  const specialties = (t.specialties ?? []).slice(0, 4);
+  const bioText     = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
+  const location    = [t.city, t.state].filter(Boolean).join(", ");
+  const tier        = tierBadge(t.yearsExperience ?? 0);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-      {/* Navy accent bar */}
-      <div className="h-1.5 w-full" style={{ backgroundColor: "#0F3154" }} />
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+      style={{ overflow: "visible" }}>
 
-      <div className="p-5 flex gap-4">
-        {/* Photo */}
-        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 self-start mt-1">
-          {t.photo ? (
-            <Image src={t.photo} alt={t.name} fill className="object-cover" sizes="80px" unoptimized />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
-              style={{ backgroundColor: "#0F3154" }}>
-              {t.name?.[0] ?? "?"}
-            </div>
-          )}
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
-
-            {/* Left: name + meta */}
-            <div className="min-w-0">
-              {/* Name + rating */}
-              <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <Link href={`/groups/${t.id}`}
-                  className="font-bold text-base hover:underline leading-tight"
-                  style={{ color: "#0F3154" }}>
-                  {t.name}
-                </Link>
-                <div className="flex items-center gap-0.5">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-semibold">{t.rating?.toFixed(1) ?? "5.0"}</span>
-                  {t.reviewCount > 0 && (
-                    <span className="text-xs text-muted-foreground ml-0.5">({t.reviewCount})</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Verified badge */}
-              <div className="flex items-center gap-1.5 text-xs text-green-700 mb-2">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                <span className="font-semibold">Verified Trainer</span>
-                {t.hasActiveSessions && (
-                  <span className="ml-2 font-semibold" style={{ color: "#0F3154" }}>· Group sessions available</span>
-                )}
-              </div>
-
-              {/* Sport + location */}
-              <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mb-2.5">
-                {primarySport && <span className="font-medium text-foreground">{primarySport}</span>}
-                {location && (
-                  <span className="flex items-center gap-0.5">
-                    <MapPin className="h-3 w-3" />{location}
-                  </span>
-                )}
-                {t.yearsExperience > 0 && <span>{t.yearsExperience} yrs exp</span>}
-              </div>
-
-              {/* Bio */}
-              {bioText && (
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-2.5">{bioText}</p>
-              )}
-
-              {/* Specialty tags */}
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {tags.map((tag) => (
-                    <span key={tag} className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Right: price + CTA */}
-            <div className="shrink-0 flex flex-col items-end gap-2 self-start">
-              {t.hourlyRate > 0 && (
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Starting at</p>
-                  <p className="text-2xl font-bold leading-tight" style={{ color: "#0F3154" }}>${t.hourlyRate}</p>
-                  <p className="text-xs text-muted-foreground">per session</p>
-                </div>
-              )}
-              <Link href={`/groups/${t.id}`}
-                className="flex items-center gap-1 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-opacity hover:opacity-90"
+      {/* ── Navy header bar ── */}
+      <div className="relative rounded-t-2xl h-16" style={{ backgroundColor: "#0F3154" }}>
+        {/* Photo: overlapping the bar bottom edge */}
+        <div className="absolute left-5 bottom-0 translate-y-1/2 z-10">
+          <div className="relative w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100">
+            {t.photo ? (
+              <Image src={t.photo} alt={t.name} fill className="object-cover" sizes="96px" unoptimized />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
                 style={{ backgroundColor: "#0F3154" }}>
-                View Profile <ChevronRight className="h-3.5 w-3.5" />
+                {t.name?.[0] ?? "?"}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Content area ── */}
+      <div className="rounded-b-2xl bg-white px-5 pb-6" style={{ paddingTop: "56px" }}>
+        <div className="flex items-start justify-between gap-4">
+
+          {/* Left: meta */}
+          <div className="flex-1 min-w-0">
+
+            {/* Name + rating */}
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <Link href={`/groups/${t.id}`}
+                className="font-bold text-lg hover:underline leading-tight"
+                style={{ color: "#0F3154" }}>
+                {t.name}
               </Link>
+              <div className="flex items-center gap-1 text-sm">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <span className="font-bold">{t.rating?.toFixed(1) ?? "5.0"}</span>
+                <span className="text-muted-foreground">
+                  ({t.reviewCount > 0 ? `${t.reviewCount} review${t.reviewCount === 1 ? "" : "s"}` : "New"})
+                </span>
+              </div>
             </div>
+
+            {/* Tier badge + verified */}
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full tracking-wider"
+                style={{ backgroundColor: tier.bg, color: tier.color }}>
+                {tier.label}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-green-700 font-medium">
+                <ShieldCheck className="h-3.5 w-3.5" /> Verified
+              </span>
+              {t.hasActiveSessions && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
+                  Group sessions available
+                </span>
+              )}
+            </div>
+
+            {/* Sport + location + distance */}
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground mb-3">
+              {allSports && <span className="font-medium text-foreground">{allSports}</span>}
+              {location && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {location}
+                </span>
+              )}
+              {t.yearsExperience > 0 && <span>{t.yearsExperience} yrs experience</span>}
+            </div>
+
+            {/* Bio */}
+            {bioText && (
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-3">{bioText}</p>
+            )}
+
+            {/* Specialty tags */}
+            {specialties.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {specialties.map((tag) => (
+                  <span key={tag}
+                    className="text-xs px-2.5 py-1 rounded-full border font-medium"
+                    style={{ borderColor: "#CBD5E1", color: "#334155", backgroundColor: "#F8FAFC" }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right: price + CTA */}
+          <div className="shrink-0 flex flex-col items-end gap-3 pt-1">
+            {t.hourlyRate > 0 && (
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Starting at</p>
+                <p className="text-3xl font-extrabold leading-none" style={{ color: "#0F3154" }}>
+                  ${t.hourlyRate}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">per session</p>
+              </div>
+            )}
+            <Link href={`/groups/${t.id}`}
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#0F3154" }}>
+              View Profile <ChevronRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </div>
