@@ -1,43 +1,76 @@
+import Image from "next/image";
 import { Star, Quote } from "lucide-react";
-import { testimonials } from "@/lib/mock-data";
+
+const testimonials = [
+  {
+    id: 1,
+    quote: "After the first session my son's confidence on the ball completely changed. The small group format meant the coach could actually watch him and give real feedback — not just shout drills.",
+    name: "Maria T.",
+    role: "Soccer parent",
+    city: "Cary, NC",
+    rating: 5,
+    img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecnl_girls.jpg",
+  },
+  {
+    id: 2,
+    quote: "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition.",
+    name: "James K.",
+    role: "U16 Player",
+    city: "Charlotte, NC",
+    rating: 5,
+    img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg",
+  },
+  {
+    id: 3,
+    quote: "Finding a good coach used to take weeks of searching and DMs. I found one on Grupup, booked in 2 minutes, and my daughter was on the field the next Saturday.",
+    name: "Denise R.",
+    role: "Soccer parent",
+    city: "Durham, NC",
+    rating: 5,
+    img: "https://media.anytime-soccer.com/wp-content/uploads/2026/02/futsal-scaled.jpg",
+  },
+];
 
 export function Testimonials() {
   return (
-    <section className="py-16 md:py-24">
-      <div className="container">
-        <div className="max-w-2xl mx-auto text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Parents love the results
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Real reviews from real sports families.
-          </p>
+    <section className="py-16 md:py-20 bg-white">
+      <div className="container max-w-5xl">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Parents love the results</h2>
+          <p className="text-muted-foreground">Real reviews from real sports families.</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5">
           {testimonials.map((t) => (
-            <div key={t.id} className="bg-card border rounded-2xl p-8 relative">
-              <Quote className="h-8 w-8 text-primary/20 absolute top-6 right-6" />
-
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={
-                      i < t.rating
-                        ? "h-4 w-4 fill-accent text-accent"
-                        : "h-4 w-4 fill-muted text-muted"
-                    }
-                  />
-                ))}
+            <div key={t.id} className="bg-[#f7f8fa] border rounded-2xl overflow-hidden shadow-sm flex flex-col">
+              {/* Photo */}
+              <div className="relative h-44 w-full">
+                <Image
+                  src={t.img}
+                  alt={t.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {/* Stars overlaid */}
+                <div className="absolute bottom-3 left-4 flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
               </div>
 
-              <p className="text-foreground leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
-
-              <div className="pt-4 border-t">
-                <div className="font-semibold">{t.parentName}</div>
-                <div className="text-sm text-muted-foreground">
-                  {t.kidName}&apos;s parent, age {t.kidAge} · {t.city}
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-1 relative">
+                <Quote className="h-6 w-6 text-[#0F3154]/15 absolute top-4 right-4" />
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 italic flex-1">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="pt-3 border-t">
+                  <p className="font-semibold text-sm">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role} · {t.city}</p>
                 </div>
               </div>
             </div>
