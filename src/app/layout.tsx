@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   description:
     "The only platform built for group sports training. Find and book group sessions in soccer, basketball, and more with elite coaches near you.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/icons/icon-192.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

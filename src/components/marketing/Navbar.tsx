@@ -16,7 +16,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   const links = [
-    { href: "/groups", label: "Find Groups" },
+    { href: "/groups", label: "Find Group Sessions" },
     { href: "/free-play", label: "Find Free Play" },
     { href: "/connect", label: "Connect" },
     { href: "/pricing", label: "Pricing" },
