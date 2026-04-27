@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SessionCard } from "@/components/marketing/SessionCard";
@@ -168,76 +168,97 @@ function SessionsPageInner() {
     </div>
   );
 
+  const activeFilterCount =
+    (selectedSport !== "All Sports" ? 1 : 0) +
+    (selectedType !== "All Types" ? 1 : 0) +
+    (selectedLevel !== "Any Level" ? 1 : 0) +
+    (selectedCountry !== "All Countries" ? 1 : 0);
+
   return (
-    <div>
-      <div className="border-b bg-secondary/20">
-        <div className="container py-8 md:py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-1">Find a Group Session</h1>
-          <p className="text-muted-foreground mb-6">
-            {loading ? "Loading sessions…" : `${filtered.length} session${filtered.length === 1 ? "" : "s"} available`}
-          </p>
-          <div className="flex gap-2 max-w-2xl">
+    <div className="min-h-screen bg-[#f7f8fa]">
+
+      {/* Search bar */}
+      <div className="bg-white border-b py-6 px-4">
+        <div className="container max-w-7xl">
+          <h1 className="text-2xl font-bold mb-5">Find a Group Session</h1>
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input type="text" placeholder="Search by sport, trainer, city, or focus…"
-                value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+                value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-white h-11" />
             </div>
-            <Button variant="outline" onClick={() => setFiltersOpen(true)} className="lg:hidden shrink-0">
-              <SlidersHorizontal className="h-4 w-4" /> Filters
-            </Button>
+            <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)}
+              className="px-3 py-2 rounded-lg border border-input text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring h-11">
+              {sports.map((s) => <option key={s}>{s}</option>)}
+            </select>
+            <button className="px-6 h-11 rounded-xl text-white font-semibold text-sm whitespace-nowrap"
+              style={{ backgroundColor: "#0F3154" }}>
+              <Search className="h-4 w-4 inline mr-2" />Find Sessions
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="container py-8">
-        <div className="grid lg:grid-cols-[240px_1fr] gap-8">
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 bg-card border rounded-2xl p-5">
-              <FilterPanel />
-            </div>
-          </aside>
-          <div>
-            {loading ? (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />)}
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="bg-card border rounded-2xl p-12 text-center">
-                <div className="text-5xl mb-4">⚽</div>
-                <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  {hasFilters ? "Try adjusting your filters." : "Be the first trainer to post a session."}
-                </p>
-                {hasFilters && <Button onClick={resetFilters}>Clear all filters</Button>}
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filtered.map((session) => <SessionCard key={session.id} session={session} />)}
-              </div>
+      {/* Filter pills */}
+      <div className="bg-white border-b py-3 px-4">
+        <div className="container max-w-7xl flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+
+            {/* Session type pill */}
+            <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
+              className="text-xs border rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer font-medium"
+              style={selectedType !== "All Types" ? { borderColor: "#0F3154", color: "#0F3154" } : undefined}>
+              {sessionTypes.map((t) => <option key={t}>{t}</option>)}
+            </select>
+
+            {/* Skill level pill */}
+            <select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)}
+              className="text-xs border rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer font-medium"
+              style={selectedLevel !== "Any Level" ? { borderColor: "#0F3154", color: "#0F3154" } : undefined}>
+              {skillLevels.map((l) => <option key={l}>{l}</option>)}
+            </select>
+
+            {/* Location pill */}
+            <select value={selectedCountry} onChange={(e) => { onCountryChange(e.target.value); }}
+              className="text-xs border rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer font-medium"
+              style={selectedCountry !== "All Countries" ? { borderColor: "#0F3154", color: "#0F3154" } : undefined}>
+              {countries.map((c) => <option key={c}>{c}</option>)}
+            </select>
+
+            {activeFilterCount > 0 && (
+              <button onClick={resetFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" /> Clear
+              </button>
             )}
           </div>
+
+          <span className="text-sm text-muted-foreground whitespace-nowrap ml-auto">
+            {loading ? "…" : <><strong>{filtered.length}</strong> session{filtered.length === 1 ? "" : "s"} found</>}
+          </span>
         </div>
       </div>
 
-      {filtersOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-foreground/50" onClick={() => setFiltersOpen(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-background overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-background">
-              <h2 className="font-bold text-lg">Filters</h2>
-              <button onClick={() => setFiltersOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-accent/10">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-4">
-              <FilterPanel />
-              <Button size="lg" className="w-full mt-6" onClick={() => setFiltersOpen(false)}>
-                Show {filtered.length} session{filtered.length === 1 ? "" : "s"}
-              </Button>
-            </div>
+      {/* Grid */}
+      <div className="container max-w-7xl py-8 px-4">
+        {loading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />)}
           </div>
-        </div>
-      )}
+        ) : filtered.length === 0 ? (
+          <div className="bg-white border rounded-2xl p-12 text-center">
+            <div className="text-5xl mb-4">⚽</div>
+            <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
+            <p className="text-muted-foreground mb-6">
+              {hasFilters ? "Try adjusting your filters." : "Be the first trainer to post a session."}
+            </p>
+            {hasFilters && <Button onClick={resetFilters}>Clear all filters</Button>}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filtered.map((session) => <SessionCard key={session.id} session={session} />)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
