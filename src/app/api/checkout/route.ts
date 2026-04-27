@@ -15,28 +15,8 @@ export async function POST(req: NextRequest) {
   try {
     const { userId: existingUserId } = await auth();
     const body = await req.json();
-    const { sessionId, athleteName, contactName, firstName, lastName, email, notes, password } = body;
-
-    // Create Clerk account on the fly for guests
-    let userId = existingUserId;
-    if (!userId) {
-      if (!email || !password) {
-        return NextResponse.json({ error: "Please complete your account details to book." }, { status: 400 });
-      }
-      try {
-        const client = await clerkClient();
-        const newUser = await client.users.createUser({
-          emailAddress: [email],
-          password,
-          firstName: firstName ?? "",
-          lastName: lastName ?? "",
-        });
-        userId = newUser.id;
-      } catch (clerkErr: any) {
-        const msg = clerkErr?.errors?.[0]?.message ?? "Account creation failed";
-        return NextResponse.json({ error: msg }, { status: 400 });
-      }
-    }
+    const { sessionId, athleteName, contactName, firstName, lastName, email, notes } = body;
+    const userId = existingUserId ?? `guest-${Date.now()}`;
 
     const [session] = await db
       .select()
