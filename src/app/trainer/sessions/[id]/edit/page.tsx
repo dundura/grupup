@@ -14,7 +14,6 @@ const sessionTypes = [
   { value: "semi-private", label: "Semi-Private", desc: "2–3 players" },
   { value: "small-group",  label: "Small Group",  desc: "4–6 players" },
   { value: "clinic",       label: "Clinic",        desc: "7+ players" },
-  { value: "private",      label: "Private 1-on-1", desc: "1 player" },
 ];
 
 export default function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
