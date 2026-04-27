@@ -273,6 +273,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""}
                     description={session.notes ?? undefined}
                   />
+                  <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
                 </div>
               </div>
             )}
@@ -323,9 +324,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
               </p>
             </div>
-
-            {/* Invite friends */}
-            <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
 
             {/* Attendees */}
             {attendees.length > 0 && (
