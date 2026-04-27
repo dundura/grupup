@@ -91,9 +91,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             {/* Hero header */}
             <div className="rounded-2xl overflow-hidden">
               <div className="px-6 py-5" style={{ backgroundColor: "#0F3154" }}>
-                <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">
-                  {session.sport} · {session.sessionType.replace("-", " ")} · {session.city}
-                </p>
                 <h1 className="text-xl md:text-2xl font-bold text-white leading-snug">{session.title}</h1>
               </div>
             </div>
