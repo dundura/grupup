@@ -286,6 +286,11 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5 shrink-0">
+                      <Link href={`/trainer/sessions/${s.id}/edit`}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-muted-foreground hover:text-blue-600 transition-colors"
+                        title="Edit session">
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                       <button
                         onClick={() => deleteSession(s.id)}
                         className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors"
