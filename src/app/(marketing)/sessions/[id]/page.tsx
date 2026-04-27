@@ -98,36 +98,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            {/* Spots bar */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-2">
-              <div className="flex justify-between text-sm font-medium">
-                <span className={almostFull ? "font-bold" : ""} style={almostFull ? { color: "#DC373E" } : {}}>
-                  {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
-                </span>
-                <span className="text-muted-foreground text-xs">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all"
-                  style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
-              </div>
-            </div>
-
-            {/* Booking button */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
-              {isFull ? (
-                <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
-                  style={{ backgroundColor: "#DC373E" }}>Session Full</div>
-              ) : (
-                <Link href={`/sessions/${session.id}/book`}
-                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  Reserve My Spot
-                </Link>
-              )}
-              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
-              </p>
-            </div>
 
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
@@ -210,6 +180,35 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   ${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span>
                 </p>
               </div>
+            </div>
+
+            {/* Spots + booking */}
+            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
+                    {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
+                  </span>
+                  <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all"
+                    style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
+                </div>
+              </div>
+              {isFull ? (
+                <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                  style={{ backgroundColor: "#DC373E" }}>Session Full</div>
+              ) : (
+                <Link href={`/sessions/${session.id}/book`}
+                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-white font-semibold"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  Reserve My Spot
+                </Link>
+              )}
+              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
+              </p>
             </div>
 
             {/* Trainer card */}
