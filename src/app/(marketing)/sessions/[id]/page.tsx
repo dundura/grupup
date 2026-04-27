@@ -218,6 +218,24 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
+            {/* First class free callout */}
+            {session.firstClassFree && trainer && (
+              <div className="bg-white rounded-2xl border shadow-sm p-5">
+                <div className="rounded-xl p-4 mb-3 text-center" style={{ backgroundColor: "#f0f4f9" }}>
+                  <p className="text-base font-bold" style={{ color: "#0F3154" }}>🎉 First class free!</p>
+                  <p className="text-xs text-muted-foreground mt-1">New players — message the trainer to claim your free first class.</p>
+                </div>
+                <ContactTrainerForm
+                  sessionId={session.id}
+                  sessionTitle={session.title}
+                  trainerName={trainer.name ?? "Trainer"}
+                  defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
+                  ctaLabel="Claim Free First Class"
+                  ctaStyle="highlight"
+                />
+              </div>
+            )}
+
             {/* Spots + booking */}
             <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
               <div className="space-y-1.5">

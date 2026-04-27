@@ -36,6 +36,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "",
+    firstClassFree: false,
   });
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           pricePerPlayer: String(s.pricePerPlayer ?? 25),
           notes: s.notes ?? "",
           instructions: (s as any).instructions ?? "",
+          firstClassFree: (s as any).firstClassFree ?? false,
         });
         setLoading(false);
       })
@@ -273,6 +275,21 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 placeholder="e.g. Arrive 10 minutes before the session. Bring water and wear appropriate gear..."
                 className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border p-6">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={(form as any).firstClassFree}
+                onChange={(e) => setForm((f) => ({ ...f, firstClassFree: e.target.checked }))}
+                className="mt-0.5 h-4 w-4 accent-[#0F3154]"
+              />
+              <div>
+                <p className="font-semibold text-sm">Offer first class free</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Players will see a "First class free" callout and can message you to claim it.</p>
+              </div>
+            </label>
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}

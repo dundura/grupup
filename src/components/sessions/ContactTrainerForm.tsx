@@ -9,15 +9,21 @@ export default function ContactTrainerForm({
   sessionId,
   sessionTitle,
   trainerName,
+  defaultMessage = "",
+  ctaLabel = "Questions? Contact Trainer",
+  ctaStyle = "outline",
 }: {
   sessionId: number;
   sessionTitle: string;
   trainerName: string;
+  defaultMessage?: string;
+  ctaLabel?: string;
+  ctaStyle?: "outline" | "highlight";
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -58,13 +64,22 @@ export default function ContactTrainerForm({
   return (
     <div>
       {!open ? (
+        ctaStyle === "highlight" ? (
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-center w-full py-3 rounded-xl font-semibold text-sm transition-colors text-white"
+            style={{ backgroundColor: "#0F3154" }}>
+            🎉 {ctaLabel}
+          </button>
+        ) : (
         <button
           onClick={() => setOpen(true)}
           className="flex items-center justify-center w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-muted"
           style={{ color: "#0F3154", borderColor: "#0F3154" }}>
           <MessageSquare className="h-4 w-4 mr-2" />
-          Questions? Contact Trainer
+          {ctaLabel}
         </button>
+        )
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2.5">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

@@ -139,6 +139,7 @@ export const trainerSessions = pgTable("trainer_sessions", {
   ageRange: varchar("age_range", { length: 50 }),
   notes: text("notes"),
   instructions: text("instructions"),
+  firstClassFree: boolean("first_class_free").default(false).notNull(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
