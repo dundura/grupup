@@ -108,16 +108,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            {/* Instructions */}
-            <div className="bg-white rounded-2xl border shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Instructions</p>
-              {(session as any).instructions ? (
-                <p className="text-muted-foreground leading-relaxed text-sm">{(session as any).instructions}</p>
-              ) : (
-                <p className="text-muted-foreground text-sm italic">No instructions added yet.</p>
-              )}
-            </div>
-
             {/* Details 2x2 grid */}
             <div className="bg-white rounded-2xl border shadow-sm p-5">
               <div className="grid grid-cols-2 gap-0 divide-x divide-y divide-gray-100">
@@ -157,6 +147,14 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
             </div>
+
+            {/* Special Instructions */}
+            {(session as any).instructions && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Special Instructions</p>
+                <p className="text-muted-foreground leading-relaxed text-sm">{(session as any).instructions}</p>
+              </div>
+            )}
 
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
