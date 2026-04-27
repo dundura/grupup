@@ -99,6 +99,42 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             </div>
 
 
+            {/* Details table */}
+            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-4 divide-y divide-gray-100">
+              {(session.dayOfWeek || session.duration) && (
+                <div className="pt-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Date / Time</p>
+                  <div className="space-y-1.5 text-sm">
+                    {session.dayOfWeek && session.time && (
+                      <p className="flex items-center gap-2 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
+                    )}
+                    {session.duration && (
+                      <p className="flex items-center gap-2 font-medium"><Clock className="h-4 w-4 shrink-0 text-muted-foreground" />{session.duration} min</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {session.city && (
+                <div className="pt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Location</p>
+                  <p className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />{session.venue ? `${session.venue}, ` : ""}{session.city}</p>
+                </div>
+              )}
+              <div className="pt-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About</p>
+                <div className="space-y-1.5 text-sm font-medium">
+                  <p className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0 text-muted-foreground" />{session.spotsTotal} spots{session.ageRange ? ` · Ages ${session.ageRange}` : ""}</p>
+                  {session.skillLevel && (
+                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>{session.skillLevel}</span>
+                  )}
+                </div>
+              </div>
+              <div className="pt-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
+                <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span></p>
+              </div>
+            </div>
+
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
@@ -125,62 +161,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           {/* Right sidebar: details table + trainer card + attendees */}
           <div>
             <div className="sticky top-28 space-y-5">
-
-            {/* Details table */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-4 divide-y divide-gray-100">
-
-              {(session.dayOfWeek || session.duration) && (
-                <div className="pt-0">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Date / Time</p>
-                  <div className="space-y-1.5 text-sm">
-                    {session.dayOfWeek && session.time && (
-                      <p className="flex items-center gap-2 font-medium">
-                        <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        {session.dayOfWeek}s at {session.time}
-                      </p>
-                    )}
-                    {session.duration && (
-                      <p className="flex items-center gap-2 font-medium">
-                        <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        {session.duration} min
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {session.city && (
-                <div className="pt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Location</p>
-                  <p className="flex items-center gap-2 text-sm font-medium">
-                    <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    {session.venue ? `${session.venue}, ` : ""}{session.city}
-                  </p>
-                </div>
-              )}
-
-              <div className="pt-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About</p>
-                <div className="space-y-1.5 text-sm font-medium">
-                  <p className="flex items-center gap-2">
-                    <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    {session.spotsTotal} spots{session.ageRange ? ` · Ages ${session.ageRange}` : ""}
-                  </p>
-                  {session.skillLevel && (
-                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>
-                      {session.skillLevel}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
-                <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>
-                  ${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span>
-                </p>
-              </div>
-            </div>
 
             {/* Spots + booking */}
             <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
