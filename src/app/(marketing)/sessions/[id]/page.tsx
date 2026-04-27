@@ -88,12 +88,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           {/* Left column: title + description + booking */}
           <div className="space-y-5">
 
-            {/* Hero header */}
-            <div className="rounded-2xl overflow-hidden">
-              <div className="px-6 py-5" style={{ backgroundColor: "#0F3154" }}>
-                <h1 className="text-xl md:text-2xl font-bold text-white leading-snug">{session.title}</h1>
-              </div>
-            </div>
+            <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
             {/* About this session */}
             <div className="bg-white rounded-2xl border shadow-sm p-6">
