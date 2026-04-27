@@ -138,51 +138,47 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
 
-              {/* Booking + first class free */}
-              <div className="space-y-3">
+              {/* Booking */}
+              <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
                 {session.firstClassFree && trainer && (
-                  <div className="text-center py-2 px-3 rounded-xl border border-dashed border-amber-300 bg-amber-50">
-                    <p className="text-sm font-semibold text-amber-700">🎉 First class free</p>
-                    <p className="text-xs text-amber-600 mt-0.5">New players — message trainer to claim</p>
-                    <div className="mt-2">
-                      <ContactTrainerForm
-                        sessionId={session.id}
-                        sessionTitle={session.title}
-                        trainerName={trainer?.name ?? "Trainer"}
-                        defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
-                        ctaLabel="Claim Free First Class"
-                        ctaStyle="highlight"
-                      />
-                    </div>
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-semibold text-center">🎉 First class free</p>
+                    <p className="text-xs text-muted-foreground text-center">New players — message trainer to claim</p>
+                    <ContactTrainerForm
+                      sessionId={session.id}
+                      sessionTitle={session.title}
+                      trainerName={trainer?.name ?? "Trainer"}
+                      defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
+                      ctaLabel="Claim Free First Class"
+                      ctaStyle="highlight"
+                    />
                   </div>
                 )}
-                <div className="space-y-2.5">
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
-                        {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
-                      </span>
-                      <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all"
-                        style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
-                    </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
+                      {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
+                    </span>
+                    <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
                   </div>
-                  {isFull ? (
-                    <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
-                      style={{ backgroundColor: "#DC373E" }}>Session Full</div>
-                  ) : (
-                    <Link href={`/sessions/${session.id}/book`}
-                      className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
-                      style={{ backgroundColor: "#DC373E" }}>
-                      Reserve My Spot
-                    </Link>
-                  )}
-                  <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                    <Shield className="h-3 w-3" /> Secure · Cancel 24h before
-                  </p>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all"
+                      style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
+                  </div>
                 </div>
+                {isFull ? (
+                  <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                    style={{ backgroundColor: "#DC373E" }}>Session Full</div>
+                ) : (
+                  <Link href={`/sessions/${session.id}/book`}
+                    className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Reserve My Spot
+                  </Link>
+                )}
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <Shield className="h-3 w-3" /> Secure · Cancel 24h before
+                </p>
               </div>
 
             </div>
