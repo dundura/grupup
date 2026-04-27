@@ -34,7 +34,7 @@ export function TrustSection() {
               Train Together. Grow Together.
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> makes it easy to find local sports trainers and book affordable group sessions for your child.
+              <strong>Grup<span style={{ color: "#DC373E" }}>Up</span></strong> makes it easy to find local sports trainers and book affordable group sessions for your child.
             </p>
           </div>
 
