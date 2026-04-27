@@ -14,7 +14,7 @@ interface TrainerRow {
   hourlyRate: number; hasActiveSessions: boolean;
 }
 
-const SPORTS = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
+const SPORTS = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 
 export default function TrainersPage() {
   const [allTrainers, setAllTrainers] = useState<TrainerRow[]>([]);

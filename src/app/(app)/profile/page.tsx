@@ -9,7 +9,7 @@ const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").th
 import { completeOnboarding } from "@/app/onboarding/_actions";
 import { CheckCircle, Plus, X } from "lucide-react";
 
-const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball"];
+const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const countries = [
   "United States", "Canada", "United Kingdom", "Australia", "Ireland",

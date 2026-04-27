@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { SessionCard } from "@/components/marketing/SessionCard";
 import type { GroupSession } from "@/lib/types";
 
-const sports = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis"];
+const sports = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const sessionTypes = ["All Types", "Private", "Semi-Private", "Small Group", "Clinic"];
 const skillLevels = ["Any Level", "Beginner", "Intermediate", "Advanced", "Elite"];
 const days = ["Any Day", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];

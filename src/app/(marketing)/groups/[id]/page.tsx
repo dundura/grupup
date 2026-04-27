@@ -110,7 +110,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-green-600" />
                 <p className="text-xs font-medium">Verified</p>
-                <p className="text-[11px] text-muted-foreground">Grupup trainer</p>
+                <p className="text-[11px] text-muted-foreground">Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> trainer</p>
               </div>
             </div>
 
