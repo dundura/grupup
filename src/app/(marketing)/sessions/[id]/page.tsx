@@ -84,31 +84,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <p className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-3">
                   {session.sport} · {session.sessionType.replace("-", " ")} · {session.city}
                 </p>
-                <h1 className="text-xl md:text-2xl font-bold text-white leading-snug mb-4">{session.title}</h1>
-
-                {trainer && (
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
-                      {trainer.photo ? (
-                        <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="48px" unoptimized />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-lg font-bold text-white"
-                          style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-                          {trainer.name?.[0] ?? "T"}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{trainer.name}</p>
-                      <div className="flex items-center gap-1.5 text-white/70 text-xs">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        <span className="font-semibold text-white/90">{trainer.rating?.toFixed(1)}</span>
-                        <span>· {trainer.reviewCount} reviews</span>
-                        {(trainer.yearsExperience ?? 0) > 0 && <span>· {trainer.yearsExperience} yrs exp</span>}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <h1 className="text-xl md:text-2xl font-bold text-white leading-snug">{session.title}</h1>
               </div>
 
               <div className="p-6 space-y-5 divide-y divide-gray-100">
