@@ -40,6 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       ageRange: body.ageRange ?? "",
       notes: body.notes ?? "",
       instructions: body.instructions ?? "",
+      videoUrl: body.videoUrl ?? "",
       firstClassFree: body.firstClassFree ?? false,
     }).where(and(eq(trainerSessions.id, parseInt(id)), eq(trainerSessions.trainerClerkId, userId)));
     return NextResponse.json({ ok: true });

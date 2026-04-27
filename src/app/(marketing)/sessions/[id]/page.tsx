@@ -12,8 +12,28 @@ import { eq, and, ne } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
 import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 import CopyLinkButton from "@/components/sessions/CopyLinkButton";
+import FollowButton from "@/components/sessions/FollowButton";
+import { auth } from "@clerk/nextjs/server";
+import { trainerFollows } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
+
+function toEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
+      const id = u.hostname.includes("youtu.be")
+        ? u.pathname.slice(1)
+        : u.searchParams.get("v");
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (u.hostname.includes("vimeo.com")) {
+      const id = u.pathname.split("/").filter(Boolean).pop();
+      return id ? `https://player.vimeo.com/video/${id}` : null;
+    }
+  } catch {}
+  return null;
+}
 
 const skillColors: Record<string, string> = {
   Beginner:     "bg-green-100 text-green-700",
@@ -32,8 +52,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let trainerEmail = "";
   let otherSessions: typeof trainerSessions.$inferSelect[] = [];
   let attendees: { userName: string | null }[] = [];
+  let isFollowing = false;
+  let currentUserId: string | null = null;
 
   try {
+    const { userId } = await auth();
+    currentUserId = userId;
+
     const [row] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionId));
     if (!row || !row.isActive) notFound();
     session = row;
@@ -57,6 +82,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       .from(bookings)
       .where(and(eq(bookings.sessionId, String(sessionId)), eq(bookings.status, "paid")));
 
+    if (userId) {
+      const [follow] = await db.select().from(trainerFollows).where(
+        and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, session.trainerClerkId))
+      );
+      isFollowing = !!follow;
+    }
+
     // Get trainer email from Clerk
     try {
       const client = await clerkClient();
@@ -67,6 +99,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
     notFound();
   }
 
+  const embedUrl = (session as any).videoUrl ? toEmbedUrl((session as any).videoUrl) : null;
   const almostFull = session.spotsLeft <= 2 && session.spotsLeft > 0;
   const isFull = session.spotsLeft === 0;
   const fillPct = Math.round(((session.spotsTotal - session.spotsLeft) / session.spotsTotal) * 100);
@@ -151,6 +184,15 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
+            {/* Session video */}
+            {embedUrl && (
+              <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+                <div className="aspect-video">
+                  <iframe src={embedUrl} title="Session video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+                </div>
+              </div>
+            )}
+
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
@@ -192,7 +234,14 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   )}
                 </div>
                 <div className="p-4 space-y-2">
-                  <p className="font-bold text-base">{trainer.name}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-bold text-base">{trainer.name}</p>
+                    <FollowButton
+                      trainerClerkId={session.trainerClerkId}
+                      initialIsFollowing={isFollowing}
+                      isSignedIn={!!currentUserId}
+                    />
+                  </div>
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (

@@ -36,7 +36,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "",
-    firstClassFree: false,
+    videoUrl: "", firstClassFree: false,
   });
 
   useEffect(() => {
@@ -60,6 +60,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           pricePerPlayer: String(s.pricePerPlayer ?? 25),
           notes: s.notes ?? "",
           instructions: (s as any).instructions ?? "",
+          videoUrl: (s as any).videoUrl ?? "",
           firstClassFree: (s as any).firstClassFree ?? false,
         });
         setLoading(false);
@@ -275,6 +276,12 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 placeholder="e.g. Arrive 10 minutes before the session. Bring water and wear appropriate gear..."
                 className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border p-6 space-y-2">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Video <span className="font-normal normal-case text-xs">(optional)</span></label>
+            <p className="text-xs text-muted-foreground">Paste a YouTube or Vimeo link to show a preview video on your session page.</p>
+            <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
           </div>
 
           <div className="bg-white rounded-2xl border p-6">
