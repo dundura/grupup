@@ -142,7 +142,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
                 {session.firstClassFree && trainer && (
                   <div className="space-y-1.5">
-                    <p className="text-xs font-semibold text-center">🎉 First class free</p>
                     <p className="text-xs text-muted-foreground text-center">New players — message trainer to claim</p>
                     <ContactTrainerForm
                       sessionId={session.id}
