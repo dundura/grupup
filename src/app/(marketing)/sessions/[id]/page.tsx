@@ -11,6 +11,7 @@ import { trainerSessions, trainers, bookings } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
 import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
+import CopyLinkButton from "@/components/sessions/CopyLinkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -264,6 +265,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
               </p>
             </div>
+
+            {/* Invite friends */}
+            <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
 
             {/* Attendees */}
             {attendees.length > 0 && (
