@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import {
   Star, MapPin, ShieldCheck, ChevronDown, ChevronRight,
@@ -44,6 +44,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
     lastName: user?.lastName ?? "",
     email: user?.emailAddresses?.[0]?.emailAddress ?? "",
     phone: "",
+    password: "",
     athleteName: "",
     notes: "",
   });
@@ -52,7 +53,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
   const typeName = session.sessionType.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const step1Valid = form.firstName.trim() && form.email.trim();
+  const step1Valid = form.firstName.trim() && form.email.trim() && (!!user || form.password.length >= 8);
   const step2Valid = form.athleteName.trim();
 
   async function handleCheckout() {
@@ -65,9 +66,12 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
           sessionId: session.id,
           athleteName: form.athleteName,
           contactName: `${form.firstName} ${form.lastName}`.trim(),
+          firstName: form.firstName,
+          lastName: form.lastName,
           email: form.email,
           phone: form.phone,
           notes: form.notes,
+          password: !user ? form.password : undefined,
         }),
       });
       const data = await res.json();
@@ -139,27 +143,55 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
             {/* Step 1: Contact Info */}
             {step === 1 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <h2 className="text-lg font-bold mb-5">Contact Info</h2>
+
+                {/* Account creation header — only for guests */}
+                {!user && (
+                  <div className="mb-6 pb-6 border-b">
+                    <h2 className="text-lg font-bold mb-1">Create an account</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Already have an account?{" "}
+                      <SignInButton mode="modal">
+                        <button className="font-semibold underline" style={{ color: "#DC373E" }}>Log in here.</button>
+                      </SignInButton>
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-3 bg-[#f7f8fa] rounded-lg px-3 py-2">
+                      Finish booking below to create your Grup<strong><span style={{ color: "#DC373E" }}>Up</span></strong> account.
+                    </p>
+                  </div>
+                )}
+
+                <h2 className="text-lg font-bold mb-5">{user ? "Contact Info" : "Your Details"}</h2>
+
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-sm font-medium mb-1.5 block">First name</label>
+                      <label className="text-sm font-medium mb-1.5 block">First Name <span style={{ color: "#DC373E" }}>*</span></label>
                       <Input value={form.firstName} onChange={(e) => setF("firstName", e.target.value)} placeholder="Alex" />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-1.5 block">Last name</label>
+                      <label className="text-sm font-medium mb-1.5 block">Last Name <span style={{ color: "#DC373E" }}>*</span></label>
                       <Input value={form.lastName} onChange={(e) => setF("lastName", e.target.value)} placeholder="Smith" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Email address</label>
+                    <label className="text-sm font-medium mb-1.5 block">Email <span style={{ color: "#DC373E" }}>*</span></label>
                     <Input type="email" value={form.email} onChange={(e) => setF("email", e.target.value)} placeholder="you@email.com" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Phone <span className="text-muted-foreground font-normal">(optional)</span></label>
-                    <Input type="tel" value={form.phone} onChange={(e) => setF("phone", e.target.value)} placeholder="+1 (555) 000-0000" />
+                    <label className="text-sm font-medium mb-1.5 block">Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
+                    <Input type="tel" value={form.phone} onChange={(e) => setF("phone", e.target.value)} placeholder="(123) 456-7890" />
                   </div>
+                  {!user && (
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Create Password <span style={{ color: "#DC373E" }}>*</span></label>
+                      <Input type="password" value={form.password} onChange={(e) => setF("password", e.target.value)} placeholder="Min. 8 characters" />
+                      {form.password.length > 0 && form.password.length < 8 && (
+                        <p className="text-xs mt-1" style={{ color: "#DC373E" }}>Password must be at least 8 characters</p>
+                      )}
+                    </div>
+                  )}
                 </div>
+
                 <button
                   onClick={() => step1Valid && setStep(2)}
                   disabled={!step1Valid}
