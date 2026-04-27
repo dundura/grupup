@@ -178,7 +178,7 @@ export function SessionCard({ session }: SessionCardProps) {
           className="flex-1 py-2.5 rounded-xl text-center text-sm font-semibold text-white transition-opacity group-hover:opacity-90"
           style={{ backgroundColor: "#DC373E" }}
         >
-          Join Session
+          View & Book
         </div>
         <button
           onClick={handleInterested}
