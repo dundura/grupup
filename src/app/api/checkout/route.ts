@@ -55,10 +55,11 @@ export async function POST(req: NextRequest) {
         },
       ],
       metadata: {
-        sessionId: String(session.id),
+        trainerSessionId: String(session.id),
         userId,
+        userName: contactName ?? "",
+        userEmail: email ?? "",
         athleteName: athleteName ?? "",
-        contactName: contactName ?? "",
         notes: notes ?? "",
       },
       success_url: `${origin}/sessions/${session.id}/book/success?checkout_session_id={CHECKOUT_SESSION_ID}`,

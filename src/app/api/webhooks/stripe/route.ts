@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/db";
-import { bookings, sessions } from "@/db/schema";
+import { bookings, trainerSessions, trainers } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { sendBookingConfirmation } from "@/lib/email";
 
@@ -22,34 +22,47 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const cs = event.data.object as Stripe.Checkout.Session;
-    const { sessionId, clerkUserId, userName, userEmail } = cs.metadata!;
+    const { trainerSessionId, userId, userName, userEmail, athleteName, notes } = cs.metadata ?? {};
 
+    const sessionIdInt = parseInt(trainerSessionId ?? "");
+    if (isNaN(sessionIdInt)) return NextResponse.json({ received: true });
+
+    // Record booking
     await db.insert(bookings).values({
-      sessionId,
-      clerkUserId,
-      userName,
-      userEmail,
-      status: "confirmed",
+      sessionId: trainerSessionId,
+      clerkUserId: userId ?? "",
+      userName: userName ?? "",
+      userEmail: userEmail ?? "",
+      status: "paid",
       stripeSessionId: cs.id,
       amountPaid: (cs.amount_total ?? 0) / 100,
     });
 
+    // Decrement spots and auto-deactivate if full
     await db
-      .update(sessions)
-      .set({ spotsLeft: sql`${sessions.spotsLeft} - 1` })
-      .where(eq(sessions.id, sessionId));
+      .update(trainerSessions)
+      .set({ spotsLeft: sql`GREATEST(${trainerSessions.spotsLeft} - 1, 0)` })
+      .where(eq(trainerSessions.id, sessionIdInt));
 
-    const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
+    const [session] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
+
+    // Auto-deactivate when full
+    if (session && session.spotsLeft <= 0) {
+      await db.update(trainerSessions).set({ isActive: false }).where(eq(trainerSessions.id, sessionIdInt));
+    }
+
+    // Send confirmation email
     if (session && userEmail) {
+      const [trainer] = await db.select().from(trainers).where(eq(trainers.clerkId, session.trainerClerkId));
       await sendBookingConfirmation({
         toEmail: userEmail,
         toName: userName ?? "there",
         sessionTitle: session.title,
-        trainerName: session.trainerId ?? "your trainer",
+        trainerName: trainer?.name ?? "your trainer",
         dayOfWeek: session.dayOfWeek ?? "",
         time: session.time ?? "",
         venue: session.venue ?? "",
-        city: session.city,
+        city: session.city ?? "",
         amount: (cs.amount_total ?? 0) / 100,
       });
     }

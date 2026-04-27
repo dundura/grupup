@@ -33,7 +33,7 @@ export default function NewSessionPage() {
   const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
-    dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
+    dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false,
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
@@ -95,7 +95,8 @@ export default function NewSessionPage() {
     !form.sessionType   && "Session type",
     !form.sport         && "Sport",
     !form.city.trim()   && "City",
-    // Plan mode uses per-session dates; standard mode needs day + time
+    !form.skillLevel    && "Skill level",
+    form.ageRanges.length === 0 && "Age range",
     !form.isPlan && !form.dayOfWeek && "Day of week",
     !form.isPlan && !form.time      && "Start time",
   ].filter(Boolean) as string[];
@@ -128,7 +129,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -390,7 +391,7 @@ export default function NewSessionPage() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Skill Level</label>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Skill Level <span style={{ color: "#DC373E" }}>*</span></label>
               <div className="grid grid-cols-4 gap-2">
                 {levels.map((l) => (
                   <button key={l} type="button" onClick={() => set("skillLevel", l)}
@@ -402,12 +403,19 @@ export default function NewSessionPage() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Age Range</label>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">
+                Age Range <span style={{ color: "#DC373E" }}>*</span>
+                <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
+              </label>
               <div className="flex flex-wrap gap-2">
                 {ageRanges.map((a) => (
-                  <button key={a} type="button" onClick={() => set("ageRange", a)}
+                  <button key={a} type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      ageRanges: f.ageRanges.includes(a) ? f.ageRanges.filter((x) => x !== a) : [...f.ageRanges, a],
+                    }))}
                     className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.ageRange === a ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    style={form.ageRanges.includes(a) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
                     {a}
                   </button>
                 ))}
@@ -416,7 +424,7 @@ export default function NewSessionPage() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots</label>
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
             <div>
               <label className="text-sm font-medium mb-1.5 block">
                 Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       spotsTotal,
       spotsLeft: spotsTotal,
       skillLevel: body.skillLevel,
-      ageRange: body.ageRange,
+      ageRange: Array.isArray(body.ageRanges) ? body.ageRanges.join(", ") : (body.ageRange ?? ""),
       notes: body.notes,
       isActive: true,
     }).returning();
