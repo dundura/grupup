@@ -15,7 +15,6 @@ const sessionTypes = [
   { value: "semi-private", label: "Semi-Private", desc: "2–3 players · $30/player", spots: 3 },
   { value: "small-group",  label: "Small Group",  desc: "4–6 players · $25/player", spots: 6 },
   { value: "clinic",       label: "Clinic",        desc: "7+ players · $20/player", spots: 10 },
-  { value: "private",      label: "Private 1-on-1", desc: "1 player · you set the rate", spots: 1 },
 ];
 
 const defaultPrices: Record<string, number> = {

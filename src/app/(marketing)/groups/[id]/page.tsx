@@ -161,6 +161,12 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                     <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{location}</p>
                   )}
                 </div>
+                {/* Private booking contact */}
+                <a href={`mailto:info@anytime-soccer.com?subject=Private session inquiry — ${trainer.name}`}
+                  className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted mt-2"
+                  style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+                  Inquire about private sessions
+                </a>
               </div>
             </div>
 

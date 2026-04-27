@@ -6,7 +6,8 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
-    const trainerRows = await db.select().from(trainerSessions).where(eq(trainerSessions.isActive, true));
+    const trainerRows = (await db.select().from(trainerSessions).where(eq(trainerSessions.isActive, true)))
+      .filter((s) => s.sessionType !== "private");
     if (trainerRows.length === 0) return NextResponse.json([]);
 
     const clerkIds = [...new Set(trainerRows.map((s) => s.trainerClerkId))];
