@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 
 interface TrainerRow {
   id: string; name: string; photo: string; bio: string;
-  city: string; state: string; rating: number; reviewCount: number;
+  city: string; state: string; zipCode: string; rating: number; reviewCount: number;
   yearsExperience: number; specialties: string[]; certifications: string[];
   skillLevels: string[]; sports: string[]; sport: string;
   hourlyRate: number; hasActiveSessions: boolean;
@@ -37,9 +37,10 @@ export default function TrainersPage() {
     let list = allTrainers.filter((t) => {
       if (locationInput.trim()) {
         const q = locationInput.trim().toLowerCase();
-        const cityMatch = t.city?.toLowerCase().includes(q) || t.state?.toLowerCase().includes(q);
-        // Also match zip if stored (future)
-        if (!cityMatch) return false;
+        const match = t.city?.toLowerCase().includes(q)
+          || t.state?.toLowerCase().includes(q)
+          || t.zipCode?.toLowerCase().includes(q);
+        if (!match) return false;
       }
       if (sportFilter !== "All Sports") {
         const trainerSports = [...(t.sports ?? []), t.sport].filter(Boolean);
