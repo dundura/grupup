@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     console.error("[POST /api/checkout]", err);
     const msg = err instanceof Error ? err.message : "";
     if (msg.includes("STRIPE_SECRET_KEY")) {
-      return NextResponse.json({ error: "Payments not configured yet. Please contact support@grupup.app." }, { status: 503 });
+      return NextResponse.json({ error: "Payments not configured yet. Please contact info@anytime-soccer.com." }, { status: 503 });
     }
     return NextResponse.json({ error: "Failed to create checkout. Please try again." }, { status: 500 });
   }

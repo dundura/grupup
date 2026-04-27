@@ -27,7 +27,7 @@ const STEPS = ["Contact Info", "Package Options", "Schedule", "Checkout"] as con
 
 const FAQ = [
   { q: "How do group sessions work?", a: "You reserve a spot in a small group session (2–10 players) led by a vetted local coach. You train alongside peers at the same level — better reps, more competition, fraction of the private cost." },
-  { q: "Can I contact the coach before booking?", a: "Not yet through the app — but the coach's notes and profile have everything you need. If you have specific questions, reach us at support@grupup.app." },
+  { q: "Can I contact the coach before booking?", a: "Not yet through the app — but the coach's notes and profile have everything you need. If you have specific questions, reach us at info@anytime-soccer.com." },
   { q: "What is the cancellation policy?", a: "Cancel up to 24 hours before the session for a full refund. Within 24 hours the session fee is non-refundable." },
   { q: "Is my payment secure?", a: "Yes. All payments are processed by Stripe with industry-standard encryption. Grupup never stores your card details." },
   { q: "What if the coach cancels?", a: "If a coach cancels a session you've booked, you'll receive a full refund within 3–5 business days." },
@@ -53,7 +53,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
   const typeName = session.sessionType.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const step1Valid = form.firstName.trim() && form.email.trim();
+  const step1Valid = form.firstName.trim() && form.email.trim() && form.phone.trim();
   const step2Valid = form.athleteName.trim();
 
   async function handleCheckout() {
@@ -174,7 +174,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <Input type="email" value={form.email} onChange={(e) => setF("email", e.target.value)} placeholder="you@email.com" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
+                    <label className="text-sm font-medium mb-1.5 block">Phone <span style={{ color: "#DC373E" }}>*</span></label>
                     <Input type="tel" value={form.phone} onChange={(e) => setF("phone", e.target.value)} placeholder="(123) 456-7890" />
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
             {/* Support */}
             <div className="bg-white rounded-2xl border shadow-sm p-5 text-sm">
               <p className="font-semibold mb-1">Need help?</p>
-              <p className="text-muted-foreground text-xs mb-1">support@grupup.app</p>
+              <p className="text-muted-foreground text-xs mb-1">info@anytime-soccer.com</p>
               <p className="text-muted-foreground text-xs">Mon–Fri · 9am–6pm ET</p>
             </div>
 
