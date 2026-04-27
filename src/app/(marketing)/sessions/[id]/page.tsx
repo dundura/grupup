@@ -111,42 +111,68 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
 
-              <div className="p-6 space-y-4">
-                {/* Details grid */}
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {session.dayOfWeek && session.time && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CalendarDays className="h-4 w-4 shrink-0" />
-                      <span>{session.dayOfWeek}s at {session.time}</span>
+              <div className="p-6 space-y-5 divide-y divide-gray-100">
+
+                {/* Date/Time */}
+                {(session.dayOfWeek || session.duration) && (
+                  <div className="pt-0">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Date / Time</p>
+                    <div className="space-y-1.5 text-sm text-foreground">
+                      {session.dayOfWeek && session.time && (
+                        <p className="flex items-center gap-2 font-medium">
+                          <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          {session.dayOfWeek}s at {session.time}
+                        </p>
+                      )}
+                      {session.duration && (
+                        <p className="flex items-center gap-2 font-medium">
+                          <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          {session.duration} min
+                        </p>
+                      )}
                     </div>
-                  )}
-                  {session.duration && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 shrink-0" />
-                      <span>{session.duration} min</span>
-                    </div>
-                  )}
-                  {session.city && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 shrink-0" />
-                      <span>{session.venue ? `${session.venue}, ` : ""}{session.city}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 shrink-0" />
-                    <span>{session.spotsTotal} spots total{session.ageRange ? ` · Ages ${session.ageRange}` : ""}</span>
+                  </div>
+                )}
+
+                {/* Location */}
+                {session.city && (
+                  <div className="pt-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Location</p>
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      {session.venue ? `${session.venue}, ` : ""}{session.city}
+                    </p>
+                  </div>
+                )}
+
+                {/* About */}
+                <div className="pt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About</p>
+                  <div className="space-y-1.5 text-sm font-medium">
+                    <p className="flex items-center gap-2">
+                      <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      {session.spotsTotal} spots{session.ageRange ? ` · Ages ${session.ageRange}` : ""}
+                    </p>
+                    {session.skillLevel && (
+                      <p className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>
+                          {session.skillLevel}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Skill level */}
-                {session.skillLevel && (
-                  <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>
-                    {session.skillLevel}
-                  </span>
-                )}
+                {/* Cost */}
+                <div className="pt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
+                  <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>
+                    ${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span>
+                  </p>
+                </div>
 
                 {/* Spots bar */}
-                <div className="space-y-1.5">
+                <div className="pt-4 space-y-1.5">
                   <div className="flex justify-between text-xs">
                     <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
                       {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
@@ -161,9 +187,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
                 {/* Notes */}
                 {session.notes && (
-                  <div className="bg-muted/40 rounded-xl p-4 text-sm text-muted-foreground">
-                    <p className="font-semibold text-foreground mb-1 text-xs uppercase tracking-wider">Notes from the coach</p>
-                    {session.notes}
+                  <div className="pt-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Notes from the coach</p>
+                    <p className="text-sm text-muted-foreground">{session.notes}</p>
                   </div>
                 )}
               </div>
