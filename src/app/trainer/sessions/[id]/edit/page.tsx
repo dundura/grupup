@@ -16,6 +16,15 @@ const sessionTypes = [
   { value: "clinic",       label: "Clinic",        desc: "7+ players" },
 ];
 
+function baseHourlyRate(spots: number): number {
+  if (spots <= 3) return 30;
+  if (spots <= 6) return 25;
+  return 20;
+}
+function calcPrice(spots: number, durationMin: number): number {
+  return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
+}
+
 export default function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -55,7 +64,18 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       .catch(() => { setError("Failed to load session"); setLoading(false); });
   }, [id]);
 
-  function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
+  function set(key: string, val: string) {
+    setForm((f) => {
+      const next = { ...f, [key]: val };
+      if (key === "spotsTotal") {
+        next.pricePerPlayer = String(calcPrice(parseInt(val) || 1, parseInt(f.duration) || 60));
+      }
+      if (key === "duration") {
+        next.pricePerPlayer = String(calcPrice(parseInt(f.spotsTotal) || 1, parseInt(val) || 60));
+      }
+      return next;
+    });
+  }
 
   const missing = [
     !form.title.trim()  && "Session title",
@@ -197,16 +217,44 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Total spots</label>
-                <Input type="number" min="1" max="20" value={form.spotsTotal} onChange={(e) => set("spotsTotal", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Price per player ($)</label>
-                <Input type="number" min="5" value={form.pricePerPlayer} onChange={(e) => set("pricePerPlayer", e.target.value)} />
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
+              </label>
+              <input type="range" min="1" max="20" value={form.spotsTotal}
+                onChange={(e) => set("spotsTotal", e.target.value)}
+                className="w-full accent-[#0F3154]" />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>1</span><span>20</span>
               </div>
             </div>
+            {(() => {
+              const spots = parseInt(form.spotsTotal) || 1;
+              const duration = parseInt(form.duration) || 60;
+              const perSession = parseInt(form.pricePerPlayer) || 0;
+              const hourlyRate = baseHourlyRate(spots);
+              const trainerEarns = Math.round(perSession * 0.85);
+              const totalIfFull = trainerEarns * spots;
+              return (
+                <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Players pay</span>
+                    <span className="font-semibold">${perSession}/player</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">You earn (85%)</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t pt-2">
+                    <span className="text-muted-foreground">If session fills ({spots} spots)</span>
+                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="bg-white rounded-2xl border p-6">
