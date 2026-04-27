@@ -94,7 +94,12 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               {session.notes ? (
                 <p className="text-muted-foreground leading-relaxed text-sm">{session.notes}</p>
               ) : (
-                <p className="text-muted-foreground text-sm italic">No description added yet.</p>
+                <div className="space-y-3">
+                  <p className="text-muted-foreground text-sm italic">No description added yet.</p>
+                  <p className="text-xs text-muted-foreground bg-[#f7f8fa] rounded-lg px-3 py-2">
+                    To add a description, go to your <Link href="/dashboard" className="font-semibold underline" style={{ color: "#0F3154" }}>dashboard</Link> → edit this session → use the Notes field to describe what players can expect.
+                  </p>
+                </div>
               )}
             </div>
 
