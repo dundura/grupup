@@ -52,9 +52,10 @@ export function SessionCard({ session }: SessionCardProps) {
     <Link
       href={`/sessions/${session.id}`}
       className="group block bg-card border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all"
+      style={{ borderTop: "3px solid #0F3154" }}
     >
-      {/* Header band */}
-      <div className="px-5 pt-5 pb-4" style={{ backgroundColor: "#0F3154" }}>
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4">
         {offer && (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-3" style={{ backgroundColor: "#DC373E", color: "#fff" }}>
             🏷️ {offer.label}
@@ -64,30 +65,27 @@ export function SessionCard({ session }: SessionCardProps) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl leading-none">{session.sportEmoji}</span>
-              <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">{session.sport}</span>
-              <span className="text-white/40 text-xs">·</span>
-              <span className="text-white/60 text-xs font-semibold">{SESSION_TYPE_LABELS[session.sessionType]}</span>
+              <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">{session.sport}</span>
+              <span className="text-muted-foreground text-xs">·</span>
+              <span className="text-muted-foreground text-xs font-semibold">{SESSION_TYPE_LABELS[session.sessionType]}</span>
             </div>
-            <h3 className="text-white font-bold text-base leading-tight">{session.title}</h3>
-            <p className="text-white/50 text-xs mt-0.5">{session.focus}</p>
+            <h3 className="font-bold text-base leading-tight">{session.title}</h3>
+            <p className="text-muted-foreground text-xs mt-0.5">{session.focus}</p>
           </div>
           <div className="text-right shrink-0">
             {offer && discountedPrice !== null ? (
               <>
-                <div className="text-white/40 text-sm line-through leading-none">${session.pricePerPlayer}</div>
-                <div className="font-extrabold text-xl leading-none" style={{ color: discountedPrice === 0 ? "#6EE7B7" : "#FCD34D" }}>
+                <div className="text-muted-foreground text-sm line-through leading-none">${session.pricePerPlayer}</div>
+                <div className="font-extrabold text-xl leading-none" style={{ color: "#DC373E" }}>
                   {discountedPrice === 0 ? "FREE" : `$${discountedPrice}`}
                 </div>
               </>
             ) : (
-              <div className="text-white font-extrabold text-xl leading-none">${session.pricePerPlayer}</div>
+              <div className="font-extrabold text-xl leading-none" style={{ color: "#0F3154" }}>${session.pricePerPlayer}</div>
             )}
-            <div className="text-white/50 text-xs mt-0.5">
+            <div className="text-muted-foreground text-xs mt-0.5">
               {session.sessionType === "private" ? "/ session" : "/ player"}
             </div>
-            {session.sessionType === "private" && session.trainerRate && (
-              <div className="text-white/30 text-xs mt-0.5">incl. 15% fee</div>
-            )}
           </div>
         </div>
       </div>
