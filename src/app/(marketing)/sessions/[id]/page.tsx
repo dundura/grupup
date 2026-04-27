@@ -261,10 +261,18 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     trainerName={trainer.name ?? "Trainer"}
                   />
                   <Link href={`/groups/${trainer.id}`}
-                    className="block text-center text-xs font-semibold py-2 rounded-lg border mt-2 hover:bg-muted transition-colors"
+                    className="block text-center text-sm font-semibold py-2.5 rounded-lg border mt-2 hover:bg-muted transition-colors"
                     style={{ color: "#0F3154", borderColor: "#0F3154" }}>
                     View trainer profile
                   </Link>
+                  <AddToCalendarButton
+                    title={session.title}
+                    dayOfWeek={session.dayOfWeek ?? ""}
+                    time={session.time ?? ""}
+                    durationMin={session.duration ?? 60}
+                    location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""}
+                    description={session.notes ?? undefined}
+                  />
                 </div>
               </div>
             )}
@@ -315,16 +323,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
               </p>
             </div>
-
-            {/* Add to calendar */}
-            <AddToCalendarButton
-              title={session.title}
-              dayOfWeek={session.dayOfWeek ?? ""}
-              time={session.time ?? ""}
-              durationMin={session.duration ?? 60}
-              location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""}
-              description={session.notes ?? undefined}
-            />
 
             {/* Invite friends */}
             <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
