@@ -30,6 +30,7 @@ export default function NewSessionPage() {
   const { isSignedIn } = useAuth();
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
@@ -151,8 +152,12 @@ export default function NewSessionPage() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Type</label>
-            <div className="space-y-3">
+            <button type="button" onClick={() => setSessionTypeOpen((v) => !v)}
+              className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Session Type {form.sessionType && <span className="text-xs font-semibold normal-case tracking-normal text-foreground">{sessionTypes.find(t => t.value === form.sessionType)?.label}</span>}
+              <span className="text-base leading-none ml-auto pl-2">{sessionTypeOpen ? "−" : "+"}</span>
+            </button>
+            {sessionTypeOpen && <div className="space-y-3">
               {sessionTypes.map((t) => (
                 <button key={t.value} type="button" onClick={() => set("sessionType", t.value)}
                   className="w-full flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all"
@@ -163,10 +168,10 @@ export default function NewSessionPage() {
                   </div>
                 </button>
               ))}
-            </div>
+            </div>}
 
-            {/* Recurring toggle — shown under session type, hidden when plan */}
-            {form.sessionType && !form.isPlan && (
+            {/* Recurring toggle — shown when section open and type selected */}
+            {sessionTypeOpen && form.sessionType && !form.isPlan && (
               <div className="pt-2 border-t">
                 <button
                   type="button"
@@ -190,7 +195,7 @@ export default function NewSessionPage() {
             )}
 
             {/* Training Plan toggle */}
-            {form.sessionType && (
+            {sessionTypeOpen && form.sessionType && (
               <div className="pt-2 border-t">
                 <button
                   type="button"
@@ -210,7 +215,7 @@ export default function NewSessionPage() {
                   <div className="text-left">
                     <p className="font-semibold text-sm">Make this a Training Plan</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Player pays upfront for multiple weeks · discount applied automatically
+                      Player pays upfront for multiple sessions · discount applied automatically
                     </p>
                   </div>
                   <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
@@ -220,7 +225,7 @@ export default function NewSessionPage() {
 
                 {form.isPlan && (
                   <div className="mt-3 space-y-3">
-                    <label className="text-sm font-medium block">Number of sessions</label>
+                    <label className="text-sm font-medium block">Number of sessions in plan</label>
                     <div className="grid grid-cols-4 gap-2">
                       {[2, 3, 4, 5, 6, 7, 8].map((w) => {
                         const disc = planDiscount(w);

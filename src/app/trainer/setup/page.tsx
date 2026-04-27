@@ -291,9 +291,9 @@ export default function TrainerSetupPage() {
                       onChange={(e) => set("yearsExperience", e.target.value)} placeholder="e.g. 8" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Private rate ($/hr)</label>
+                    <label className="text-sm font-medium mb-1.5 block">Your private 1-on-1 rate ($/hr)</label>
                     <Input type="number" min="30" step="5" value={form.hourlyRate}
-                      onChange={(e) => set("hourlyRate", e.target.value)} />
+                      onChange={(e) => set("hourlyRate", e.target.value)} placeholder="e.g. 85" />
                   </div>
                 </div>
               </div>
