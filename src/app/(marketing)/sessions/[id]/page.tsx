@@ -125,61 +125,66 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
-            {/* About this session */}
-            <div className="bg-white rounded-2xl border shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About this session</p>
-              {session.notes ? (
-                <p className="text-muted-foreground leading-relaxed text-sm">{session.notes}</p>
-              ) : (
-                <p className="text-muted-foreground text-sm italic">No description added yet.</p>
-              )}
-            </div>
+            {/* About + Booking side by side */}
+            <div className="grid sm:grid-cols-[1fr_220px] gap-4 items-start">
 
-            {/* First class free callout */}
-            {session.firstClassFree && trainer && (
+              {/* About */}
               <div className="bg-white rounded-2xl border shadow-sm p-5">
-                <div className="rounded-xl p-4 mb-3 text-center" style={{ backgroundColor: "#f0f4f9" }}>
-                  <p className="text-base font-bold" style={{ color: "#0F3154" }}>🎉 First class free!</p>
-                  <p className="text-xs text-muted-foreground mt-1">New players — message the trainer to claim your free first class.</p>
-                </div>
-                <ContactTrainerForm
-                  sessionId={session.id}
-                  sessionTitle={session.title}
-                  trainerName={trainer?.name ?? "Trainer"}
-                  defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
-                  ctaLabel="Claim Free First Class"
-                  ctaStyle="highlight"
-                />
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About this session</p>
+                {session.notes ? (
+                  <p className="text-muted-foreground leading-relaxed text-sm">{session.notes}</p>
+                ) : (
+                  <p className="text-muted-foreground text-sm italic">No description added yet.</p>
+                )}
               </div>
-            )}
 
-            {/* Spots + booking */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
-                    {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
-                  </span>
-                  <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all"
-                    style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
+              {/* Booking + first class free */}
+              <div className="space-y-3">
+                {session.firstClassFree && trainer && (
+                  <div className="text-center py-2 px-3 rounded-xl border border-dashed border-amber-300 bg-amber-50">
+                    <p className="text-sm font-semibold text-amber-700">🎉 First class free</p>
+                    <p className="text-xs text-amber-600 mt-0.5">New players — message trainer to claim</p>
+                    <div className="mt-2">
+                      <ContactTrainerForm
+                        sessionId={session.id}
+                        sessionTitle={session.title}
+                        trainerName={trainer?.name ?? "Trainer"}
+                        defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
+                        ctaLabel="Claim Free First Class"
+                        ctaStyle="highlight"
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2.5">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
+                        {isFull ? "Session full" : almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.spotsTotal} spots open`}
+                      </span>
+                      <span className="text-muted-foreground">{session.spotsTotal - session.spotsLeft}/{session.spotsTotal} joined</span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all"
+                        style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
+                    </div>
+                  </div>
+                  {isFull ? (
+                    <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                      style={{ backgroundColor: "#DC373E" }}>Session Full</div>
+                  ) : (
+                    <Link href={`/sessions/${session.id}/book`}
+                      className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+                      style={{ backgroundColor: "#DC373E" }}>
+                      Reserve My Spot
+                    </Link>
+                  )}
+                  <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                    <Shield className="h-3 w-3" /> Secure · Cancel 24h before
+                  </p>
                 </div>
               </div>
-              {isFull ? (
-                <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
-                  style={{ backgroundColor: "#DC373E" }}>Session Full</div>
-              ) : (
-                <Link href={`/sessions/${session.id}/book`}
-                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  Reserve My Spot
-                </Link>
-              )}
-              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
-              </p>
+
             </div>
 
             {/* Details 2x2 grid */}
