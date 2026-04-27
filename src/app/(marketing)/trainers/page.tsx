@@ -203,99 +203,87 @@ function tierStyle(exp: number) {
 }
 
 function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
-  const sports     = t.sports?.length ? t.sports : t.sport ? [t.sport] : [];
-  const allSports  = sports.join(", ");
+  const sports      = t.sports?.length ? t.sports : t.sport ? [t.sport] : [];
   const specialties = (t.specialties ?? []).slice(0, 3);
-  const bioText    = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
-  const location   = [t.city, t.state].filter(Boolean).join(", ");
-  const tier       = tierStyle(t.yearsExperience ?? 0);
-  const pill       = trainerPill(t);
+  const bioText     = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
+  const location    = [t.city, t.state].filter(Boolean).join(", ");
+  const pill        = trainerPill(t);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
 
-      {/* Photo section with navy header + overlapping circular photo */}
-      <div className="relative bg-white" style={{ paddingTop: "64px" }}>
-        {/* Navy bar */}
-        <div className="absolute top-0 left-0 right-0 h-16 rounded-t-2xl" style={{ backgroundColor: "#0F3154" }}>
-          {/* Status pill */}
+      {/* Full-width photo */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+        {t.photo ? (
+          <Image src={t.photo} alt={t.name} fill className="object-cover object-top" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" unoptimized />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-5xl font-extrabold text-white"
+            style={{ backgroundColor: "#0F3154" }}>
+            {t.name?.[0] ?? "?"}
+          </div>
+        )}
+
+        {/* Pills overlaid at bottom of photo */}
+        <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
           {pill && (
-            <span className="absolute top-3 left-4 text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide"
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide"
               style={{ backgroundColor: pill.bg, color: pill.color }}>
               {pill.label}
             </span>
           )}
-          {/* Group sessions badge */}
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/90 text-gray-700">
+            In Person
+          </span>
           {t.hasActiveSessions && (
-            <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500 text-white">
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-green-500 text-white">
               Group Sessions
             </span>
           )}
         </div>
-        {/* Circular photo overlapping */}
-        <div className="absolute left-4 top-4 z-10">
-          <div className="relative w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100">
-            {t.photo ? (
-              <Image src={t.photo} alt={t.name} fill className="object-cover" sizes="80px" unoptimized />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
-                style={{ backgroundColor: "#0F3154" }}>
-                {t.name?.[0] ?? "?"}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Content */}
-      <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
+      <div className="px-4 pt-4 pb-4 flex flex-col flex-1">
+
         {/* Name + rating */}
-        <div className="flex items-start justify-between gap-2 mb-1">
+        <div className="flex items-start justify-between gap-2 mb-1.5">
           <Link href={`/groups/${t.id}`}
-            className="font-bold text-base leading-snug hover:underline"
+            className="font-bold text-lg leading-snug hover:underline"
             style={{ color: "#0F3154" }}>
             {t.name}
           </Link>
-          <div className="flex items-center gap-0.5 shrink-0 text-sm">
+          <div className="flex items-center gap-0.5 shrink-0">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-            <span className="font-bold">{t.rating?.toFixed(1) ?? "5.0"}</span>
+            <span className="text-sm font-bold">{t.rating?.toFixed(1) ?? "5.0"}</span>
+            {(t.reviewCount ?? 0) > 0 && (
+              <span className="text-xs text-muted-foreground">({t.reviewCount})</span>
+            )}
           </div>
-        </div>
-
-        {/* Tier + verified */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full tracking-wider"
-            style={{ backgroundColor: tier.bg, color: tier.color }}>
-            {tierLabel(t.yearsExperience ?? 0)}
-          </span>
-          <span className="flex items-center gap-0.5 text-[11px] text-green-700 font-medium">
-            <ShieldCheck className="h-3 w-3" /> Verified
-          </span>
         </div>
 
         {/* Bio */}
         {bioText && (
-          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-3">{bioText}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">{bioText}</p>
         )}
 
-        {/* Meta */}
-        <div className="space-y-1 text-xs text-muted-foreground mb-3">
-          {allSports && (
-            <p className="flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 shrink-0" />
-              {allSports}{t.skillLevels?.length ? ` · ${(t.skillLevels ?? []).join(", ")}` : ""}
-            </p>
-          )}
+        {/* Meta icons */}
+        <div className="space-y-1.5 text-xs text-muted-foreground mb-3">
           {location && (
             <p className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-green-600" />
               Trains in {location}
             </p>
           )}
-          {t.yearsExperience > 0 && (
+          {sports.length > 0 && (
             <p className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 shrink-0" />
-              {t.yearsExperience} years experience
+              <Users className="h-3.5 w-3.5 shrink-0 text-green-600" />
+              {sports.join(", ")}{(t.skillLevels ?? []).length > 0 ? ` · ${(t.skillLevels ?? []).join(", ")}` : ""}
+            </p>
+          )}
+          {(t.yearsExperience ?? 0) > 0 && (
+            <p className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 shrink-0 text-green-600" />
+              {t.yearsExperience} years coaching experience
             </p>
           )}
         </div>
@@ -312,18 +300,12 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
           </div>
         )}
 
-        {/* Price + CTA */}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
-          {t.hourlyRate > 0 ? (
-            <div>
-              <span className="text-lg font-extrabold" style={{ color: "#0F3154" }}>${t.hourlyRate}</span>
-              <span className="text-xs text-muted-foreground ml-1">/ session</span>
-            </div>
-          ) : <div />}
+        {/* CTA */}
+        <div className="mt-auto pt-3 border-t border-gray-100">
           <Link href={`/groups/${t.id}`}
-            className="px-4 py-2 rounded-xl text-white text-xs font-semibold transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#0F3154" }}>
-            View Profile
+            className="block w-full text-center py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#DC373E" }}>
+            Book Now
           </Link>
         </div>
       </div>
