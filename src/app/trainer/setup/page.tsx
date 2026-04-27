@@ -16,6 +16,13 @@ const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA
 const skillLevels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const countries = ["United States", "Canada", "United Kingdom", "Australia", "Ireland", "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa", "Nigeria", "Ghana", "Jamaica", "Trinidad & Tobago", "Other"];
 
+const usStates = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
+
+const canadaProvinces = ["Alberta","British Columbia","Manitoba","New Brunswick","Newfoundland and Labrador","Northwest Territories","Nova Scotia","Nunavut","Ontario","Prince Edward Island","Quebec","Saskatchewan","Yukon"];
+
+const ukRegions = ["England","Scotland","Wales","Northern Ireland"];
+const australiaStates = ["New South Wales","Victoria","Queensland","Western Australia","South Australia","Tasmania","Australian Capital Territory","Northern Territory"];
+
 export default function TrainerSetupPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
@@ -184,24 +191,58 @@ export default function TrainerSetupPage() {
               {/* Location */}
               <div className="bg-white rounded-2xl border p-6 space-y-4">
                 <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Location</label>
+
+                {/* Country */}
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Country</label>
-                  <select value={form.country} onChange={(e) => set("country", e.target.value)}
+                  <select value={form.country} onChange={(e) => { set("country", e.target.value); set("state", ""); }}
                     className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
                     <option value="">Select your country</option>
                     {countries.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">City</label>
-                    <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">State / Province</label>
-                    <Input value={form.state} onChange={(e) => set("state", e.target.value)} placeholder="e.g. NC" />
-                  </div>
+
+                {/* State / Province — dropdown for US, Canada, UK, Australia; text for others */}
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    {form.country === "Canada" ? "Province / Territory" : form.country === "United Kingdom" ? "Region" : "State / Province"}
+                  </label>
+                  {form.country === "United States" ? (
+                    <select value={form.state} onChange={(e) => set("state", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select a state</option>
+                      {usStates.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  ) : form.country === "Canada" ? (
+                    <select value={form.state} onChange={(e) => set("state", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select a province</option>
+                      {canadaProvinces.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  ) : form.country === "United Kingdom" ? (
+                    <select value={form.state} onChange={(e) => set("state", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select a region</option>
+                      {ukRegions.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  ) : form.country === "Australia" ? (
+                    <select value={form.state} onChange={(e) => set("state", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select a state</option>
+                      {australiaStates.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <Input value={form.state} onChange={(e) => set("state", e.target.value)} placeholder="State / Province / Region" />
+                  )}
                 </div>
+
+                {/* City */}
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">City</label>
+                  <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
+                </div>
+
+                {/* Zip */}
                 <div className="max-w-[180px]">
                   <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
                   <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
