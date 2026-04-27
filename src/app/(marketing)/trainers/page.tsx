@@ -69,7 +69,7 @@ export default function TrainersPage() {
 
       {/* ── Search bar ── */}
       <div className="bg-white border-b py-6 px-4">
-        <div className="container max-w-4xl">
+        <div className="container max-w-7xl">
           <h1 className="text-2xl font-bold mb-5">Find a Trainer</h1>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -98,7 +98,7 @@ export default function TrainersPage() {
 
       {/* ── Filter pills + sort ── */}
       <div className="bg-white border-b py-3 px-4">
-        <div className="container max-w-4xl flex items-center justify-between gap-3 flex-wrap">
+        <div className="container max-w-7xl flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setGroupOnly((v) => !v)}
@@ -156,9 +156,9 @@ export default function TrainersPage() {
       </div>
 
       {/* ── Grid ── */}
-      <div className="container max-w-4xl py-8 px-4">
+      <div className="container max-w-7xl py-8 px-4">
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-80 rounded-2xl bg-white border animate-pulse" />
             ))}
@@ -171,7 +171,7 @@ export default function TrainersPage() {
             <button onClick={clearAll} className="text-sm font-semibold text-[#DC373E] hover:underline">Clear filters</button>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((t) => <TrainerCard key={t.id} trainer={t} />)}
           </div>
         )}
