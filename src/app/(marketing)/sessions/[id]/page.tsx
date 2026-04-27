@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { trainerSessions, trainers, bookings } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
   let session;
   let trainer;
+  let trainerEmail = "";
   let otherSessions: typeof trainerSessions.$inferSelect[] = [];
   let attendees: { userName: string | null }[] = [];
 
@@ -52,6 +54,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       .select({ userName: bookings.userName })
       .from(bookings)
       .where(and(eq(bookings.sessionId, String(sessionId)), eq(bookings.status, "paid")));
+
+    // Get trainer email from Clerk
+    try {
+      const client = await clerkClient();
+      const clerkUser = await client.users.getUser(session.trainerClerkId);
+      trainerEmail = clerkUser.emailAddresses?.[0]?.emailAddress ?? "";
+    } catch {}
   } catch {
     notFound();
   }
@@ -88,20 +97,39 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
-            {/* Description — editable by trainer via notes field for now */}
+            {/* About this session */}
             <div className="bg-white rounded-2xl border shadow-sm p-6">
-              <h2 className="font-bold text-base mb-3">About this session</h2>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">About this session</p>
+              <h2 className="font-bold text-base mb-3">Group Session</h2>
               {session.notes ? (
                 <p className="text-muted-foreground leading-relaxed text-sm">{session.notes}</p>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-muted-foreground text-sm italic">No description added yet.</p>
-                  <p className="text-xs text-muted-foreground bg-[#f7f8fa] rounded-lg px-3 py-2">
-                    To add a description, go to your <Link href="/dashboard" className="font-semibold underline" style={{ color: "#0F3154" }}>dashboard</Link> → edit this session → use the Notes field to describe what players can expect.
-                  </p>
-                </div>
+                <p className="text-muted-foreground text-sm italic">No description added yet. Edit this session from your dashboard to add one.</p>
               )}
             </div>
+
+            {/* Instructions */}
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Instructions</p>
+              {(session as any).instructions ? (
+                <p className="text-muted-foreground leading-relaxed text-sm">{(session as any).instructions}</p>
+              ) : (
+                <p className="text-muted-foreground text-sm italic">No instructions added yet. Edit this session from your dashboard to add what players should bring, wear, or know before arriving.</p>
+              )}
+            </div>
+
+            {/* Contact trainer */}
+            {trainerEmail && (
+              <div className="bg-white rounded-2xl border shadow-sm p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Questions?</p>
+                <a
+                  href={`mailto:${trainerEmail}?bcc=neil@anytime-soccer.com&subject=Question about: ${encodeURIComponent(session.title)}`}
+                  className="flex items-center justify-center w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-muted"
+                  style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                  Contact Trainer
+                </a>
+              </div>
+            )}
 
 
             {/* Details table */}

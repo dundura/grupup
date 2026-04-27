@@ -35,7 +35,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25", notes: "",
+    spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "",
   });
 
   useEffect(() => {
@@ -58,6 +58,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           spotsTotal: String(s.spotsTotal ?? 6),
           pricePerPlayer: String(s.pricePerPlayer ?? 25),
           notes: s.notes ?? "",
+          instructions: (s as any).instructions ?? "",
         });
         setLoading(false);
       })
@@ -257,11 +258,21 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             })()}
           </div>
 
-          <div className="bg-white rounded-2xl border p-6">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Notes for players (optional)</label>
-            <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={2}
-              placeholder="What to bring, parking info, what to expect..."
-              className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">About this session <span style={{ color: "#DC373E" }}>*</span></label>
+              <p className="text-xs text-muted-foreground mb-2">Describe what players will work on.</p>
+              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3}
+                placeholder="e.g. This session focuses on ball mastery and finishing in small groups..."
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Instructions <span style={{ color: "#DC373E" }}>*</span></label>
+              <p className="text-xs text-muted-foreground mb-2">What should players bring, wear, or know before arriving?</p>
+              <textarea value={form.instructions} onChange={(e) => set("instructions", e.target.value)} rows={3}
+                placeholder="e.g. Arrive 10 minutes before the session. Bring water and wear appropriate gear..."
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}

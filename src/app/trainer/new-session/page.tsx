@@ -33,7 +33,7 @@ export default function NewSessionPage() {
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false,
+    spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "", recurring: false,
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
   });
@@ -96,6 +96,8 @@ export default function NewSessionPage() {
     !form.city.trim()   && "City",
     !form.skillLevel    && "Skill level",
     form.ageRanges.length === 0 && "Age range",
+    !form.notes.trim()        && "About this session",
+    !form.instructions.trim() && "Instructions",
     !form.isPlan && !form.dayOfWeek && "Day of week",
     !form.isPlan && !form.time      && "Start time",
   ].filter(Boolean) as string[];
@@ -128,7 +130,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -504,11 +506,25 @@ export default function NewSessionPage() {
             })()}
           </div>
 
-          <div className="bg-white rounded-2xl border p-6">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Notes for players (optional)</label>
-            <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={2}
-              placeholder="What to bring, parking info, what to expect..."
-              className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
+                About this session <span style={{ color: "#DC373E" }}>*</span>
+              </label>
+              <p className="text-xs text-muted-foreground mb-2">Describe what players will work on and what makes your session great.</p>
+              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3}
+                placeholder="e.g. This session focuses on ball mastery and finishing in small groups. Players will get real reps in a competitive environment..."
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
+                Instructions <span style={{ color: "#DC373E" }}>*</span>
+              </label>
+              <p className="text-xs text-muted-foreground mb-2">What should players bring, wear, or know before arriving?</p>
+              <textarea value={form.instructions} onChange={(e) => set("instructions", e.target.value)} rows={3}
+                placeholder="e.g. Arrive 10 minutes before session. Bring water and wear appropriate gear..."
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
           </div>
 
           <Button type="submit" size="lg" className="w-full text-base" disabled={!isValid || saving}

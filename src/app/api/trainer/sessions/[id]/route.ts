@@ -39,6 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       skillLevel: body.skillLevel ?? "",
       ageRange: body.ageRange ?? "",
       notes: body.notes ?? "",
+      instructions: body.instructions ?? "",
     }).where(and(eq(trainerSessions.id, parseInt(id)), eq(trainerSessions.trainerClerkId, userId)));
     return NextResponse.json({ ok: true });
   } catch (err) {

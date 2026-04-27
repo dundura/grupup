@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
       skillLevel: body.skillLevel,
       ageRange: Array.isArray(body.ageRanges) ? body.ageRanges.join(", ") : (body.ageRange ?? ""),
       notes: body.notes,
+      instructions: body.instructions || "Arrive 10 minutes before the session. Bring water and wear appropriate gear.",
       isActive: true,
     }).returning();
 
