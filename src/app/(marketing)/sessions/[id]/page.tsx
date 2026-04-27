@@ -169,43 +169,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
-            {/* Trainer bio */}
-            {trainer && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-                <h2 className="font-bold text-base">About {trainer.name}</h2>
-                {trainer.bio && (
-                  <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: trainer.bio }} />
-                )}
-                {(trainer.specialties ?? []).length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Specialties</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(trainer.specialties ?? []).map((s) => (
-                        <Badge key={s} variant="outline">{s}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {(trainer.certifications ?? []).length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                      <Award className="h-3.5 w-3.5" /> Certifications
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(trainer.certifications ?? []).map((c) => (
-                        <Badge key={c} variant="secondary">{c}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <Link href={`/groups/${trainer.id}`}
-                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
-                  style={{ color: "#DC373E" }}>
-                  View full trainer profile <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
 
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
@@ -285,6 +248,42 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
             </div>
+
+            {/* Trainer card */}
+            {trainer && (
+              <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+                <div className="relative h-52 w-full">
+                  {trainer.photo ? (
+                    <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="320px" unoptimized />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white"
+                      style={{ backgroundColor: "#0F3154" }}>
+                      {trainer.name?.[0] ?? "T"}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 space-y-2">
+                  <p className="font-bold text-base">{trainer.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                      ))}
+                    </div>
+                    <span className="font-bold text-sm">{trainer.rating?.toFixed(1) ?? "5.0"}</span>
+                    <span className="text-muted-foreground text-xs">· {trainer.reviewCount ?? 0} reviews</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    {(trainer.yearsExperience ?? 0) > 0 && <p>· {trainer.yearsExperience} yrs exp</p>}
+                  </div>
+                  <Link href={`/groups/${trainer.id}`}
+                    className="block text-center text-xs font-semibold py-2 rounded-lg border mt-2 hover:bg-muted transition-colors"
+                    style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                    View trainer profile
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
