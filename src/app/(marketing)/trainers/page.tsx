@@ -235,7 +235,7 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
             In Person
           </span>
           {t.hasActiveSessions && (
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-green-500 text-white">
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
               Group Sessions
             </span>
           )}
@@ -270,19 +270,19 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
         <div className="space-y-1.5 text-xs text-muted-foreground mb-3">
           {location && (
             <p className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-green-600" />
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#DC373E]" />
               Trains in {location}
             </p>
           )}
           {sports.length > 0 && (
             <p className="flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 shrink-0 text-green-600" />
+              <Users className="h-3.5 w-3.5 shrink-0 text-[#DC373E]" />
               {sports.join(", ")}{(t.skillLevels ?? []).length > 0 ? ` · ${(t.skillLevels ?? []).join(", ")}` : ""}
             </p>
           )}
           {(t.yearsExperience ?? 0) > 0 && (
             <p className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 shrink-0 text-green-600" />
+              <Calendar className="h-3.5 w-3.5 shrink-0 text-[#DC373E]" />
               {t.yearsExperience} years coaching experience
             </p>
           )}
