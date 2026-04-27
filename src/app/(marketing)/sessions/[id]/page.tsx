@@ -141,12 +141,14 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Special Instructions */}
-            {(session as any).instructions && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Special Instructions</p>
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Special Instructions</p>
+              {(session as any).instructions ? (
                 <p className="text-muted-foreground leading-relaxed text-sm">{(session as any).instructions}</p>
-              </div>
-            )}
+              ) : (
+                <p className="text-muted-foreground text-sm italic">No instructions added yet.</p>
+              )}
+            </div>
 
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
