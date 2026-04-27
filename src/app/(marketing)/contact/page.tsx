@@ -21,8 +21,15 @@ export default function ContactPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("Contact form error:", data);
+        setStatus("error");
+        return;
+      }
       setStatus("sent");
-    } catch {
+    } catch (err) {
+      console.error("Contact form exception:", err);
       setStatus("error");
     }
   }

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: "GrupUp Contact <onboarding@resend.dev>",
     to: "info@anytime-soccer.com",
     replyTo: email,
@@ -38,5 +38,10 @@ export async function POST(req: NextRequest) {
     `,
   });
 
-  return NextResponse.json({ success: true });
+  if (error) {
+    console.error("Resend error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, id: data?.id });
 }
