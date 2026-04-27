@@ -3,13 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft, MapPin, Star, Clock, Users, CalendarDays,
-  Award, Shield, ChevronRight,
+  Shield, ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { trainerSessions, trainers, bookings } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
+import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 
 export const dynamic = "force-dynamic";
 
@@ -99,8 +100,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
             {/* About this session */}
             <div className="bg-white rounded-2xl border shadow-sm p-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">About this session</p>
-              <h2 className="font-bold text-base mb-3">Group Session</h2>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About this session</p>
               {session.notes ? (
                 <p className="text-muted-foreground leading-relaxed text-sm">{session.notes}</p>
               ) : (
@@ -118,53 +118,43 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            {/* Contact trainer */}
-            {trainerEmail && (
-              <div className="bg-white rounded-2xl border shadow-sm p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Questions?</p>
-                <a
-                  href={`mailto:${trainerEmail}?bcc=neil@anytime-soccer.com&subject=Question about: ${encodeURIComponent(session.title)}`}
-                  className="flex items-center justify-center w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-muted"
-                  style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                  Contact Trainer
-                </a>
-              </div>
-            )}
-
-
-            {/* Details table */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-4 divide-y divide-gray-100">
-              {(session.dayOfWeek || session.duration) && (
-                <div className="pt-0">
+            {/* Details 2x2 grid */}
+            <div className="bg-white rounded-2xl border shadow-sm p-5">
+              <div className="grid grid-cols-2 gap-0 divide-x divide-y divide-gray-100">
+                {/* Date/Time */}
+                <div className="p-4 pl-0 pt-0">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Date / Time</p>
                   <div className="space-y-1.5 text-sm">
-                    {session.dayOfWeek && session.time && (
-                      <p className="flex items-center gap-2 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
-                    )}
+                    {session.dayOfWeek && session.time ? (
+                      <p className="flex items-center gap-1.5 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
+                    ) : <p className="text-muted-foreground text-sm">—</p>}
                     {session.duration && (
-                      <p className="flex items-center gap-2 font-medium"><Clock className="h-4 w-4 shrink-0 text-muted-foreground" />{session.duration} min</p>
+                      <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs"><Clock className="h-3.5 w-3.5 shrink-0" />{session.duration} min</p>
                     )}
                   </div>
                 </div>
-              )}
-              {session.city && (
-                <div className="pt-4">
+                {/* Location */}
+                <div className="p-4 pr-0 pt-0">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Location</p>
-                  <p className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />{session.venue ? `${session.venue}, ` : ""}{session.city}</p>
+                  {session.city ? (
+                    <p className="flex items-start gap-1.5 text-sm font-medium"><MapPin className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />{session.venue ? `${session.venue}, ` : ""}{session.city}</p>
+                  ) : <p className="text-muted-foreground text-sm">—</p>}
                 </div>
-              )}
-              <div className="pt-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About</p>
-                <div className="space-y-1.5 text-sm font-medium">
-                  <p className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0 text-muted-foreground" />{session.spotsTotal} spots{session.ageRange ? ` · Ages ${session.ageRange}` : ""}</p>
-                  {session.skillLevel && (
-                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>{session.skillLevel}</span>
-                  )}
+                {/* About */}
+                <div className="p-4 pl-0 pb-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">About</p>
+                  <div className="space-y-1.5 text-sm font-medium">
+                    <p className="flex items-center gap-1.5"><Users className="h-4 w-4 shrink-0 text-muted-foreground" />{session.spotsTotal} spots{session.ageRange ? ` · Ages ${session.ageRange}` : ""}</p>
+                    {session.skillLevel && (
+                      <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${skillColors[session.skillLevel] ?? "bg-muted text-muted-foreground"}`}>{session.skillLevel}</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="pt-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
-                <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span></p>
+                {/* Cost */}
+                <div className="p-4 pr-0 pb-0">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
+                  <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span></p>
+                </div>
               </div>
             </div>
 
@@ -222,6 +212,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   <div className="text-xs text-muted-foreground space-y-1">
                     {(trainer.yearsExperience ?? 0) > 0 && <p>· {trainer.yearsExperience} yrs exp</p>}
                   </div>
+                  <ContactTrainerForm
+                    sessionId={session.id}
+                    sessionTitle={session.title}
+                    trainerName={trainer.name ?? "Trainer"}
+                  />
                   <Link href={`/groups/${trainer.id}`}
                     className="block text-center text-xs font-semibold py-2 rounded-lg border mt-2 hover:bg-muted transition-colors"
                     style={{ color: "#0F3154", borderColor: "#0F3154" }}>
