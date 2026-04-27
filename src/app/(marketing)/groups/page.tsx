@@ -104,18 +104,6 @@ function SessionsPageInner() {
 
   const FilterPanel = () => (
     <div className="space-y-6">
-      {/* Sport */}
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Sport</p>
-        <div className="space-y-1">
-          {sports.map((s) => (
-            <button key={s} onClick={() => setSelectedSport(s)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedSport === s ? "text-white" : "text-foreground hover:bg-muted"}`}
-              style={selectedSport === s ? { backgroundColor: "#0F3154" } : undefined}>{s}</button>
-          ))}
-        </div>
-      </div>
-
       {/* Session Type — collapsed by default */}
       <div>
         <button
