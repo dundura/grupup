@@ -179,6 +179,18 @@ export default function TrainersPage() {
   );
 }
 
+function trainerPill(t: TrainerRow): { label: string; bg: string; color: string } | null {
+  const reviews = t.reviewCount ?? 0;
+  const rating  = t.rating ?? 5;
+  const exp     = t.yearsExperience ?? 0;
+  if (reviews >= 10)                        return { label: "Highly Rebooked",  bg: "#DCFCE7", color: "#166534" };
+  if (reviews >= 5 && rating >= 4.8)        return { label: "Top Rated",        bg: "#FEF9C3", color: "#854D0E" };
+  if (exp >= 10)                            return { label: "Elite Coach",       bg: "#EDE9FE", color: "#5B21B6" };
+  if (exp >= 5 && t.hasActiveSessions)      return { label: "Popular",           bg: "#DBEAFE", color: "#1E40AF" };
+  if (reviews === 0)                        return { label: "New to GrupUp",     bg: "#F1F5F9", color: "#475569" };
+  return null;
+}
+
 function tierLabel(exp: number): string {
   if (exp >= 7) return "GOLD";
   if (exp >= 3) return "SILVER";
@@ -197,6 +209,7 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
   const bioText    = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
   const location   = [t.city, t.state].filter(Boolean).join(", ");
   const tier       = tierStyle(t.yearsExperience ?? 0);
+  const pill       = trainerPill(t);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
@@ -205,7 +218,14 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
       <div className="relative bg-white" style={{ paddingTop: "64px" }}>
         {/* Navy bar */}
         <div className="absolute top-0 left-0 right-0 h-16 rounded-t-2xl" style={{ backgroundColor: "#0F3154" }}>
-          {/* Group badge in header */}
+          {/* Status pill */}
+          {pill && (
+            <span className="absolute top-3 left-4 text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide"
+              style={{ backgroundColor: pill.bg, color: pill.color }}>
+              {pill.label}
+            </span>
+          )}
+          {/* Group sessions badge */}
           {t.hasActiveSessions && (
             <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500 text-white">
               Group Sessions
