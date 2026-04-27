@@ -4,7 +4,7 @@ function getResend() {
   if (!process.env.RESEND_API_KEY) throw new Error("RESEND_API_KEY not set");
   return new Resend(process.env.RESEND_API_KEY);
 }
-const FROM = "Grupup <bookings@grupup.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 
 export async function sendBookingConfirmation({
   toEmail,
