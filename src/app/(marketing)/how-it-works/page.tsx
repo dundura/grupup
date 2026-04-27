@@ -44,7 +44,7 @@ const types = [
 const benefits = [
   { icon: Users,        title: "Vetted Local Coaches",  desc: "Every trainer on Grupup has a profile, specialties, and verified reviews from real players and parents." },
   { icon: ShieldCheck,  title: "Secure Payments",       desc: "All payments processed by Stripe. No need to bring cash, write checks, or chase invoices." },
-  { icon: Star,         title: "Grupup Guarantee",      desc: "If your first session doesn't meet expectations, we'll help you find a better match or refund your booking." },
+  { icon: Star,         title: "GrupUp Guarantee",      desc: "If your first session doesn't meet expectations, we'll help you find a better match or refund your booking." },
   { icon: CalendarCheck,title: "Flexible Scheduling",   desc: "One-off sessions, weekly recurring, or multi-week training plans — book what fits your schedule." },
   { icon: RefreshCw,    title: "Easy Cancellation",     desc: "Cancel up to 24 hours before a session for a full refund. No questions asked." },
   { icon: Search,       title: "All Sports",            desc: "Soccer, basketball, football, tennis, lacrosse, and more — all in one place." },

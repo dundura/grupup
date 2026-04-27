@@ -123,7 +123,7 @@ export function PackageBooking({ trainerId, trainerName, sessions }: Props) {
 
         <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
           <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
-          Grupup Guarantee — full refund if your first session doesn't deliver
+          Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> Guarantee — full refund if your first session doesn't deliver
         </p>
       </div>
     </div>

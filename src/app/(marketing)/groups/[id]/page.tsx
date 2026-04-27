@@ -209,7 +209,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             {/* Guarantee */}
             <div className="bg-white rounded-2xl border shadow-sm p-5 text-sm text-center">
               <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="font-bold mb-1">Grupup Guarantee</p>
+              <p className="font-bold mb-1">Grup<span style={{ color: "#DC373E", fontWeight: 900 }}>Up</span> Guarantee</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 If your first session doesn't meet expectations, we'll help you find a better match or refund your booking.
               </p>

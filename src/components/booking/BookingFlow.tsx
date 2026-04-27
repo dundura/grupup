@@ -424,7 +424,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
             {/* Guarantee */}
             <div className="rounded-2xl border shadow-sm p-5 text-sm text-center" style={{ backgroundColor: "#f0f4f9" }}>
               <ShieldCheck className="h-8 w-8 mx-auto mb-2" style={{ color: "#0F3154" }} />
-              <p className="font-bold text-sm mb-1" style={{ color: "#0F3154" }}>Grupup Guarantee</p>
+              <p className="font-bold text-sm mb-1" style={{ color: "#0F3154" }}>Grup<span style={{ color: "#DC373E" }}>Up</span> Guarantee</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 If your first session doesn't meet expectations, we'll help you find a better match or refund your booking.
               </p>
