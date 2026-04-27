@@ -140,19 +140,6 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
               {/* Booking */}
               <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
-                {session.firstClassFree && trainer && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground text-center">New players — message trainer to claim</p>
-                    <ContactTrainerForm
-                      sessionId={session.id}
-                      sessionTitle={session.title}
-                      trainerName={trainer?.name ?? "Trainer"}
-                      defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
-                      ctaLabel="Claim Free First Class"
-                      ctaStyle="highlight"
-                    />
-                  </div>
-                )}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
@@ -178,6 +165,19 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
                   <Shield className="h-3 w-3" /> Secure · Cancel 24h before
                 </p>
+                {session.firstClassFree && trainer && (
+                  <div className="space-y-1.5 pt-1 border-t">
+                    <p className="text-xs text-muted-foreground text-center">New players — message trainer to claim</p>
+                    <ContactTrainerForm
+                      sessionId={session.id}
+                      sessionTitle={session.title}
+                      trainerName={trainer?.name ?? "Trainer"}
+                      defaultMessage={`Hi, I'd like to claim the free first class for "${session.title}".`}
+                      ctaLabel="Claim Free First Class"
+                      ctaStyle="highlight"
+                    />
+                  </div>
+                )}
               </div>
 
             </div>
