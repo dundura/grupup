@@ -74,6 +74,7 @@ export interface GroupSession {
   sport: string;
   sportEmoji: string;
   focus: string;
+  coverPhoto?: string;
   trainer: {
     id: string;
     name: string;

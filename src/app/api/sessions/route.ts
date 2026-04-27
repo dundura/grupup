@@ -46,6 +46,7 @@ export async function GET() {
         sport: s.sport,
         sportEmoji: "⚽",
         focus: "",
+        coverPhoto: s.sessionPhoto || dbProfile?.photo || clerkFallback?.photo || "",
         sessionType: s.sessionType,
         city: s.city ?? "",
         state: "",

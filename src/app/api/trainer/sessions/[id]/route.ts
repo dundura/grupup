@@ -38,6 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       spotsTotal: parseInt(body.spotsTotal) || 6,
       skillLevel: body.skillLevel ?? "",
       ageRange: body.ageRange ?? "",
+      sessionPhoto: body.sessionPhoto ?? null,
       notes: body.notes ?? "",
       instructions: body.instructions ?? "",
       videoUrl: body.videoUrl ?? "",

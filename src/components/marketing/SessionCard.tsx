@@ -52,8 +52,14 @@ export function SessionCard({ session }: SessionCardProps) {
     <Link
       href={`/sessions/${session.id}`}
       className="group block bg-card border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all"
-      style={{ borderTop: "3px solid #0F3154" }}
     >
+      {/* Cover photo */}
+      {session.coverPhoto && (
+        <div className="relative w-full aspect-[4/3] overflow-hidden">
+          <Image src={session.coverPhoto} alt={session.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
+        </div>
+      )}
+
       {/* Header */}
       <div className="px-5 pt-5 pb-4">
         {offer && (

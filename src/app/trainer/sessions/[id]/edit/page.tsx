@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useAuth } from "@clerk/nextjs";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
@@ -36,7 +37,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "",
-    videoUrl: "", firstClassFree: false,
+    sessionPhoto: "", videoUrl: "", firstClassFree: false,
   });
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           pricePerPlayer: String(s.pricePerPlayer ?? 25),
           notes: s.notes ?? "",
           instructions: (s as any).instructions ?? "",
+          sessionPhoto: (s as any).sessionPhoto ?? "",
           videoUrl: (s as any).videoUrl ?? "",
           firstClassFree: (s as any).firstClassFree ?? false,
         });
@@ -259,6 +261,15 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 </div>
               );
             })()}
+          </div>
+
+          <div className="bg-white rounded-2xl border p-6 space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Photo <span className="font-normal normal-case text-xs">(optional — defaults to your profile photo)</span></label>
+            <ImageUpload
+              currentUrl={(form as any).sessionPhoto}
+              onUploaded={(url) => setForm((f) => ({ ...f, sessionPhoto: url }))}
+              label="Upload a session preview photo"
+            />
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
