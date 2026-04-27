@@ -11,13 +11,19 @@ export async function GET() {
     );
     if (rows.length === 0) return NextResponse.json([]);
 
-    // Which trainers have at least one active session?
+    // Which trainers have active sessions + what's their lowest price?
     const clerkIds = rows.map((r) => r.clerkId).filter(Boolean) as string[];
     const activeSessions = await db
-      .select({ trainerClerkId: trainerSessions.trainerClerkId })
+      .select({ trainerClerkId: trainerSessions.trainerClerkId, pricePerPlayer: trainerSessions.pricePerPlayer })
       .from(trainerSessions)
       .where(and(eq(trainerSessions.isActive, true), inArray(trainerSessions.trainerClerkId, clerkIds)));
     const activeSet = new Set(activeSessions.map((s) => s.trainerClerkId));
+    const lowestPrice: Record<string, number> = {};
+    for (const s of activeSessions) {
+      if (!lowestPrice[s.trainerClerkId] || s.pricePerPlayer < lowestPrice[s.trainerClerkId]) {
+        lowestPrice[s.trainerClerkId] = s.pricePerPlayer;
+      }
+    }
 
     // Fill in missing photos from Clerk
     const missingPhoto = rows.filter((r) => !r.photo && r.clerkId);
@@ -36,6 +42,7 @@ export async function GET() {
       ...r,
       photo: r.photo || clerkPhotos[r.clerkId ?? ""] || "",
       hasActiveSessions: activeSet.has(r.clerkId ?? ""),
+      lowestSessionPrice: lowestPrice[r.clerkId ?? ""] ?? null,
     }));
 
     return NextResponse.json(result);

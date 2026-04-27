@@ -300,10 +300,19 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
           </div>
         )}
 
-        {/* CTA */}
-        <div className="mt-auto pt-3 border-t border-gray-100">
+        {/* Price + CTA */}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
+          {(t as any).lowestSessionPrice ? (
+            <div>
+              <span className="text-xs text-muted-foreground">Sessions from</span>
+              <div>
+                <span className="text-xl font-extrabold" style={{ color: "#0F3154" }}>${(t as any).lowestSessionPrice}</span>
+                <span className="text-xs text-muted-foreground ml-1">/ player</span>
+              </div>
+            </div>
+          ) : <div />}
           <Link href={`/groups/${t.id}`}
-            className="block w-full text-center py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
+            className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 shrink-0"
             style={{ backgroundColor: "#DC373E" }}>
             Book Now
           </Link>
