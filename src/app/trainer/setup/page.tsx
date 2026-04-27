@@ -20,6 +20,7 @@ export default function TrainerSetupPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [step, setStep] = useState(1);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
@@ -88,18 +89,21 @@ export default function TrainerSetupPage() {
 
   async function handleSave() {
     setSaving(true);
+    setSaveError("");
     try {
       const res = await fetch("/api/trainer/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      const d = await res.json();
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        const d = await res.json();
-        alert(d.error ?? "Something went wrong. Please try again.");
+        setSaveError(d.error ?? "Something went wrong. Please try again.");
       }
+    } catch (err) {
+      setSaveError("Network error — please check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -335,6 +339,11 @@ export default function TrainerSetupPage() {
                 </div>
               </div>
 
+              {saveError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+                  {saveError}
+                </div>
+              )}
               <div className="flex gap-3">
                 <Button variant="outline" size="lg" onClick={() => setStep(1)}>← Back</Button>
                 <Button className="flex-1" size="lg" disabled={saving}
