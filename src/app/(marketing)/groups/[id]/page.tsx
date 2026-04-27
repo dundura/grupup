@@ -178,12 +178,15 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             {location && (
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="font-bold text-sm mb-3">Training Locations</p>
-                {/* Map placeholder — swap with embedded Google Map iframe when you have API key */}
-                <div className="h-36 rounded-xl overflow-hidden bg-[#f0f4f9] flex items-center justify-center mb-3 border">
-                  <div className="text-center">
-                    <MapPin className="h-8 w-8 mx-auto mb-1" style={{ color: "#0F3154" }} />
-                    <p className="text-xs text-muted-foreground">{location}</p>
-                  </div>
+                <div className="h-48 rounded-xl overflow-hidden mb-3 border">
+                  <iframe
+                    title="Training location map"
+                    width="100%"
+                    height="100%"
+                    loading="lazy"
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(location)}&output=embed&z=13`}
+                  />
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 mt-0.5"
