@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
-import { trainerSessions, trainers } from "@/db/schema";
+import { trainerSessions, trainers, bookings } from "@/db/schema";
 import { eq, and, ne } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +27,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let session;
   let trainer;
   let otherSessions: typeof trainerSessions.$inferSelect[] = [];
+  let attendees: { userName: string | null }[] = [];
 
   try {
     const [row] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionId));
@@ -46,6 +47,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           ne(trainerSessions.id, sessionId)
         )
       );
+
+    attendees = await db
+      .select({ userName: bookings.userName })
+      .from(bookings)
+      .where(and(eq(bookings.sessionId, String(sessionId)), eq(bookings.status, "paid")));
   } catch {
     notFound();
   }
@@ -251,6 +257,32 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
                   <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
                 </p>
+
+                {/* Attendees */}
+                {attendees.length > 0 && (
+                  <div className="pt-3 border-t">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      Who's attending ({attendees.length})
+                    </p>
+                    <div className="space-y-2">
+                      {attendees.map((a, i) => {
+                        const name = a.userName ?? "Player";
+                        const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                        const firstName = name.split(" ")[0];
+                        const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
+                        return (
+                          <div key={i} className="flex items-center gap-2.5">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
+                              style={{ backgroundColor: "#0F3154" }}>
+                              {initials}
+                            </div>
+                            <span className="text-sm font-medium">{firstName} {lastInitial}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
