@@ -170,6 +170,33 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             </div>
 
 
+            {/* Booking widget — in left body */}
+            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
+                <p className="text-3xl font-bold text-white">${session.pricePerPlayer}</p>
+                <p className="text-white/60 text-sm">per player · {session.sessionType.replace("-", " ")}</p>
+              </div>
+              <div className="p-5 space-y-3">
+                <div className="text-sm space-y-1.5 text-muted-foreground">
+                  {session.dayOfWeek && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{session.dayOfWeek}s at {session.time}</p>}
+                  {session.city && <p className="flex items-center gap-2"><MapPin className="h-4 w-4" />{session.city}</p>}
+                </div>
+                {isFull ? (
+                  <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                    style={{ backgroundColor: "#DC373E" }}>Session Full</div>
+                ) : (
+                  <Link href={`/sessions/${session.id}/book`}
+                    className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Reserve My Spot
+                  </Link>
+                )}
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                  <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
+                </p>
+              </div>
+            </div>
+
             {/* Other sessions by this trainer */}
             {otherSessions.length > 0 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
@@ -193,61 +220,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {/* Right: booking sidebar */}
+          {/* Right sidebar: trainer card + attendees */}
           <div>
-            <div className="sticky top-28 bg-white rounded-2xl border shadow-sm overflow-hidden">
-              <div className="px-5 py-4" style={{ backgroundColor: "#0F3154" }}>
-                <p className="text-3xl font-bold text-white">${session.pricePerPlayer}</p>
-                <p className="text-white/60 text-sm">per player · {session.sessionType.replace("-", " ")}</p>
-              </div>
-              <div className="p-5 space-y-3">
-                <div className="text-sm space-y-1.5 text-muted-foreground">
-                  {session.dayOfWeek && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />{session.dayOfWeek}s at {session.time}</p>}
-                  {session.city && <p className="flex items-center gap-2"><MapPin className="h-4 w-4" />{session.city}</p>}
-                </div>
-                {isFull ? (
-                  <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
-                    style={{ backgroundColor: "#DC373E" }}>
-                    Session Full
-                  </div>
-                ) : (
-                  <Link href={`/sessions/${session.id}/book`}
-                    className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
-                    style={{ backgroundColor: "#DC373E" }}>
-                    Reserve My Spot
-                  </Link>
-                )}
-                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                  <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
-                </p>
-
-                {/* Attendees */}
-                {attendees.length > 0 && (
-                  <div className="pt-3 border-t">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      Who's attending ({attendees.length})
-                    </p>
-                    <div className="space-y-2">
-                      {attendees.map((a, i) => {
-                        const name = a.userName ?? "Player";
-                        const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-                        const firstName = name.split(" ")[0];
-                        const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
-                        return (
-                          <div key={i} className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
-                              style={{ backgroundColor: "#0F3154" }}>
-                              {initials}
-                            </div>
-                            <span className="text-sm font-medium">{firstName} {lastInitial}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className="sticky top-28 space-y-5">
 
             {/* Trainer card */}
             {trainer && (
@@ -284,6 +259,33 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
             )}
+
+            {/* Attendees */}
+            {attendees.length > 0 && (
+              <div className="bg-white rounded-2xl border shadow-sm p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                  Who's attending ({attendees.length})
+                </p>
+                <div className="space-y-2">
+                  {attendees.map((a, i) => {
+                    const name = a.userName ?? "Player";
+                    const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                    const firstName = name.split(" ")[0];
+                    const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
+                    return (
+                      <div key={i} className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
+                          style={{ backgroundColor: "#0F3154" }}>
+                          {initials}
+                        </div>
+                        <span className="text-sm font-medium">{firstName} {lastInitial}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            </div>
           </div>
 
         </div>
