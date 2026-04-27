@@ -13,6 +13,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 import CopyLinkButton from "@/components/sessions/CopyLinkButton";
 import FollowButton from "@/components/sessions/FollowButton";
+import AddToCalendarButton from "@/components/sessions/AddToCalendarButton";
 import { auth } from "@clerk/nextjs/server";
 import { trainerFollows } from "@/db/schema";
 
@@ -314,6 +315,16 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <Shield className="h-3.5 w-3.5" /> Secure checkout · Cancel up to 24h before
               </p>
             </div>
+
+            {/* Add to calendar */}
+            <AddToCalendarButton
+              title={session.title}
+              dayOfWeek={session.dayOfWeek ?? ""}
+              time={session.time ?? ""}
+              durationMin={session.duration ?? 60}
+              location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""}
+              description={session.notes ?? undefined}
+            />
 
             {/* Invite friends */}
             <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
