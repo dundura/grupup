@@ -76,14 +76,6 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            {/* Bio */}
-            {bioText && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <h2 className="font-bold text-base mb-3">About {trainer.name.split(" ")[0]}</h2>
-                <p className="text-muted-foreground leading-relaxed text-sm">{bioText}</p>
-              </div>
-            )}
-
             {/* 4-column overview */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {location && (
@@ -132,32 +124,16 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               }))}
             />
 
-            {/* Specialties & certs */}
-            {((trainer.specialties as string[] | null) ?? []).length > 0 && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <h2 className="font-bold text-base mb-3 flex items-center gap-2">
-                  <Award className="h-4 w-4" style={{ color: "#0F3154" }} /> Specialties & Certifications
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {((trainer.specialties as string[] | null) ?? []).map((s) => (
-                    <Badge key={s} variant="outline">{s}</Badge>
-                  ))}
-                  {((trainer.certifications as string[] | null) ?? []).map((c) => (
-                    <Badge key={c} variant="secondary">{c}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ── RIGHT COLUMN (sidebar) ── */}
           <div className="space-y-5 lg:sticky lg:top-24">
 
-            {/* Trainer photo */}
+            {/* Trainer card */}
             <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
               <div className="relative h-64 w-full">
                 {trainer.photo ? (
-                  <Image src={trainer.photo} alt={trainer.name} fill className="object-cover" sizes="320px" unoptimized />
+                  <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="320px" unoptimized />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white"
                     style={{ backgroundColor: "#0F3154" }}>
@@ -165,12 +141,26 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   </div>
                 )}
               </div>
-              <div className="p-4">
+              <div className="p-4 space-y-2">
                 <p className="font-bold text-base">{trainer.name}</p>
-                {location && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="h-3.5 w-3.5" />{location}</p>}
-                {trainer.hourlyRate && (
-                  <p className="text-sm font-semibold mt-2" style={{ color: "#DC373E" }}>From ${trainer.hourlyRate}/session</p>
-                )}
+                {/* Rating row */}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                    ))}
+                  </div>
+                  <span className="font-bold text-sm">{trainer.rating?.toFixed(1) ?? "5.0"}</span>
+                  <span className="text-muted-foreground text-xs">· {trainer.reviewCount ?? 0} reviews</span>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  {(trainer.yearsExperience ?? 0) > 0 && (
+                    <p>· {trainer.yearsExperience} yrs exp</p>
+                  )}
+                  {location && (
+                    <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{location}</p>
+                  )}
+                </div>
               </div>
             </div>
 
