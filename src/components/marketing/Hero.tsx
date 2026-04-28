@@ -116,7 +116,7 @@ export function Hero() {
               <div className="grid grid-cols-1 gap-2" style={{ height: "320px" }}>
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80"
+                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
                     alt="Basketball players"
                     className="w-full h-full object-cover"
                   />
