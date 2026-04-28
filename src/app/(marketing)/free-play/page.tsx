@@ -140,6 +140,7 @@ export default function FreePlayPage() {
         : e
       )
     );
+    fetch(`/api/free-play/${eventId}/join`, { method: "POST" }).catch(() => {});
   }
 
   return (

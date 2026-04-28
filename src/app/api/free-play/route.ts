@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { freePlayEvents } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { auth } from "@clerk/nextjs/server";
+import { freePlayEvents, playerFollows } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { sendFollowerFreePlayAlert } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -45,6 +46,35 @@ export async function POST(req: NextRequest) {
       description: body.description,
       isActive: true,
     }).returning();
+
+    // Notify the creator's followers
+    try {
+      const client = await clerkClient();
+      const [creator, followerRows] = await Promise.all([
+        client.users.getUser(userId),
+        db.select({ followerClerkId: playerFollows.followerClerkId })
+          .from(playerFollows)
+          .where(and(eq(playerFollows.targetClerkId, userId), eq(playerFollows.status, "approved"))),
+      ]);
+      const creatorMeta = creator.publicMetadata as { playerName?: string };
+      const creatorName = creatorMeta.playerName?.trim()
+        || `${creator.firstName ?? ""} ${creator.lastName ?? ""}`.trim()
+        || body.organizerName || "Someone";
+
+      for (const { followerClerkId } of followerRows) {
+        try {
+          const fu = await client.users.getUser(followerClerkId);
+          const email = fu.emailAddresses?.[0]?.emailAddress ?? "";
+          if (email) {
+            await sendFollowerFreePlayAlert({
+              toEmail: email, playerName: creatorName,
+              eventTitle: event.title, eventId: event.id,
+              action: "created", spotsLeft: (body.playersNeeded ?? 10) - 1,
+            });
+          }
+        } catch {}
+      }
+    } catch {}
 
     return NextResponse.json(event, { status: 201 });
   } catch (err) {
