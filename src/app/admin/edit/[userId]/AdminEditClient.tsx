@@ -35,6 +35,7 @@ export default function AdminEditClient({
   const [form, setForm] = useState(initialData);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [error, setError] = useState("");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -80,7 +81,7 @@ export default function AdminEditClient({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
+    if (res.ok) { setSaved(true); setShowPopup(true); setTimeout(() => setSaved(false), 3000); }
     else { const d = await res.json(); setError(d.error ?? "Failed to save"); }
     setSaving(false);
   }
@@ -89,6 +90,23 @@ export default function AdminEditClient({
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-10">
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-6 sm:pb-0">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full mx-auto mb-4 bg-green-100">
+              <CheckCircle className="h-7 w-7 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-1">Profile updated!</h2>
+            <p className="text-muted-foreground text-sm mb-5">Changes saved successfully.</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPopup(false)}>Close</Button>
+              <Button className="flex-1" style={{ backgroundColor: "#0F3154" }} onClick={() => { setShowPopup(false); router.push("/admin"); }}>
+                Back to Admin
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -238,11 +256,8 @@ export default function AdminEditClient({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">League</label>
-                  <select value={form.league} onChange={(e) => set("league", e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="">Select league</option>
-                    {leagues.map((l) => <option key={l}>{l}</option>)}
-                  </select>
+                  <Input value={form.league} onChange={(e) => set("league", e.target.value.slice(0, 40))}
+                    placeholder="e.g. ECNL, AAU, High School Varsity…" maxLength={40} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Team / Club</label>
@@ -263,8 +278,8 @@ export default function AdminEditClient({
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
                 <div>
-                  <p className="text-sm font-semibold">Approved</p>
-                  <p className="text-xs text-muted-foreground">Player appears on /connect when approved</p>
+                  <p className="text-sm font-semibold">Active on Connect</p>
+                  <p className="text-xs text-muted-foreground">Toggle off to remove this player from Connect with Players</p>
                 </div>
                 <button type="button" onClick={() => set("isApproved", !form.isApproved)}
                   className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isApproved ? "bg-green-500" : "bg-gray-200"}`}>

@@ -513,15 +513,18 @@ export default function ProfilePage() {
               {/* Competitive league */}
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Competitive level / league</label>
-                <select value={form.league} onChange={(e) => set("league", e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option value="">Select league</option>
-                  {getLeagues(form.selectedPlayerSports).map((l) => <option key={l}>{l}</option>)}
-                </select>
-                {form.league === "Other" && (
-                  <Input className="mt-2" value={form.leagueOther} onChange={(e) => set("leagueOther", e.target.value)}
-                    placeholder="Type your league…" />
-                )}
+                <div className="relative">
+                  <Input
+                    value={form.league}
+                    onChange={(e) => set("league", e.target.value.slice(0, 40))}
+                    placeholder="e.g. ECNL, AAU, High School Varsity…"
+                    maxLength={40}
+                    className="pr-12"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                    {40 - form.league.length}
+                  </span>
+                </div>
               </div>
 
               {/* Team */}
