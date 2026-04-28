@@ -59,7 +59,7 @@ export function Hero() {
                   style={{ fontFamily: "var(--font-barlow-condensed)", fontWeight: 800 }}>
                   Convenient, Affordable, Social
                 </p>
-                <p className="text-white/80 text-base sm:text-lg font-medium">
+                <p className="hidden sm:block text-white/80 text-base sm:text-lg font-medium">
                   Train together, split the cost, level up your game.
                 </p>
               </div>
