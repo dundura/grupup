@@ -87,8 +87,6 @@ export const bookings = pgTable("bookings", {
   trainerClerkId: varchar("trainer_clerk_id", { length: 255 }),
   trainerPaid: boolean("trainer_paid").default(false).notNull(),
   trainerPaidAt: timestamp("trainer_paid_at"),
-  questionnaireResponses: json("questionnaire_responses").$type<Record<string, string> | null>().default(null),
-  questionnaireCompleted: boolean("questionnaire_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -185,12 +183,6 @@ export const trainerSessions = pgTable("trainer_sessions", {
   instructions: text("instructions"),
   videoUrl: text("video_url"),
   firstClassFree: boolean("first_class_free").default(false).notNull(),
-  questionnaire: json("questionnaire").$type<{
-    title: string;
-    questions: Array<{
-      id: string; type: "text" | "choice"; label: string; required: boolean; options?: string[];
-    }>;
-  } | null>().default(null),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
