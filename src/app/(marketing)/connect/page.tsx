@@ -144,19 +144,26 @@ export default async function ConnectPage() {
 
                     {/* White bottom */}
                     <div className="bg-white rounded-b-2xl border border-t-0 border-gray-200 px-5 py-4">
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="text-center">
-                          <p className="text-sm font-bold" style={{ color: "#0F3154" }}>{p.birthYear || "—"}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Birth Year</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-bold truncate" style={{ color: "#0F3154" }}>{p.league || p.level || "—"}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Level / League</p>
-                        </div>
+                      <div className="flex items-center justify-center gap-3 flex-wrap mb-4 text-xs">
+                        {p.birthYear && (
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground">Born</span>
+                            <span className="font-bold" style={{ color: "#0F3154" }}>{p.birthYear}</span>
+                          </span>
+                        )}
+                        {(p.league || p.level) && (
+                          <>
+                            {p.birthYear && <span className="text-muted-foreground">·</span>}
+                            <span className="font-bold" style={{ color: "#0F3154" }}>{p.league || p.level}</span>
+                          </>
+                        )}
+                        {p.team && (
+                          <>
+                            <span className="text-muted-foreground">·</span>
+                            <span className="font-bold" style={{ color: "#0F3154" }}>🏆 {p.team}</span>
+                          </>
+                        )}
                       </div>
-                      {p.team && (
-                        <p className="text-center text-xs text-muted-foreground mb-3 truncate">🏆 {p.team}</p>
-                      )}
                       <div className="flex gap-2">
                         <Link href={`/connect/${p.id}`}
                           className="flex-1 block text-center py-2.5 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-opacity"
