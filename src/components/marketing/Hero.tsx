@@ -173,6 +173,7 @@ export function Hero() {
                     <p className="text-[9px] text-white/60 mt-0.5">Football · Cary, NC</p>
                   </div>
                 </div>
+              </div>
 
               {/* Highlights card */}
               <div className="bg-white rounded-2xl p-4 shadow-sm divide-y divide-gray-100">
