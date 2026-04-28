@@ -31,9 +31,13 @@ export default function NewSessionPage() {
   const [done, setDone] = useState(false);
   const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
   const [form, setForm] = useState({
-    title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
+    title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "", recurring: false,
+    spotsTotal: "6", pricePerPlayer: "25",
+    notes: "This session focuses on improving key skills in a small group environment. Players will get high-quality reps, real competition, and personalized feedback.",
+    instructions: "Arrive 10 minutes before the session. Bring water and wear appropriate gear.",
+    videoUrl: "",
+    recurring: false,
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
   });
@@ -71,14 +75,11 @@ export default function NewSessionPage() {
   function set(key: string, val: string) {
     setForm((f) => {
       const next = { ...f, [key]: val };
-      if (key === "sessionType") {
-        next.pricePerPlayer = String(defaultPrices[val] ?? 25);
-        next.spotsTotal = String(sessionTypes.find((t) => t.value === val)?.spots ?? 6);
-      }
       if (key === "spotsTotal") {
         const spots = parseInt(val) || 1;
         const duration = parseInt(f.duration) || 60;
         next.pricePerPlayer = String(calcPrice(spots, duration));
+        next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
       }
       if (key === "duration") {
         const spots = parseInt(f.spotsTotal) || 1;
@@ -91,7 +92,6 @@ export default function NewSessionPage() {
 
   const missing = [
     !form.title.trim()  && "Session title",
-    !form.sessionType   && "Session type",
     !form.sport         && "Sport",
     !form.city.trim()   && "City",
     !form.skillLevel    && "Skill level",
@@ -154,103 +154,106 @@ export default function NewSessionPage() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <button type="button" onClick={() => setSessionTypeOpen((v) => !v)}
-              className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Session Type {form.sessionType && <span className="text-xs font-semibold normal-case tracking-normal text-foreground">{sessionTypes.find(t => t.value === form.sessionType)?.label}</span>}
-              <span className="text-base leading-none ml-auto pl-2">{sessionTypeOpen ? "−" : "+"}</span>
-            </button>
-            {sessionTypeOpen && <div className="space-y-3">
-              {sessionTypes.map((t) => (
-                <button key={t.value} type="button" onClick={() => set("sessionType", t.value)}
-                  className="w-full flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all"
-                  style={form.sessionType === t.value ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
-                  <div>
-                    <p className="font-semibold">{t.label}</p>
-                    <p className="text-sm text-muted-foreground">{t.desc}</p>
-                  </div>
-                </button>
-              ))}
-            </div>}
-
-            {/* Recurring toggle — shown when section open and type selected */}
-            {sessionTypeOpen && form.sessionType && !form.isPlan && (
-              <div className="pt-2 border-t">
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
-                  className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-                  style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}
-                >
-                  <div className="text-left">
-                    <p className="font-semibold text-sm">Recurring session</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {form.recurring && form.dayOfWeek
-                        ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
-                        : "Runs every week on the selected day"}
-                    </p>
-                  </div>
-                  <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
-                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
-                  </div>
-                </button>
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
+              </label>
+              <input type="range" min="1" max="20" value={form.spotsTotal}
+                onChange={(e) => set("spotsTotal", e.target.value)}
+                className="w-full accent-[#0F3154]" />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>1 (private)</span>
+                <span>20 (clinic)</span>
               </div>
+            </div>
+            {(() => {
+              const spots     = parseInt(form.spotsTotal) || 1;
+              const duration  = parseInt(form.duration) || 60;
+              const perSession = parseInt(form.pricePerPlayer) || 0;
+              const hourlyRate = baseHourlyRate(spots);
+              if (form.isPlan) {
+                const numSessions  = parseInt(form.planWeeks) || 4;
+                const disc         = planDiscount(numSessions);
+                const fullTotal    = perSession * numSessions;
+                const planTotal    = Math.round(fullTotal * (1 - disc / 100));
+                const trainerEarns = Math.round(planTotal * 0.85);
+                const totalIfFull  = trainerEarns * spots;
+                return (
+                  <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
+                    <div className="text-xs text-muted-foreground mb-1">${perSession}/player/session × {numSessions} sessions = <span className="line-through">${fullTotal}</span> → {disc}% off</div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Players pay upfront</span><span className="font-semibold">${planTotal}/player</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">You earn per player (85%)</span><span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span></div>
+                    <div className="flex justify-between text-sm border-t pt-2"><span className="text-muted-foreground">If plan fills ({spots} spots)</span><span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span></div>
+                    <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">⚠️ You must honor this price and run all sessions even if not all spots fill.</p>
+                  </div>
+                );
+              }
+              const trainerEarns = Math.round(perSession * 0.85);
+              const totalIfFull  = trainerEarns * spots;
+              return (
+                <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1"><span>Base rate: ${hourlyRate}/player/hr × {duration} min</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Players pay</span><span className="font-semibold">${perSession}/player</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">You earn (85%)</span><span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span></div>
+                  <div className="flex justify-between text-sm border-t pt-2"><span className="text-muted-foreground">If session fills ({spots} spots)</span><span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span></div>
+                  <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">⚠️ You must honor this price and run the session even if not all spots fill.</p>
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="bg-white rounded-2xl border p-6 space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Options</label>
+
+            {/* Recurring toggle */}
+            {!form.isPlan && (
+              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
+                className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Recurring session</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {form.recurring && form.dayOfWeek ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}` : "Runs every week on the selected day"}
+                  </p>
+                </div>
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
+                </div>
+              </button>
             )}
 
             {/* Training Plan toggle */}
-            {sessionTypeOpen && form.sessionType && (
-              <div className="pt-2 border-t">
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({
-                    ...f,
-                    isPlan: !f.isPlan,
-                    recurring: false,
-                    planSessions: !f.isPlan
-                      ? buildPlanSessions(parseInt(f.planWeeks) || 4, undefined, f.time)
-                      : f.planSessions,
-                  }))}
-                  className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-                  style={form.isPlan
-                    ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" }
-                    : { borderColor: "#e2e8f0" }}
-                >
-                  <div className="text-left">
-                    <p className="font-semibold text-sm">Make this a Training Plan</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Player pays upfront for multiple sessions · discount applied automatically
-                    </p>
-                  </div>
-                  <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
-                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
-                  </div>
-                </button>
+            <button type="button"
+              onClick={() => setForm((f) => ({ ...f, isPlan: !f.isPlan, recurring: false, planSessions: !f.isPlan ? buildPlanSessions(parseInt(f.planWeeks) || 4, undefined, f.time) : f.planSessions }))}
+              className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+              style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
+              <div className="text-left">
+                <p className="font-semibold text-sm">Make this a Training Plan</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Player pays upfront for multiple sessions · discount applied automatically</p>
+              </div>
+              <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
+              </div>
+            </button>
 
-                {form.isPlan && (
-                  <div className="mt-3 space-y-3">
-                    <label className="text-sm font-medium block">Number of sessions in plan</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {[2, 3, 4, 5, 6, 7, 8].map((w) => {
-                        const disc = planDiscount(w);
-                        return (
-                          <button key={w} type="button"
-                            onClick={() => setForm((f) => ({
-                              ...f,
-                              planWeeks: String(w),
-                              planSessions: buildPlanSessions(w, f.planSessions[0]?.date, f.planSessions[0]?.time || f.time),
-                            }))}
-                            className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
-                            style={form.planWeeks === String(w)
-                              ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" }
-                              : { borderColor: "#e2e8f0" }}>
-                            <span className="font-bold text-sm">{w}</span>
-                            <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                  </div>
-                )}
+            {form.isPlan && (
+              <div className="space-y-2 pt-1">
+                <label className="text-sm font-medium block">Number of sessions in plan</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[2, 3, 4, 5, 6, 7, 8].map((w) => {
+                    const disc = planDiscount(w);
+                    return (
+                      <button key={w} type="button"
+                        onClick={() => setForm((f) => ({ ...f, planWeeks: String(w), planSessions: buildPlanSessions(w, f.planSessions[0]?.date, f.planSessions[0]?.time || f.time) }))}
+                        className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
+                        style={form.planWeeks === String(w) ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
+                        <span className="font-bold text-sm">{w}</span>
+                        <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -425,88 +428,6 @@ export default function NewSessionPage() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">
-                Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
-              </label>
-              <input type="range" min="1" max="20" value={form.spotsTotal}
-                onChange={(e) => set("spotsTotal", e.target.value)}
-                className="w-full accent-[#0F3154]" />
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>1 (private)</span>
-                <span>20 (clinic)</span>
-              </div>
-            </div>
-
-            {(() => {
-              const spots     = parseInt(form.spotsTotal) || 1;
-              const duration  = parseInt(form.duration) || 60;
-              const perSession = parseInt(form.pricePerPlayer) || 0;
-              const hourlyRate = baseHourlyRate(spots);
-
-              if (form.isPlan) {
-                // Plan pricing: player pays upfront for all sessions, discounted
-                const numSessions  = parseInt(form.planWeeks) || 4;
-                const disc         = planDiscount(numSessions);
-                const fullTotal    = perSession * numSessions;           // e.g. $80
-                const planTotal    = Math.round(fullTotal * (1 - disc / 100)); // e.g. $72
-                const trainerEarns = Math.round(planTotal * 0.85);            // e.g. $61
-                const totalIfFull  = trainerEarns * spots;                    // e.g. $427
-
-                return (
-                  <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
-                    <div className="text-xs text-muted-foreground mb-1">
-                      ${perSession}/player/session × {numSessions} sessions = <span className="line-through">${fullTotal}</span> → {disc}% off
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Players pay upfront</span>
-                      <span className="font-semibold">${planTotal}/player</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">You earn per player (85%)</span>
-                      <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span>
-                    </div>
-                    <div className="flex justify-between text-sm border-t pt-2">
-                      <span className="text-muted-foreground">If plan fills ({spots} spots)</span>
-                      <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span>
-                    </div>
-                    <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">
-                      ⚠️ You must honor this price and run all sessions even if not all spots fill.
-                    </p>
-                  </div>
-                );
-              }
-
-              // Single session pricing
-              const trainerEarns = Math.round(perSession * 0.85);
-              const totalIfFull  = trainerEarns * spots;
-              return (
-                <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Players pay</span>
-                    <span className="font-semibold">${perSession}/player</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">You earn (85%)</span>
-                    <span className="font-bold" style={{ color: "#0F3154" }}>${trainerEarns}/player</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t pt-2">
-                    <span className="text-muted-foreground">If session fills ({spots} spots)</span>
-                    <span className="font-bold" style={{ color: "#0F3154" }}>${totalIfFull} total</span>
-                  </div>
-                  <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-1 border border-amber-200">
-                    ⚠️ You must honor this price and run the session even if not all spots fill.
-                  </p>
-                </div>
-              );
-            })()}
-          </div>
-
-          <div className="bg-white rounded-2xl border p-6 space-y-4">
             <div>
               <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
                 About this session <span style={{ color: "#DC373E" }}>*</span>
@@ -524,6 +445,11 @@ export default function NewSessionPage() {
               <textarea value={form.instructions} onChange={(e) => set("instructions", e.target.value)} rows={3}
                 placeholder="e.g. Arrive 10 minutes before session. Bring water and wear appropriate gear..."
                 className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Session Video <span className="font-normal normal-case text-xs">(optional)</span></label>
+              <p className="text-xs text-muted-foreground mb-2">Paste a YouTube or Vimeo link to show a preview on your session page.</p>
+              <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
             </div>
           </div>
 
