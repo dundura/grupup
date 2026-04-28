@@ -88,7 +88,7 @@ export async function completeOnboarding(formData: {
       if (formData.improvementAreas !== undefined) {
         profileFields.improvementAreas = formData.improvementAreas.length ? formData.improvementAreas : ["Ball Skills"];
       }
-      if (!alreadyApproved) profileFields.isApproved = false;
+      if (!alreadyApproved) profileFields.isApproved = true;
     } else {
       // trainer
       if (formData.selectedSports !== undefined) profileFields.sports = formData.selectedSports;
