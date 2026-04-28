@@ -28,7 +28,7 @@ const STEPS = ["Contact Info", "Package Options", "Schedule", "Checkout"] as con
 
 const FAQ = [
   { q: "How do group sessions work?", a: "You reserve a spot in a small group session (2–10 players) led by a vetted local coach. You train alongside peers at the same level — better reps, more competition, fraction of the private cost." },
-  { q: "Can I contact the coach before booking?", a: "Not yet through the app — but the coach's notes and profile have everything you need. If you have specific questions, reach us at info@anytime-soccer.com." },
+  { q: "Can I contact the coach before booking?", a: "Yes! Visit the coach's profile and use the Contact Trainer form to send them a message directly through the app." },
   { q: "What is the cancellation policy?", a: "Cancel up to 24 hours before the session for a full refund. Within 24 hours the session fee is non-refundable." },
   { q: "Is my payment secure?", a: "Yes. All payments are processed by Stripe with industry-standard encryption. Grupup never stores your card details." },
   { q: "What if the coach cancels?", a: "If a coach cancels a session you've booked, you'll receive a full refund within 3–5 business days." },
