@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
   const allowedMetaFields = [
     "city", "country", "sport", "playerSports", "level", "league", "team",
     "bio", "birthYear", "gender", "videoLinks", "photo", "isApproved", "isHidden",
-    "sports", "specialties", "certifications", "yearsExperience",
+    "sports", "specialties", "certifications", "yearsExperience", "improvementAreas",
   ];
   for (const field of allowedMetaFields) {
     if (field in body) metaUpdates[field] = body[field];

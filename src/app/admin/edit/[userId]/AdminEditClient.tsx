@@ -10,8 +10,9 @@ import Link from "next/link";
 import { PhotoCropModal } from "@/components/ui/PhotoCropModal";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
-const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational", "Other"];
-const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
+const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "AAU", "High School Varsity", "College", "Recreational", "Other"];
+const levels = ["Beginner", "Intermediate", "Advanced", "Elite", "Recreational", "Club", "Academy", "AAU", "Varsity", "Travel Ball", "Select", "Competitive"];
+const improvementAreaOptions = ["Ball Skills", "Finishing", "Defending", "1v1", "Passing", "Shooting", "Speed & Agility", "Dribbling", "Heading", "Goalkeeping", "Game Sense", "Set Pieces"];
 const currentYear = new Date().getFullYear();
 const birthYears = Array.from({ length: 30 }, (_, i) => currentYear - 5 - i);
 
@@ -26,6 +27,7 @@ export default function AdminEditClient({
     playerSports: string[]; sports: string[]; level: string; league: string;
     team: string; birthYear: string; gender: string; yearsExperience: string;
     specialties: string[]; certifications: string[]; videoLinks: string[];
+    improvementAreas: string[];
     isApproved: boolean; isHidden: boolean;
   };
 }) {
@@ -164,11 +166,35 @@ export default function AdminEditClient({
             </div>
           </div>
 
-          {/* Bio */}
-          <div className="bg-white rounded-2xl border p-5">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Bio</label>
-            <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={4}
-              className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+          {/* Bio / player looking for */}
+          <div className="bg-white rounded-2xl border p-5 space-y-4">
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
+                {isPlayer ? "What are you looking for?" : "Bio"}
+              </label>
+              <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3}
+                className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+            </div>
+            {isPlayer && (
+              <div>
+                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Focus Areas</label>
+                <div className="flex flex-wrap gap-2">
+                  {improvementAreaOptions.map((a) => (
+                    <button key={a} type="button"
+                      onClick={() => {
+                        const arr = form.improvementAreas ?? [];
+                        set("improvementAreas", arr.includes(a) ? arr.filter((x: string) => x !== a) : [...arr, a]);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={(form.improvementAreas ?? []).includes(a)
+                        ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                        : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Player-specific */}
