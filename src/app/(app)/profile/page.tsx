@@ -221,7 +221,7 @@ export default function ProfilePage() {
           {role !== "trainer" ? (
             <div>
               <label className="text-sm font-medium mb-2 block">Sports <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-3">
                 {sports.map((s) => (
                   <button key={s} type="button" onClick={() => toggleList("selectedPlayerSports", s)}
                     className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
@@ -231,6 +231,55 @@ export default function ProfilePage() {
                     {s}
                   </button>
                 ))}
+                {/* Custom sports already added */}
+                {form.selectedPlayerSports.filter((s) => !sports.includes(s)).map((s) => (
+                  <span key={s} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+                    style={{ backgroundColor: "#0F3154" }}>
+                    {s}
+                    <button type="button" onClick={() => toggleList("selectedPlayerSports", s)}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {/* Write-in sport */}
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1 max-w-[220px]">
+                  <Input
+                    value={(form as any).customPlayerSport ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value.slice(0, 20);
+                      setForm((f) => ({ ...f, customPlayerSport: val }));
+                    }}
+                    placeholder="Other sport…"
+                    maxLength={20}
+                    className="pr-10 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = ((form as any).customPlayerSport ?? "").trim();
+                        if (val && !form.selectedPlayerSports.includes(val)) {
+                          toggleList("selectedPlayerSports", val);
+                        }
+                        setForm((f) => ({ ...f, customPlayerSport: "" }));
+                      }
+                    }}
+                  />
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                    {20 - ((form as any).customPlayerSport?.length ?? 0)}
+                  </span>
+                </div>
+                <Button type="button" variant="outline" size="sm"
+                  disabled={!((form as any).customPlayerSport ?? "").trim()}
+                  onClick={() => {
+                    const val = ((form as any).customPlayerSport ?? "").trim();
+                    if (val && !form.selectedPlayerSports.includes(val)) {
+                      toggleList("selectedPlayerSports", val);
+                    }
+                    setForm((f) => ({ ...f, customPlayerSport: "" }));
+                  }}>
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ) : (
