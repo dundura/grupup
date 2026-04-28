@@ -63,6 +63,34 @@ export async function sendBookingConfirmation({
   });
 }
 
+export async function sendTrainerNewFollower({
+  trainerEmail,
+  trainerName,
+  followerName,
+}: {
+  trainerEmail: string;
+  trainerName: string;
+  followerName: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: trainerEmail,
+    subject: `${followerName} is now following you on GrupUp`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <h1 style="color: #0F3154; margin: 0 0 8px;">New follower! 🎉</h1>
+        <p style="color: #6b7280; margin: 0 0 24px;">
+          <strong>${followerName}</strong> is now following you on GrupUp. They'll be notified whenever you post a new session.
+        </p>
+        <a href="https://grupup.app/dashboard" style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+          View Dashboard
+        </a>
+      </div>
+    `,
+  });
+}
+
 export async function sendTrainerNewBooking({
   trainerEmail,
   trainerName,
