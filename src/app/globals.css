@@ -89,6 +89,11 @@
   50% { transform: translateY(-18px); }
 }
 
+@keyframes textPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.04); }
+}
+
 /* ── Blog article content ───────────────────────────────────────────────────── */
 .blog-content h2 {
   font-size: 1.25rem;
