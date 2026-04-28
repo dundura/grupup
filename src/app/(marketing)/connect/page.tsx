@@ -69,7 +69,6 @@ export default async function ConnectPage() {
       };
 
       if (!(meta.role === "player" || meta.role === "parent")) continue;
-      if (u.id === viewerUserId) continue;
 
       // If user has child profiles, show each child as a card
       if (meta.childProfiles?.length) {
