@@ -111,7 +111,7 @@ export function Hero() {
               </form>
 
               {/* Soccer image */}
-              <div className="relative rounded-2xl overflow-hidden" style={{ height: "260px" }}>
+              <div className="relative rounded-2xl overflow-hidden h-[260px] sm:h-[340px]">
                 <img
                   src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777378113162-feqi88.png"
                   alt="Soccer players training"
@@ -139,16 +139,24 @@ export function Hero() {
             {/* ── Right column (desktop only) ── */}
             <div className="hidden lg:flex flex-col gap-3">
 
-              <div className="flex flex-col gap-2" style={{ height: "380px" }}>
+              <div className="flex flex-col gap-2" style={{ height: "430px" }}>
                 {/* Basketball */}
-                <div className="relative rounded-2xl overflow-hidden" style={{ height: "185px" }}>
-                  <img
-                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
-                    alt="Basketball players"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
+                <div className="relative" style={{ height: "230px" }}>
+                  <div className="relative rounded-2xl overflow-hidden h-full">
+                    <img
+                      src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
+                      alt="Basketball players"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
+                  </div>
+                  {/* White pill — bottom left */}
+                  <div className="absolute -bottom-2 -left-2 bg-white rounded-lg shadow-xl px-2 py-1.5 z-10"
+                    style={{ animation: "heroFloat 5s ease-in-out 2s infinite" }}>
+                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Why group?</p>
+                    <p className="text-[10px] font-semibold text-gray-800">60% less than private</p>
+                  </div>
                 </div>
 
                 {/* Football — pill on bottom right */}
