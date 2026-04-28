@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { trainers, trainerSessions, bookings } from "@/db/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and } from "drizzle-orm";
 import AdminClient from "./AdminClient";
 
 export const dynamic = "force-dynamic";
@@ -106,5 +106,39 @@ export default async function AdminPage() {
     };
   });
 
-  return <AdminClient trainers={trainerList} players={playerList} bookings={bookingList} />;
+  // Fetch all sessions with booking counts
+  const allSessions = await db.select().from(trainerSessions).orderBy(desc(trainerSessions.createdAt));
+
+  // Booking counts per session
+  const paidBookings = await db.select({ sessionId: bookings.sessionId }).from(bookings).where(eq(bookings.status, "paid"));
+  const bookingsPerSession: Record<string, number> = {};
+  for (const b of paidBookings) {
+    if (b.sessionId) bookingsPerSession[b.sessionId] = (bookingsPerSession[b.sessionId] ?? 0) + 1;
+  }
+
+  // Trainer names for sessions
+  const sessionTrainerIds = [...new Set(allSessions.map((s) => s.trainerClerkId).filter(Boolean))];
+  const sessionTrainerMap: Record<string, string> = {};
+  if (sessionTrainerIds.length) {
+    const rows = await db.select({ clerkId: trainers.clerkId, name: trainers.name }).from(trainers).where(inArray(trainers.clerkId, sessionTrainerIds));
+    for (const r of rows) if (r.clerkId) sessionTrainerMap[r.clerkId] = r.name;
+  }
+
+  const sessionList = allSessions.map((s) => ({
+    id: s.id,
+    title: s.title,
+    trainerName: sessionTrainerMap[s.trainerClerkId] ?? "Unknown",
+    trainerClerkId: s.trainerClerkId,
+    sessionType: s.sessionType ?? "group",
+    pricePerPlayer: s.pricePerPlayer,
+    spotsTotal: s.spotsTotal,
+    spotsLeft: s.spotsLeft,
+    bookingCount: bookingsPerSession[String(s.id)] ?? 0,
+    isActive: s.isActive ?? false,
+    createdAt: s.createdAt?.toISOString() ?? "",
+    city: s.city ?? "",
+    sport: s.sport ?? "",
+  }));
+
+  return <AdminClient trainers={trainerList} players={playerList} bookings={bookingList} sessions={sessionList} />;
 }

@@ -2,12 +2,19 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign } from "lucide-react";
+import Link from "next/link";
+import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink } from "lucide-react";
 
 interface AdminUser {
   id: string; name: string; email: string; photo: string; role: string;
   joinedAt: string; sessionCount: number; bookingCount: number;
   archived: boolean; trainerId?: string | null; isApproved?: boolean;
+}
+
+interface AdminSession {
+  id: number; title: string; trainerName: string; trainerClerkId: string;
+  sessionType: string; pricePerPlayer: number; spotsTotal: number; spotsLeft: number;
+  bookingCount: number; isActive: boolean; createdAt: string; city: string; sport: string;
 }
 
 interface AdminBooking {
@@ -18,11 +25,11 @@ interface AdminBooking {
 }
 
 export default function AdminClient({
-  trainers, players, bookings: initialBookings,
+  trainers, players, bookings: initialBookings, sessions,
 }: {
-  trainers: AdminUser[]; players: AdminUser[]; bookings: AdminBooking[];
+  trainers: AdminUser[]; players: AdminUser[]; bookings: AdminBooking[]; sessions: AdminSession[];
 }) {
-  const [tab, setTab] = useState<"trainers" | "players" | "payouts">("trainers");
+  const [tab, setTab] = useState<"trainers" | "players" | "sessions" | "payouts">("trainers");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState({ trainers, players });
   const [bookings, setBookings] = useState(initialBookings);
@@ -78,16 +85,20 @@ export default function AdminClient({
 
         {/* Tabs */}
         <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-          <div className="flex gap-2">
-            {(["trainers", "players", "payouts"] as const).map((t) => (
+          <div className="flex gap-2 flex-wrap">
+            {(["trainers", "players", "sessions", "payouts"] as const).map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-colors"
                 style={tab === t ? { backgroundColor: "#0F3154", color: "white" } : { backgroundColor: "white", color: "#0F3154", border: "1px solid #0F3154" }}>
-                {t === "payouts" ? `Payouts${unpaidTotal > 0 ? ` ($${unpaidTotal} owed)` : ""}` : `${t} (${t === "trainers" ? users.trainers.length : users.players.length})`}
+                {t === "payouts"
+                  ? `Payouts${unpaidTotal > 0 ? ` ($${unpaidTotal} owed)` : ""}`
+                  : t === "sessions"
+                  ? `Sessions (${sessions.length})`
+                  : `${t} (${t === "trainers" ? users.trainers.length : users.players.length})`}
               </button>
             ))}
           </div>
-          {tab !== "payouts" && (
+          {tab !== "payouts" && tab !== "sessions" && (
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email…"
@@ -108,7 +119,7 @@ export default function AdminClient({
         </div>
 
         {/* Users table */}
-        {tab !== "payouts" && (
+        {tab !== "payouts" && tab !== "sessions" && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
             {list.length === 0 ? (
               <p className="text-center text-muted-foreground py-12 text-sm">No {tab} found.</p>
@@ -193,6 +204,70 @@ export default function AdminClient({
                             </button>
                           )}
                         </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {/* Sessions tab */}
+        {tab === "sessions" && (
+          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            {sessions.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12 text-sm">No sessions yet.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="border-b bg-[#f7f8fa]">
+                  <tr>
+                    <th className="text-left px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Session</th>
+                    <th className="text-left px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">Trainer</th>
+                    <th className="text-center px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Bookings</th>
+                    <th className="text-center px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">Spots</th>
+                    <th className="text-left px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">Created</th>
+                    <th className="text-right px-5 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">View</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {sessions.map((s) => (
+                    <tr key={s.id} className={s.isActive ? "" : "opacity-50"}>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <p className="font-semibold leading-snug">{s.title}</p>
+                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                              {s.sport && <span className="text-xs text-muted-foreground">{s.sport}</span>}
+                              {s.city && <span className="text-xs text-muted-foreground">· {s.city}</span>}
+                              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                                {s.isActive ? "Active" : "Inactive"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">${s.pricePerPlayer}/player</span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 hidden md:table-cell">
+                        <p className="font-medium">{s.trainerName}</p>
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={`font-bold text-base ${s.bookingCount > 0 ? "" : "text-muted-foreground"}`}>
+                          {s.bookingCount}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center hidden sm:table-cell text-muted-foreground text-xs">
+                        {s.spotsLeft}/{s.spotsTotal} left
+                      </td>
+                      <td className="px-5 py-3.5 hidden lg:table-cell text-muted-foreground text-xs">
+                        {new Date(s.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <Link href={`/sessions/${s.id}`} target="_blank"
+                          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border hover:bg-[#f0f4f9] transition-colors"
+                          style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                          <ExternalLink className="h-3 w-3" /> View
+                        </Link>
                       </td>
                     </tr>
                   ))}
