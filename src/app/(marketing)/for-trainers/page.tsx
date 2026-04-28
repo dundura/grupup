@@ -6,11 +6,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const benefits = [
   {
-    icon: DollarSign,
-    title: "Keep 85% of every session",
-    description: "We take a flat 15% platform fee. No hidden costs. Direct Stripe payouts to your bank.",
-  },
-  {
     icon: Users,
     title: "We bring you the clients",
     description: "Sports families actively search our platform for group training sessions. No more cold outreach.",
