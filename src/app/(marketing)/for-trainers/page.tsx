@@ -84,7 +84,7 @@ export default function ForTrainersPage() {
                   Run group sessions to build your client base — then convert them to privates. We handle the bookings, payments, and marketing.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="#apply"
+                  <Link href="/sign-up"
                     className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base"
                     style={{ backgroundColor: "#DC373E" }}>
                     Apply Now
