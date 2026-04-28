@@ -150,15 +150,38 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 bg-primary text-primary-foreground">
-        <div className="container max-w-3xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">You keep 85%.</h2>
-          <p className="text-lg md:text-xl text-primary-foreground/80 mb-8">
-            That&apos;s it. No subscription. No listing fees. A flat 15% per booking covers payment processing, platform maintenance, and marketing that brings you clients.
-          </p>
-          <div className="inline-flex items-baseline gap-2 bg-primary-foreground/10 rounded-2xl px-8 py-6">
-            <span className="text-5xl font-bold">85%</span>
-            <span className="text-xl opacity-80">payout per session</span>
+      <section className="py-16 md:py-24" style={{ backgroundColor: "#0F3154" }}>
+        <div className="container max-w-5xl">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+
+            {/* Left — text */}
+            <div className="text-white">
+              <p className="text-[#DC373E] font-semibold text-sm uppercase tracking-wider mb-4">Free to join. No catch.</p>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-5 leading-tight">You keep 85%.</h2>
+              <p className="text-white/70 text-lg mb-6 leading-relaxed">
+                No subscription. No listing fees. Ever. A flat 15% per booking covers payment processing, platform maintenance, and the marketing that brings clients to you.
+              </p>
+              <div className="flex items-baseline gap-3 mb-6">
+                <span className="text-7xl font-extrabold" style={{ color: "#DC373E" }}>85%</span>
+                <span className="text-xl text-white/70">payout per session</span>
+              </div>
+              <div className="inline-flex items-center gap-2 bg-white/10 rounded-xl px-4 py-2.5 text-sm font-semibold text-white">
+                ✅ Free to join — only pay when you earn
+              </div>
+            </div>
+
+            {/* Right — photo */}
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
+              <Image
+                src="https://media.anytime-soccer.com/wp-content/uploads/2026/02/news_soccer08_16-9-ratio.webp"
+                alt="Trainer coaching a group session"
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
+              />
+            </div>
+
           </div>
         </div>
       </section>
