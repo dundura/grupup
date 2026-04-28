@@ -114,31 +114,34 @@ export function Hero() {
 
               {/* Two stacked images */}
               <div className="grid grid-cols-1 gap-2" style={{ height: "320px" }}>
-                <div className="relative rounded-2xl overflow-hidden">
-                  <img
-                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
-                    alt="Basketball players"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
-
-                  {/* Floating pill — top right */}
-                  <div className="absolute top-3 right-3 rounded-xl shadow-xl px-3 py-2"
-                    style={{ backgroundColor: "#0F3154", animation: "heroFloat 5s ease-in-out infinite" }}>
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                      <p className="text-[10px] font-bold text-white/60 uppercase tracking-wide">Session booked</p>
-                    </div>
-                    <p className="text-xs font-semibold text-white">Tuesday 5:30 PM · 6 players</p>
-                    <p className="text-[10px] text-white/60 mt-0.5">Basketball · Cary, NC</p>
+                {/* Basketball — pills on outer wrapper (no overflow-hidden) */}
+                <div className="relative">
+                  <div className="relative rounded-2xl overflow-hidden h-full">
+                    <img
+                      src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
+                      alt="Basketball players"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
                   </div>
 
-                  {/* Floating pill — bottom left */}
-                  <div className="absolute bottom-8 left-3 bg-white rounded-xl shadow-xl px-3 py-2"
+                  {/* Floating pill — top right, mostly off image */}
+                  <div className="absolute -top-2 -right-2 rounded-lg shadow-xl px-2 py-1.5 z-10"
+                    style={{ backgroundColor: "#0F3154", animation: "heroFloat 5s ease-in-out infinite" }}>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                      <p className="text-[9px] font-bold text-white/60 uppercase tracking-wide">Session booked</p>
+                    </div>
+                    <p className="text-[10px] font-semibold text-white">Tue 5:30 PM · 6 players</p>
+                    <p className="text-[9px] text-white/60 mt-0.5">Basketball · Cary, NC</p>
+                  </div>
+
+                  {/* Floating pill — bottom left, mostly off image */}
+                  <div className="absolute -bottom-2 -left-2 bg-white rounded-lg shadow-xl px-2 py-1.5 z-10"
                     style={{ animation: "heroFloat 5s ease-in-out 2s infinite" }}>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Why group?</p>
-                    <p className="text-xs font-semibold text-gray-800">Up to 60% less than private</p>
+                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Why group?</p>
+                    <p className="text-[10px] font-semibold text-gray-800">60% less than private</p>
                   </div>
                 </div>
                 <div className="relative rounded-2xl overflow-hidden">
