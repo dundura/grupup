@@ -21,6 +21,10 @@ const benefits = [
     problem: "Tired of chasing payments?",
     solution: "Players pay upfront at booking. Stripe deposits hit your bank 24 hours after the session. No invoices, no awkward follow-ups.",
   },
+  {
+    problem: "Leaving revenue on the table?",
+    solution: "Once you've built your base, unlock exclusive 1-on-1 offers and specialty camps — premium offerings your most loyal players are already asking for.",
+  },
 ];
 
 const steps = [
