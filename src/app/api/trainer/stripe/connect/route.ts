@@ -15,39 +15,35 @@ export async function POST() {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const stripe = getStripe();
-    const origin = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.grupup.app";
+    const origin = "https://www.grupup.app";
 
-    // Get or create trainer's Connect account
     const [trainer] = await db.select().from(trainers).where(eq(trainers.clerkId, userId));
 
     let accountId = trainer?.stripeAccountId;
 
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: "express",
-        capabilities: { transfers: { requested: true } },
-        business_profile: { url: `${origin}/groups/${trainer?.id ?? ""}` },
-      });
+      const account = await stripe.accounts.create({ type: "express" });
       accountId = account.id;
-      await db.update(trainers).set({ stripeAccountId: accountId }).where(eq(trainers.clerkId, userId));
+      if (trainer) {
+        await db.update(trainers).set({ stripeAccountId: accountId }).where(eq(trainers.clerkId, userId));
+      }
     }
 
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${origin}/api/trainer/stripe/connect`,
+      refresh_url: `${origin}/dashboard`,
       return_url: `${origin}/trainer/stripe-return`,
       type: "account_onboarding",
     });
 
     return NextResponse.json({ url: accountLink.url });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[POST /api/trainer/stripe/connect]", err);
-    return NextResponse.json({ error: "Failed to create Connect link" }, { status: 500 });
+    return NextResponse.json({ error: err?.message ?? "Failed to create Connect link" }, { status: 500 });
   }
 }
 
 export async function GET() {
-  // Called on refresh_url — re-create the link and redirect
   const res = await POST();
   const data = await res.json();
   if (data.url) return Response.redirect(data.url);

@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [isArchived, setIsArchived] = useState(false);
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [stripeError, setStripeError] = useState("");
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -67,10 +68,20 @@ export default function DashboardPage() {
 
   async function handleConnectStripe() {
     setConnectingStripe(true);
-    const res = await fetch("/api/trainer/stripe/connect", { method: "POST" });
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
-    else setConnectingStripe(false);
+    setStripeError("");
+    try {
+      const res = await fetch("/api/trainer/stripe/connect", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setStripeError(data.error ?? "Something went wrong. Please try again.");
+        setConnectingStripe(false);
+      }
+    } catch {
+      setStripeError("Network error. Please try again.");
+      setConnectingStripe(false);
+    }
   }
 
   async function handleArchive(archive: boolean) {
@@ -484,6 +495,9 @@ export default function DashboardPage() {
                   style={{ backgroundColor: "#0F3154" }}>
                   {connectingStripe ? "Redirecting to Stripe…" : "Connect Stripe Payouts"}
                 </button>
+                {stripeError && (
+                  <p className="text-xs text-red-600 text-center">{stripeError}</p>
+                )}
                 <p className="text-xs text-muted-foreground text-center">
                   Powered by Stripe · Takes ~2 minutes · Your bank info is never stored by GrupUp
                 </p>

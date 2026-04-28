@@ -102,7 +102,8 @@ export function Hero() {
                 <img
                   src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777378113162-feqi88.png"
                   alt="Soccer players training"
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-top"
+                  style={{ objectPosition: "center 20%" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <p className="absolute bottom-3 left-4 text-white font-bold text-base drop-shadow">Soccer</p>
@@ -113,9 +114,9 @@ export function Hero() {
             <div className="hidden lg:flex flex-col gap-3">
 
               {/* Two stacked images */}
-              <div className="grid grid-cols-1 gap-2" style={{ height: "320px" }}>
+              <div className="flex flex-col gap-2" style={{ height: "340px" }}>
                 {/* Basketball — pills on outer wrapper (no overflow-hidden) */}
-                <div className="relative h-full">
+                <div className="relative" style={{ height: "140px" }}>
                   <div className="relative rounded-2xl overflow-hidden h-full">
                     <img
                       src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
@@ -144,7 +145,7 @@ export function Hero() {
                     <p className="text-[10px] font-semibold text-gray-800">60% less than private</p>
                   </div>
                 </div>
-                <div className="relative rounded-2xl overflow-hidden">
+                <div className="relative rounded-2xl overflow-hidden flex-1">
                   <img
                     src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377633398-c04se8.png"
                     alt="Football players"
