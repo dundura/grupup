@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useAuth } from "@clerk/nextjs";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
@@ -36,6 +37,7 @@ export default function NewSessionPage() {
     spotsTotal: "6", pricePerPlayer: "30",
     notes: "This session focuses on improving key skills in a small group environment. Players will get high-quality reps, real competition, and personalized feedback.",
     instructions: "Arrive 10 minutes before the session. Bring water and wear appropriate gear.",
+    sessionPhoto: "",
     videoUrl: "",
     recurring: false,
     isPlan: false, planWeeks: "4",
@@ -130,7 +132,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", videoUrl: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -425,6 +427,15 @@ export default function NewSessionPage() {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border p-6 space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Photo <span className="font-normal normal-case text-xs">(optional — defaults to your profile photo)</span></label>
+            <ImageUpload
+              currentUrl={(form as any).sessionPhoto}
+              onUploaded={(url) => setForm((f) => ({ ...f, sessionPhoto: url }))}
+              label="Upload a session preview photo"
+            />
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
