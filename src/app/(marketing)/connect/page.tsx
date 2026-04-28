@@ -213,9 +213,13 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
                             {[p.city, p.country].filter(Boolean).join(", ")}
                           </span>
                         )}
-                        {p.sports.map((s) => (
-                          <span key={s}>{s}</span>
-                        ))}
+                        {p.sports.length > 1 ? (
+                          <span title={p.sports.join(", ")}>
+                            Multiple ▾
+                          </span>
+                        ) : p.sports.length === 1 ? (
+                          <span>{p.sports[0]}</span>
+                        ) : null}
                           {p.gender && <span>{p.gender}</span>}
                       </div>
                       {(p.level || p.availableForFreePlay || p.openToTrain) && (
