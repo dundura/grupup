@@ -10,6 +10,7 @@ import { completeOnboarding } from "@/app/onboarding/_actions";
 import { CheckCircle, Plus, X, Camera, Loader2, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { PhotoCropModal } from "@/components/ui/PhotoCropModal";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const meta = (user?.publicMetadata ?? {}) as {
@@ -78,16 +80,25 @@ export default function ProfilePage() {
     }));
   }
 
-  async function handlePhotoUpload(file: File) {
+  function handleFileSelect(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    // Reset input so the same file can be re-selected
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function handleCropApply(blob: Blob) {
+    setCropSrc(null);
     setUploadingPhoto(true);
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        body: JSON.stringify({ filename: "photo.jpg", contentType: "image/jpeg" }),
       });
       const { uploadUrl, cdnUrl } = await res.json();
-      await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+      await fetch(uploadUrl, { method: "PUT", body: blob, headers: { "Content-Type": "image/jpeg" } });
       set("photo", cdnUrl);
     } finally {
       setUploadingPhoto(false);
@@ -106,6 +117,16 @@ export default function ProfilePage() {
   }
 
   if (!isLoaded) return <div className="py-12 text-muted-foreground">Loading…</div>;
+
+  if (cropSrc) {
+    return (
+      <PhotoCropModal
+        imageSrc={cropSrc}
+        onApply={handleCropApply}
+        onCancel={() => setCropSrc(null)}
+      />
+    );
+  }
 
   const role = meta.role ?? "player";
   const photoSrc = form.photo || user?.imageUrl || "";
@@ -148,7 +169,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
-                onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])} />
+                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
               <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={() => fileRef.current?.click()}>
                 {uploadingPhoto ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Uploading…</> : <><Camera className="h-4 w-4 mr-1.5" /> Change photo</>}
               </Button>

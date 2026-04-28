@@ -24,11 +24,13 @@ const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
 export default async function ConnectPage() {
   const { userId: viewerUserId } = await auth();
 
+  // Single clerkClient instance for all Clerk calls on this page
+  const client = await clerkClient();
+
   // Check if viewer is admin
   let isAdmin = false;
   if (viewerUserId) {
     try {
-      const client = await clerkClient();
       const viewer = await client.users.getUser(viewerUserId);
       const email = viewer.emailAddresses?.[0]?.emailAddress ?? "";
       isAdmin = ADMIN_EMAILS.includes(email);
@@ -49,7 +51,6 @@ export default async function ConnectPage() {
   }[] = [];
 
   try {
-    const client = await clerkClient();
     const { data: clerkUsers } = await client.users.getUserList({ limit: 500 });
 
     approvedPlayers = clerkUsers
