@@ -151,6 +151,7 @@ export async function sendFollowRequest({
   fromCountry,
   fromBio,
   fromProfileId,
+  accountOwnerName,
 }: {
   toEmail: string;
   toName: string;
@@ -162,6 +163,7 @@ export async function sendFollowRequest({
   fromCountry?: string;
   fromBio?: string;
   fromProfileId?: string;
+  accountOwnerName?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
 
@@ -207,6 +209,7 @@ export async function sendFollowRequest({
           </a>
         </div>
         <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">Go to your dashboard to approve or deny this request.</p>
+        ${accountOwnerName ? `<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;text-align:center;border-top:1px solid #f3f4f6;padding-top:12px;">This account is owned by <strong>${accountOwnerName}</strong></p>` : ""}
       </div>
     `,
   });
