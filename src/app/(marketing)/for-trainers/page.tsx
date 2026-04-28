@@ -73,14 +73,14 @@ export default function ForTrainersPage() {
 
               {/* Left */}
               <div className="flex-1 min-w-0">
-                <p className="text-[#DC373E] font-semibold text-sm uppercase tracking-wider mb-4">
+                <p className="text-[#DC373E] font-semibold text-base uppercase tracking-wider mb-5">
                   Now accepting applications
                 </p>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-                  Do what you love.{" "}
-                  <span style={{ color: "#DC373E" }}>Get paid for it.</span>
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
+                  Do what you love.<br />
+                  <span className="inline-block" style={{ color: "#DC373E", animation: "textPulse 2.5s ease-in-out infinite" }}>Get paid for it.</span>
                 </h1>
-                <p className="text-white/70 text-lg md:text-xl mb-8 max-w-xl">
+                <p className="text-white/70 text-xl md:text-2xl mb-8 max-w-xl">
                   Join a platform built for group sports coaches. We handle bookings, payments, and marketing — you just coach.
                 </p>
                 <div className="flex flex-wrap gap-3">
