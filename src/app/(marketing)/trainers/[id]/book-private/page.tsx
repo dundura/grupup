@@ -120,7 +120,10 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-              <h2 className="font-semibold text-base">About the athlete</h2>
+              <div>
+                <h2 className="font-semibold text-base">About the athlete</h2>
+                <p className="text-xs text-muted-foreground mt-1">Once payment is confirmed, {trainer.name.split(" ")[0]} will reach out directly to arrange a date and time.</p>
+              </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Athlete name *</label>
                 <Input value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)} placeholder="Who is this session for?" />
