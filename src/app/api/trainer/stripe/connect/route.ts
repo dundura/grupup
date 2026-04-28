@@ -36,7 +36,11 @@ export async function POST() {
     return NextResponse.json({ url: accountLink.url });
   } catch (err: any) {
     console.error("[POST /api/trainer/stripe/connect]", err);
-    return NextResponse.json({ error: err?.message ?? "Failed to create Connect link" }, { status: 500 });
+    const msg: string = err?.message ?? "";
+    if (msg.includes("signed up for Connect")) {
+      return NextResponse.json({ error: "Stripe Connect is still being activated on your platform account. This usually takes a few hours after identity verification. Check your email from Stripe for confirmation." }, { status: 500 });
+    }
+    return NextResponse.json({ error: msg || "Failed to create Connect link" }, { status: 500 });
   }
 }
 
