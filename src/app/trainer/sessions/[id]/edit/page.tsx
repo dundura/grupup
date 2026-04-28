@@ -107,7 +107,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (res.ok) { router.push("/dashboard"); }
+      if (res.ok) { router.push(`/sessions/${id}`); }
       else { const d = await res.json(); setError(d.error ?? "Something went wrong"); }
     } finally { setSaving(false); }
   }
