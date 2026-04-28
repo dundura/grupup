@@ -7,7 +7,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-barlow-condensed" });
 
-const OG_IMAGE = "https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777375447323-924k8k.png";
+const OG_IMAGE = "https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777383893480-bmty3f.png";
 
 export const metadata: Metadata = {
   title: "Grupup - Group Sports Training Sessions",
