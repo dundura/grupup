@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const user = await client.users.getUser(targetId);
     const meta = user.publicMetadata as { photo?: string };
     return NextResponse.json({
-      name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.emailAddresses?.[0]?.emailAddress ?? "User",
+      name: (`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()) || (user.emailAddresses?.[0]?.emailAddress ?? "User"),
       photo: meta.photo ?? user.imageUrl ?? "",
     });
   } catch {
