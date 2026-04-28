@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSignIn } from "@clerk/nextjs";
-import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink, LogIn, Eye, EyeOff } from "lucide-react";
+import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink, LogIn, Eye, EyeOff, Mail, X } from "lucide-react";
 
 interface AdminUser {
   id: string; name: string; email: string; photo: string; role: string;
@@ -42,6 +42,11 @@ export default function AdminClient({
   const [superPwd, setSuperPwd] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
+  const [messageModal, setMessageModal] = useState<{ userId: string; name: string; email: string } | null>(null);
+  const [msgSubject, setMsgSubject] = useState("");
+  const [msgBody, setMsgBody] = useState("");
+  const [msgSending, setMsgSending] = useState(false);
+  const [msgSent, setMsgSent] = useState(false);
 
   const list = (tab === "trainers" ? users.trainers : users.players)
     .filter((u) => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
@@ -105,6 +110,19 @@ export default function AdminClient({
       alert(e.message || "Failed");
       setImpersonating(false);
     }
+  }
+
+  async function handleSendMessage() {
+    if (!messageModal || !msgBody.trim()) return;
+    setMsgSending(true);
+    await fetch("/api/admin/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toUserId: messageModal.userId, subject: msgSubject, message: msgBody }),
+    });
+    setMsgSent(true);
+    setMsgSending(false);
+    setTimeout(() => { setMessageModal(null); setMsgSubject(""); setMsgBody(""); setMsgSent(false); }, 1500);
   }
 
   return (
@@ -210,6 +228,14 @@ export default function AdminClient({
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Message button */}
+                          <button
+                            onClick={() => { setMessageModal({ userId: u.id, name: u.name, email: u.email }); setMsgSubject(""); setMsgBody(""); }}
+                            title="Send message"
+                            className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-[#f0f4f9] transition-colors">
+                            <Mail className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                          </button>
+
                           {/* Admin edit button (all users) */}
                           <Link href={`/admin/edit/${u.id}`}
                             title="Edit profile"
@@ -437,6 +463,50 @@ export default function AdminClient({
           </div>
         )}
       </div>
+
+      {/* Message modal */}
+      {messageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-bold text-base">Message {messageModal.name}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{messageModal.email}</p>
+              </div>
+              <button onClick={() => { setMessageModal(null); setMsgSubject(""); setMsgBody(""); setMsgSent(false); }}
+                className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <input
+                value={msgSubject}
+                onChange={(e) => setMsgSubject(e.target.value)}
+                placeholder='Subject (e.g. "Your GrupUp application")'
+                className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <textarea
+                value={msgBody}
+                onChange={(e) => setMsgBody(e.target.value)}
+                placeholder="Write your message…"
+                rows={6}
+                className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => { setMessageModal(null); setMsgSubject(""); setMsgBody(""); }}
+                className="flex-1 py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleSendMessage} disabled={msgSending || !msgBody.trim() || msgSent}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-60"
+                style={{ backgroundColor: msgSent ? "#16a34a" : "#0F3154" }}>
+                {msgSent ? "Sent ✓" : msgSending ? "Sending…" : "Send Message"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Impersonate modal */}
       {impersonateModal && (
