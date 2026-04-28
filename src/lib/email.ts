@@ -63,6 +63,51 @@ export async function sendBookingConfirmation({
   });
 }
 
+export async function sendWelcomeEmail({
+  toEmail,
+  firstName,
+}: {
+  toEmail: string;
+  firstName: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: toEmail,
+    subject: "Welcome to GrupUp 👋",
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Welcome to Grup<span style="color: #DC373E;">Up</span>, ${firstName}! 🎉</h1>
+          <p style="color: rgba(255,255,255,0.75); margin: 8px 0 0; font-size: 15px;">Train smarter. Find your group. Grow your game.</p>
+        </div>
+
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
+          You're in. GrupUp connects athletes with local coaches running small-group training sessions — better reps, real competition, and a fraction of the cost of private training.
+        </p>
+
+        <div style="background: #f8fafc; border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <p style="margin: 0 0 12px; font-weight: 700; color: #0F3154; font-size: 15px;">Here's how to get started:</p>
+          <ol style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 2;">
+            <li>Browse sessions near you</li>
+            <li>Reserve a spot (spots fill fast)</li>
+            <li>Show up and train</li>
+          </ol>
+        </div>
+
+        <a href="https://grupup.app/groups"
+          style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 24px;">
+          Find a Session Near You
+        </a>
+
+        <p style="margin: 0; font-size: 13px; color: #9ca3af; text-align: center;">
+          Questions? Reply to this email — we're always here.
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendTrainerNewFollower({
   trainerEmail,
   trainerName,
