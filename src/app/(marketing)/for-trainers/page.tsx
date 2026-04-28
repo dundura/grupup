@@ -68,7 +68,7 @@ export default function ForTrainersPage() {
           <div className="absolute inset-0 opacity-5 rounded-[20px] overflow-hidden"
             style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "40px 40px" }} />
 
-          <div className="relative px-6 sm:px-8 lg:px-12 py-16 md:py-24">
+          <div className="relative px-6 sm:px-8 lg:px-12 py-10 md:py-14">
             <div className="flex items-center gap-12">
 
               {/* Left */}
@@ -132,7 +132,7 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-10 md:py-14">
         <div className="container">
           <div className="max-w-2xl mx-auto text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Sound familiar?</h2>
@@ -150,7 +150,7 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24" style={{ backgroundColor: "#0F3154" }}>
+      <section className="py-10 md:py-14" style={{ backgroundColor: "#0F3154" }}>
         <div className="container max-w-5xl">
           <div className="grid md:grid-cols-2 gap-10 items-center">
 
@@ -186,7 +186,7 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-10 md:py-14">
         <div className="container max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">How to get started</h2>
           <div className="space-y-4">
@@ -205,7 +205,7 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 bg-secondary/30 border-y">
+      <section className="py-10 md:py-14 bg-secondary/30 border-y">
         <div className="container max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">Common questions</h2>
           <Accordion type="single" collapsible className="bg-card border rounded-2xl px-6">
@@ -219,7 +219,7 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section id="apply" className="py-16 md:py-24 text-center">
+      <section id="apply" className="py-10 md:py-14 text-center">
         <div className="container">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Apply today</h2>
           <p className="text-lg text-muted-foreground mb-8">
