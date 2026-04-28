@@ -139,7 +139,7 @@ export function Hero() {
             {/* ── Right column (desktop only) ── */}
             <div className="hidden lg:flex flex-col gap-3">
 
-              <div className="flex flex-col gap-2" style={{ height: "400px", marginBottom: "4px" }}>
+              <div className="flex flex-col gap-2" style={{ height: "400px" }}>
                 {/* Basketball */}
                 <div className="relative" style={{ height: "230px" }}>
                   <div className="relative rounded-2xl overflow-hidden h-full">
@@ -184,7 +184,7 @@ export function Hero() {
               </div>
 
               {/* Highlights card */}
-              <div className="relative z-20 bg-white rounded-2xl px-3 py-2 shadow-sm divide-y divide-gray-100">
+              <div className="relative z-20 bg-white rounded-2xl px-3 py-2 shadow-sm divide-y divide-gray-100 mt-4">
                 {highlights.map((item) => (
                   <div key={item.title} className="flex items-center gap-2 py-1.5 first:pt-0 last:pb-0">
                     <span className="text-base shrink-0">{item.icon}</span>
