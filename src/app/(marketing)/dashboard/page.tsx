@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [stripeError, setStripeError] = useState("");
+  const [followRequests, setFollowRequests] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
+  const [followers, setFollowers] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
+  const [followLoading, setFollowLoading] = useState<string | null>(null);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -62,9 +65,32 @@ export default function DashboardPage() {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
+      // Player: load follow requests
+      fetch("/api/player/follows").then((r) => r.json()).then((data) => {
+        if (data.pending) setFollowRequests(data.pending);
+        if (data.approved) setFollowers(data.approved);
+      }).catch(() => {});
       setLoading(false);
     }
   }, [isLoaded, role]);
+
+  async function handleFollowAction(followerClerkId: string, action: "approve" | "reject" | "remove") {
+    setFollowLoading(followerClerkId);
+    await fetch("/api/player/follow", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ followerClerkId, action: action === "approve" ? "approve" : "reject" }),
+    });
+    if (action === "approve") {
+      const req = followRequests.find((r) => r.followerClerkId === followerClerkId);
+      if (req) setFollowers((f) => [...f, req]);
+      setFollowRequests((r) => r.filter((x) => x.followerClerkId !== followerClerkId));
+    } else {
+      setFollowRequests((r) => r.filter((x) => x.followerClerkId !== followerClerkId));
+      setFollowers((f) => f.filter((x) => x.followerClerkId !== followerClerkId));
+    }
+    setFollowLoading(null);
+  }
 
   async function handleConnectStripe() {
     setConnectingStripe(true);
@@ -310,6 +336,78 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Player: Follow Requests & Followers */}
+        {role !== "trainer" && (followRequests.length > 0 || followers.length > 0) && (
+          <div className="bg-white rounded-2xl border p-6 space-y-5">
+            {followRequests.length > 0 && (
+              <div>
+                <h2 className="text-base font-bold mb-3 flex items-center gap-2">
+                  Follow Requests
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                    {followRequests.length}
+                  </span>
+                </h2>
+                <div className="space-y-3">
+                  {followRequests.map((r) => (
+                    <div key={r.followerClerkId} className="flex items-center gap-3">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-[#f0f4f9]">
+                        {r.photo ? (
+                          <Image src={r.photo} alt={r.name} fill className="object-cover" sizes="40px" unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white" style={{ backgroundColor: "#0F3154" }}>
+                            {r.name[0]?.toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <p className="flex-1 font-semibold text-sm">{r.name}</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleFollowAction(r.followerClerkId, "approve")}
+                          disabled={followLoading === r.followerClerkId}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity"
+                          style={{ backgroundColor: "#0F3154" }}>
+                          Approve
+                        </button>
+                        <button onClick={() => handleFollowAction(r.followerClerkId, "reject")}
+                          disabled={followLoading === r.followerClerkId}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold border text-muted-foreground hover:bg-gray-50 transition-colors">
+                          Deny
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {followers.length > 0 && (
+              <div className={followRequests.length > 0 ? "border-t pt-5" : ""}>
+                <h2 className="text-base font-bold mb-3">Followers ({followers.length})</h2>
+                <div className="space-y-3">
+                  {followers.map((f) => (
+                    <div key={f.followerClerkId} className="flex items-center gap-3">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 bg-[#f0f4f9]">
+                        {f.photo ? (
+                          <Image src={f.photo} alt={f.name} fill className="object-cover" sizes="40px" unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white" style={{ backgroundColor: "#0F3154" }}>
+                            {f.name[0]?.toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <p className="flex-1 font-semibold text-sm">{f.name}</p>
+                      <button onClick={() => handleFollowAction(f.followerClerkId, "remove")}
+                        disabled={followLoading === f.followerClerkId}
+                        className="p-1.5 rounded-lg border text-muted-foreground hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Trainer: Sessions */}
         {role === "trainer" && (

@@ -128,6 +128,13 @@ export const playerGroups = pgTable("player_groups", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const userBlocks = pgTable("user_blocks", {
+  id: serial("id").primaryKey(),
+  blockerClerkId: varchar("blocker_clerk_id", { length: 255 }).notNull(),
+  blockedClerkId: varchar("blocked_clerk_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   fromClerkId: varchar("from_clerk_id", { length: 255 }).notNull(),
@@ -141,6 +148,7 @@ export const playerFollows = pgTable("player_follows", {
   id: serial("id").primaryKey(),
   followerClerkId: varchar("follower_clerk_id", { length: 255 }).notNull(),
   targetClerkId: varchar("target_clerk_id", { length: 255 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

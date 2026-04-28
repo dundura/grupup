@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Trophy, Users, Calendar, Dumbbell, ChevronLeft, Clock, UserPlus } from "lucide-react";
 import { db } from "@/db";
-import { bookings, freePlayEvents, trainerSessions, playerFollows } from "@/db/schema";
+import { bookings, freePlayEvents, trainerSessions, playerFollows, userBlocks } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import FollowPlayerButton from "./FollowPlayerButton";
 import MessageButton from "@/components/messaging/MessageButton";
+import BlockButton from "./BlockButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     role?: string; isApproved?: boolean; isHidden?: boolean; photo?: string;
     city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
     league?: string; team?: string; bio?: string; birthYear?: string; gender?: string;
+    videoLinks?: string[]; disableMessages?: boolean;
   };
   const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
 
@@ -50,14 +52,18 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   const photo = meta.photo ?? target.imageUrl ?? "";
 
   // Fetch follower count and whether viewer follows this player
-  const [followerRows, viewerFollowRow] = await Promise.all([
-    db.select().from(playerFollows).where(eq(playerFollows.targetClerkId, targetUserId)),
+  const [followerRows, viewerFollowRow, viewerBlockRow] = await Promise.all([
+    db.select().from(playerFollows).where(and(eq(playerFollows.targetClerkId, targetUserId), eq(playerFollows.status, "approved"))),
     viewerUserId ? db.select().from(playerFollows).where(
-      and(eq(playerFollows.followerClerkId, viewerUserId), eq(playerFollows.targetClerkId, targetUserId))
+      and(eq(playerFollows.followerClerkId, viewerUserId), eq(playerFollows.targetClerkId, targetUserId), eq(playerFollows.status, "approved"))
+    ) : Promise.resolve([]),
+    viewerUserId ? db.select().from(userBlocks).where(
+      and(eq(userBlocks.blockerClerkId, viewerUserId), eq(userBlocks.blockedClerkId, targetUserId))
     ) : Promise.resolve([]),
   ]);
   const followerCount = followerRows.length;
   const isFollowing = viewerFollowRow.length > 0;
+  const isBlocked = viewerBlockRow.length > 0;
 
   // Upcoming booked sessions
   const playerBookings = await db.select().from(bookings)
@@ -131,9 +137,10 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                 </p>
               </div>
               {!isOwner && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <FollowPlayerButton targetClerkId={targetUserId} initialFollowing={isFollowing} />
-                  <MessageButton toClerkId={targetUserId} toName={name} />
+                  {isFollowing && <MessageButton toClerkId={targetUserId} toName={name} />}
+                  <BlockButton targetClerkId={targetUserId} targetName={name} initialBlocked={isBlocked} />
                 </div>
               )}
               {isOwner && (
@@ -200,6 +207,34 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
             )}
           </div>
         </div>
+
+        {/* Highlight videos */}
+        {meta.videoLinks && meta.videoLinks.length > 0 && (
+          <div className="bg-white rounded-2xl border shadow-sm p-5 mb-5">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-muted-foreground mb-3">Highlight Videos</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {meta.videoLinks.map((url, i) => {
+                const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+                if (ytMatch) {
+                  return (
+                    <div key={i} className="aspect-video rounded-xl overflow-hidden">
+                      <iframe src={`https://www.youtube.com/embed/${ytMatch[1]}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+                    </div>
+                  );
+                }
+                if (vimeoMatch) {
+                  return (
+                    <div key={i} className="aspect-video rounded-xl overflow-hidden">
+                      <iframe src={`https://player.vimeo.com/video/${vimeoMatch[1]}`} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="w-full h-full" />
+                    </div>
+                  );
+                }
+                return null;
+              }).filter(Boolean)}
+            </div>
+          </div>
+        )}
 
         {/* Upcoming sessions */}
         {playerBookings.length > 0 && (

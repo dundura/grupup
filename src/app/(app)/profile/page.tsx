@@ -36,7 +36,8 @@ export default function ProfilePage() {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
-    photo?: string; league?: string; team?: string; birthYear?: string; gender?: string; playerSports?: string[];
+    photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
+    playerSports?: string[]; videoLinks?: string[];
   };
 
   const [form, setForm] = useState({
@@ -62,6 +63,8 @@ export default function ProfilePage() {
     team: meta.team ?? "",
     birthYear: meta.birthYear ?? "",
     gender: meta.gender ?? "",
+    videoLinks: meta.videoLinks ?? ["", "", "", "", "", ""],
+    disableMessages: (meta as any).disableMessages ?? false,
   });
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
@@ -95,7 +98,8 @@ export default function ProfilePage() {
     if (!meta.role) return;
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue });
+    const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos });
     setSaved(true);
     setSaving(false);
     setTimeout(() => setSaved(false), 3000);
@@ -287,6 +291,24 @@ export default function ProfilePage() {
                   rows={3} maxLength={300}
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
                 <p className="text-xs text-muted-foreground mt-1">{form.bio.length}/300 characters</p>
+              </div>
+
+              {/* Video links */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Highlight videos <span className="text-muted-foreground font-normal">(YouTube or Vimeo · up to 6)</span></label>
+                <div className="space-y-2">
+                  {[0,1,2,3,4,5].map((i) => (
+                    <Input key={i}
+                      value={form.videoLinks[i] ?? ""}
+                      onChange={(e) => {
+                        const updated = [...form.videoLinks];
+                        updated[i] = e.target.value;
+                        setForm((f) => ({ ...f, videoLinks: updated }));
+                      }}
+                      placeholder={`Video ${i + 1} URL — e.g. https://youtube.com/watch?v=…`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 

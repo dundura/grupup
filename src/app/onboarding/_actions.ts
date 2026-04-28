@@ -22,6 +22,8 @@ export async function completeOnboarding(formData: {
   playerAge?: string;
   birthYear?: string;
   gender?: string;
+  videoLinks?: string[];
+  disableMessages?: boolean;
   isHidden?: boolean;
   photo?: string;
   // trainer
@@ -66,6 +68,8 @@ export async function completeOnboarding(formData: {
       if (formData.playerAge !== undefined) profileFields.playerAge = formData.playerAge;
       if (formData.birthYear !== undefined) profileFields.birthYear = formData.birthYear;
       if (formData.gender !== undefined) profileFields.gender = formData.gender;
+      if (formData.videoLinks !== undefined) profileFields.videoLinks = formData.videoLinks;
+      if (formData.disableMessages !== undefined) profileFields.disableMessages = formData.disableMessages;
       if (!alreadyApproved) profileFields.isApproved = false;
     } else {
       // trainer

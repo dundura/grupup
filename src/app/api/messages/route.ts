@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: FROM,
           to: recipientEmail,
+          bcc: "neil@anytime-soccer.com",
           replyTo: sender.emailAddresses?.[0]?.emailAddress,
           subject: `${senderName} sent you a message on GrupUp`,
           html: `
