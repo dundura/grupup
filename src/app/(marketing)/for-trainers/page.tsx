@@ -6,14 +6,20 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const benefits = [
   {
-    icon: Users,
-    title: "We bring you the clients",
-    description: "Sports families actively search our platform for group training sessions. No more cold outreach.",
+    problem: "Not enough clients?",
+    solution: "Families are already searching for group sessions on GrupUp. We bring them to you — no cold outreach, no social media hustle.",
   },
   {
-    icon: TrendingUp,
-    title: "Grow your reputation",
-    description: "Build a public profile with reviews that follows you. Top-rated trainers get featured.",
+    problem: "Hard to get discovered?",
+    solution: "We do the marketing. Your profile, sessions, and reviews are indexed and searchable by local families looking for exactly what you offer.",
+  },
+  {
+    problem: "Clients come and go?",
+    solution: "Group sessions are your pipeline. Players who train with you in a group naturally convert into long-term private clients.",
+  },
+  {
+    problem: "Tired of chasing payments?",
+    solution: "Players pay upfront at booking. Stripe deposits hit your bank 24 hours after the session. No invoices, no awkward follow-ups.",
   },
 ];
 
@@ -124,21 +130,16 @@ export default function ForTrainersPage() {
 
       <section className="py-16 md:py-24">
         <div className="container">
-          <div className="max-w-2xl mx-auto text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why trainers choose us</h2>
-            <p className="text-lg text-muted-foreground">
-              The highest payout in the industry with the tools to run your business.
-            </p>
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Sound familiar?</h2>
+            <p className="text-lg text-muted-foreground">GrupUp solves the most common problems coaches face.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {benefits.map((b) => (
-              <div key={b.title} className="bg-card border rounded-2xl p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
-                  <b.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{b.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{b.description}</p>
+              <div key={b.problem} className="bg-white border rounded-2xl p-6">
+                <p className="text-sm font-bold text-muted-foreground mb-2">😩 {b.problem}</p>
+                <p className="text-base font-semibold leading-snug" style={{ color: "#0F3154" }}>✅ {b.solution}</p>
               </div>
             ))}
           </div>
