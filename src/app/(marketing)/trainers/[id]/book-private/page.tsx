@@ -144,6 +144,9 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
             <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
               <Shield className="h-3.5 w-3.5" /> Secure checkout · GrupUp Guarantee
             </p>
+            <p className="text-xs text-center text-muted-foreground">
+              Can't agree on a time or place? You'll receive a <strong>100% refund</strong> — no questions asked.
+            </p>
           </div>
 
           {/* Right — trainer summary */}
