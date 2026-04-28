@@ -36,6 +36,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
   const location     = [trainer.city, trainer.state].filter(Boolean).join(", ");
   const bioText      = trainer.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
   const skillLevels  = (trainer.skillLevels as string[] | null) ?? [];
+  const hasGroupSession = sessions.some((s) => s.sessionType !== "private");
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
@@ -161,12 +162,14 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                     <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{location}</p>
                   )}
                 </div>
-                {/* Private booking contact */}
-                <a href={`mailto:info@anytime-soccer.com?subject=Private session inquiry — ${trainer.name}`}
-                  className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted mt-2"
-                  style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-                  Inquire about private sessions
-                </a>
+                {/* Private booking — only visible if trainer has at least one group session */}
+                {hasGroupSession && (
+                  <a href={`mailto:info@anytime-soccer.com?subject=Private session inquiry — ${trainer.name}`}
+                    className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted mt-2"
+                    style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+                    Inquire about private sessions
+                  </a>
+                )}
               </div>
             </div>
 
