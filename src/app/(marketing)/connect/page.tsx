@@ -69,7 +69,7 @@ export default async function ConnectPage() {
       };
 
       if (!(meta.role === "player" || meta.role === "parent")) continue;
-      if (!meta.isApproved) continue;
+      if (meta.isApproved !== true && (meta.isApproved as unknown) !== "true") continue;
       if (u.id === viewerUserId) continue;
 
       // If user has child profiles, show each child as a card
@@ -118,7 +118,7 @@ export default async function ConnectPage() {
         });
       }
     }
-  } catch { /* silently fail */ }
+  } catch (err) { console.error("[connect] failed to load players:", err); }
 
   return (
     <div>

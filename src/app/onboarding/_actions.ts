@@ -50,7 +50,7 @@ export async function completeOnboarding(formData: {
     const existingMeta = existing.publicMetadata as { isApproved?: boolean; onboardingComplete?: boolean };
 
     const isPlayer = formData.role === "player" || formData.role === "parent";
-    const alreadyApproved = existingMeta.isApproved === true;
+    const alreadyApproved = existingMeta.isApproved === true || (existingMeta.isApproved as unknown) === "true";
 
     const profileFields: Record<string, unknown> = {
       role: formData.role,
@@ -99,25 +99,25 @@ export async function completeOnboarding(formData: {
       if (formData.isHidden !== undefined) profileFields.isHidden = formData.isHidden;
     }
 
-    await client.users.updateUser(userId, {
-      publicMetadata: { ...existingMeta, ...profileFields },
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-    });
-
-    // Custom slug update (player edits their own slug)
+    // Custom slug update (player edits their own slug) — must be set BEFORE updateUser
     if (formData.customSlug) {
       const clean = formData.customSlug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
       if (clean) profileFields.profileSlug = clean;
     }
 
-    // Generate profileSlug for players on first signup
+    // Generate profileSlug for players on first signup — must be set BEFORE updateUser
     if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {
       const slugBase = `${formData.firstName} ${formData.lastName}`.trim()
         .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
       const suffix = Math.random().toString(36).slice(2, 6);
       profileFields.profileSlug = `${slugBase}-${suffix}`;
     }
+
+    await client.users.updateUser(userId, {
+      publicMetadata: { ...existingMeta, ...profileFields },
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+    });
 
     // Notify admin on first-time signup (any role)
     if (formData.isNewSignup && !existingMeta.onboardingComplete) {
