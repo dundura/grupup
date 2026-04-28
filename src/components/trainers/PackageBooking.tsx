@@ -46,7 +46,7 @@ export function PackageBooking({ trainerId, trainerName, sessions }: Props) {
 
   return (
     <div className="bg-white rounded-2xl border shadow-sm p-6">
-      <h2 className="font-bold text-base mb-4">Choose a Session Package</h2>
+      <h2 className="font-bold text-base mb-4">Group Sessions</h2>
 
       {/* Package cards */}
       <div className={`grid gap-3 mb-5 ${sessions.length === 1 ? "grid-cols-1" : sessions.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"}`}>
