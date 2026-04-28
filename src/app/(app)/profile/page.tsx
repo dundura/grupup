@@ -11,6 +11,8 @@ import { CheckCircle, Plus, X, Camera, Loader2, ExternalLink } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { PhotoCropModal } from "@/components/ui/PhotoCropModal";
+import PlayerProfilesList from "@/components/profile/PlayerProfilesList";
+import type { ChildProfile } from "@/components/profile/PlayerProfilesList";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
@@ -39,7 +41,7 @@ export default function ProfilePage() {
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
     photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
-    playerSports?: string[]; videoLinks?: string[];
+    playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
   };
 
   function buildForm(u: typeof user) {
@@ -68,6 +70,7 @@ export default function ProfilePage() {
       birthYear: m.birthYear ?? "",
       gender: m.gender ?? "",
       videoLinks: ((m.videoLinks ?? ["", "", "", "", "", ""]) as string[]),
+      childProfiles: ((m.childProfiles ?? []) as ChildProfile[]),
       disableMessages: (m as any).disableMessages ?? false,
     };
   }
@@ -130,10 +133,9 @@ export default function ProfilePage() {
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos });
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: form.childProfiles });
     setSaved(true);
     setSaving(false);
-    setTimeout(() => setSaved(false), 3000);
   }
 
   if (!isLoaded) return <div className="py-12 text-muted-foreground">Loading…</div>;
@@ -143,6 +145,29 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Success popup */}
+      {saved && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-6 sm:pb-0">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full mx-auto mb-4 bg-green-100">
+              <CheckCircle className="h-7 w-7 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-1">Profile saved!</h2>
+            <p className="text-muted-foreground text-sm mb-5">Your changes have been saved successfully.</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setSaved(false)}>Close</Button>
+              {user?.id && (
+                <Button className="flex-1" style={{ backgroundColor: "#0F3154" }} asChild>
+                  <Link href={`/connect/${user.id}`} target="_blank" onClick={() => setSaved(false)}>
+                    <ExternalLink className="h-4 w-4 mr-1.5" /> View profile
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Crop modal — rendered as fixed overlay */}
       {cropSrc && (
         <PhotoCropModal
@@ -160,11 +185,6 @@ export default function ProfilePage() {
               style={{ color: "#0F3154", borderColor: "#0F3154" }}>
               <ExternalLink className="h-3.5 w-3.5" /> View profile
             </Link>
-          )}
-          {saved && (
-            <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-semibold px-3 py-1.5 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-green-600" /> Profile saved!
-            </div>
           )}
         </div>
       </div>
@@ -506,6 +526,14 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        )}
+
+          {/* Players section — available for non-trainers */}
+        {role !== "trainer" && (
+          <PlayerProfilesList
+            initialProfiles={form.childProfiles}
+            onChange={(profiles) => setForm((f) => ({ ...f, childProfiles: profiles }))}
+          />
         )}
 
         {/* Visibility toggle — players/parents only */}

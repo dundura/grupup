@@ -23,6 +23,7 @@ export async function completeOnboarding(formData: {
   birthYear?: string;
   gender?: string;
   videoLinks?: string[];
+  childProfiles?: any[];
   disableMessages?: boolean;
   isHidden?: boolean;
   photo?: string;
@@ -69,6 +70,7 @@ export async function completeOnboarding(formData: {
       if (formData.birthYear !== undefined) profileFields.birthYear = formData.birthYear;
       if (formData.gender !== undefined) profileFields.gender = formData.gender;
       if (formData.videoLinks !== undefined) profileFields.videoLinks = formData.videoLinks;
+      if (formData.childProfiles !== undefined) profileFields.childProfiles = formData.childProfiles;
       if (formData.disableMessages !== undefined) profileFields.disableMessages = formData.disableMessages;
       if (!alreadyApproved) profileFields.isApproved = false;
     } else {

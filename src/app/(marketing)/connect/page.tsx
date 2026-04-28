@@ -53,19 +53,49 @@ export default async function ConnectPage() {
   try {
     const { data: clerkUsers } = await client.users.getUserList({ limit: 500 });
 
-    approvedPlayers = clerkUsers
-      .filter((u) => {
-        const meta = u.publicMetadata as { role?: string; isApproved?: boolean; isHidden?: boolean };
-        return (meta.role === "player" || meta.role === "parent") && meta.isApproved && !meta.isHidden;
-      })
-      .map((u) => {
-        const meta = u.publicMetadata as {
-          city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
-          league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
-          gender?: string; profileSlug?: string;
-        };
+    for (const u of clerkUsers) {
+      const meta = u.publicMetadata as {
+        role?: string; isApproved?: boolean; isHidden?: boolean;
+        city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
+        league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
+        gender?: string; profileSlug?: string;
+        childProfiles?: Array<{
+          id: string; slug: string; name: string; photo: string; sports: string[];
+          level: string; league: string; team: string; birthYear: string; gender: string;
+          bio: string; isHidden: boolean;
+        }>;
+      };
+
+      if (!(meta.role === "player" || meta.role === "parent")) continue;
+      if (!meta.isApproved) continue;
+      if (u.id === viewerUserId) continue;
+
+      // If user has child profiles, show each child as a card
+      if (meta.childProfiles?.length) {
+        for (const child of meta.childProfiles) {
+          if (child.isHidden) continue;
+          approvedPlayers.push({
+            id: child.slug || `${u.id}-${child.id}`,
+            clerkId: u.id,
+            name: child.name || "Player",
+            photo: child.photo || "",
+            city: meta.city ?? "",
+            country: meta.country ?? "",
+            sports: child.sports ?? [],
+            level: child.level ?? "",
+            league: child.league ?? "",
+            bio: child.bio ?? "",
+            team: child.team ?? "",
+            birthYear: child.birthYear ?? "",
+            gender: child.gender ?? "",
+          });
+        }
+      }
+
+      // Also show the user's own profile card (unless hidden)
+      if (!meta.isHidden) {
         const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
-        return {
+        approvedPlayers.push({
           id: meta.profileSlug ?? u.id,
           clerkId: u.id,
           name: (`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim()) || (u.emailAddresses?.[0]?.emailAddress ?? "Player"),
@@ -79,10 +109,9 @@ export default async function ConnectPage() {
           team: meta.team ?? "",
           birthYear: meta.birthYear ?? "",
           gender: meta.gender ?? "",
-        };
-      })
-      // Hide the viewer's own card
-      .filter((p) => p.clerkId !== viewerUserId);
+        });
+      }
+    }
   } catch { /* silently fail */ }
 
   return (

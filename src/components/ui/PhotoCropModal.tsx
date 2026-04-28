@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Cropper from "react-easy-crop";
+import dynamic from "next/dynamic";
 import type { Area } from "react-easy-crop";
 import { X, ZoomIn, ZoomOut, Loader2 } from "lucide-react";
 import { Button } from "./button";
+
+const Cropper = dynamic(() => import("react-easy-crop"), { ssr: false });
 
 async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -66,7 +68,7 @@ export function PhotoCropModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="font-bold text-lg">Crop photo</h2>
+          <h2 className="font-bold text-lg">Crop & position photo</h2>
           <button onClick={onCancel} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-5 w-5" />
           </button>
@@ -101,14 +103,12 @@ export function PhotoCropModal({
           />
           <ZoomIn className="h-4 w-4 text-muted-foreground shrink-0" />
         </div>
+        <p className="text-center text-xs text-muted-foreground pb-2">Drag to reposition · scroll to zoom</p>
 
         {/* Actions */}
         <div className="flex gap-3 p-4">
-          <Button variant="outline" className="flex-1" onClick={onCancel} disabled={applying}>
-            Cancel
-          </Button>
-          <Button className="flex-1" onClick={handleApply} disabled={applying}
-            style={{ backgroundColor: "#DC373E" }}>
+          <Button variant="outline" className="flex-1" onClick={onCancel} disabled={applying}>Cancel</Button>
+          <Button className="flex-1" onClick={handleApply} disabled={applying} style={{ backgroundColor: "#DC373E" }}>
             {applying ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Applying…</> : "Apply"}
           </Button>
         </div>
