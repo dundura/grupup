@@ -49,6 +49,9 @@ export function Hero() {
             <div className="flex flex-col gap-4">
               {/* Text */}
               <div>
+                <p className="text-[#DC373E] font-semibold text-sm uppercase tracking-wider mb-3">
+                  The only platform built for group sports training
+                </p>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-2">
                   Group sports training
                 </h1>
