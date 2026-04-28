@@ -267,9 +267,9 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-3 text-left">
                         {p.bio || "Looking for group training sessions to improve my skills and connect with players near me."}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <Link href={`/connect/${p.id}`}
-                          className="flex-1 block text-center py-2.5 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                          className="flex-1 block text-center py-2.5 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
                           style={{ backgroundColor: "#DC373E" }}>
                           View Profile
                         </Link>
