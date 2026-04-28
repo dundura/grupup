@@ -40,6 +40,7 @@ export async function completeOnboarding(formData: {
   // player extras
   position?: string;
   improvementAreas?: string[];
+  socials?: { instagram?: string; tiktok?: string; twitter?: string; youtube?: string; facebook?: string; snapchat?: string };
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { userId } = await auth();
@@ -85,6 +86,7 @@ export async function completeOnboarding(formData: {
       if (formData.openToTrain !== undefined) profileFields.openToTrain = formData.openToTrain;
       if (formData.disableMessages !== undefined) profileFields.disableMessages = formData.disableMessages;
       if (formData.position !== undefined) profileFields.position = formData.position;
+      if (formData.socials !== undefined) profileFields.socials = formData.socials;
       if (formData.improvementAreas !== undefined) {
         profileFields.improvementAreas = formData.improvementAreas.length ? formData.improvementAreas : ["Ball Skills"];
       }

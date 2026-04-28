@@ -83,6 +83,7 @@ export default function ProfilePage() {
     state?: string; zipCode?: string; profileSlug?: string;
     availableForFreePlay?: boolean; openToTrain?: boolean;
     position?: string; improvementAreas?: string[];
+    socials?: { instagram?: string; tiktok?: string; twitter?: string; youtube?: string; facebook?: string; snapchat?: string };
     playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
   };
 
@@ -120,6 +121,7 @@ export default function ProfilePage() {
       disableMessages: (m as any).disableMessages ?? false,
       position: m.position ?? "",
       improvementAreas: (m.improvementAreas ?? ["Ball Skills"]) as string[],
+      socials: m.socials ?? {},
     };
   }
 
@@ -205,7 +207,7 @@ export default function ProfilePage() {
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
     const improvementAreas = ((form as any).improvementAreas as string[]).filter(Boolean);
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode, customSlug: (form as any).customSlug, position: (form as any).position, improvementAreas: improvementAreas.length ? improvementAreas : ["Ball Skills"] });
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode, customSlug: (form as any).customSlug, position: (form as any).position, improvementAreas: improvementAreas.length ? improvementAreas : ["Ball Skills"], socials: (form as any).socials });
     setSaved(true);
     setSaving(false);
   }
@@ -591,6 +593,31 @@ export default function ProfilePage() {
                   rows={3} maxLength={300}
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
                 <p className="text-xs text-muted-foreground mt-1">{form.bio.length}/300 characters</p>
+              </div>
+
+              {/* Socials */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Social links <span className="text-muted-foreground font-normal">(optional)</span></label>
+                <div className="space-y-2">
+                  {[
+                    { key: "instagram", label: "Instagram", placeholder: "instagram.com/username" },
+                    { key: "tiktok",    label: "TikTok",    placeholder: "tiktok.com/@username" },
+                    { key: "twitter",   label: "X / Twitter", placeholder: "x.com/username" },
+                    { key: "youtube",   label: "YouTube",   placeholder: "youtube.com/@channel" },
+                    { key: "facebook",  label: "Facebook",  placeholder: "facebook.com/username" },
+                    { key: "snapchat",  label: "Snapchat",  placeholder: "snapchat.com/add/username" },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key} className="flex items-center gap-2">
+                      <span className="text-xs font-semibold w-20 shrink-0 text-muted-foreground">{label}</span>
+                      <Input
+                        value={(form as any).socials?.[key] ?? ""}
+                        onChange={(e) => setForm((f) => ({ ...f, socials: { ...(f as any).socials, [key]: e.target.value } }))}
+                        placeholder={placeholder}
+                        className="text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Video links */}

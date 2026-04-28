@@ -42,6 +42,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     videoLinks?: string[]; disableMessages?: boolean;
     availableForFreePlay?: boolean; openToTrain?: boolean;
     position?: string; improvementAreas?: string[];
+    socials?: { instagram?: string; tiktok?: string; twitter?: string; youtube?: string; facebook?: string; snapchat?: string };
   };
   const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
 
@@ -227,6 +228,30 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
               </div>
             )}
           </div>
+          {/* Socials */}
+          {meta.socials && Object.values(meta.socials).some(Boolean) && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {[
+                { key: "instagram", label: "Instagram", color: "#E1306C", icon: "📷" },
+                { key: "tiktok",    label: "TikTok",    color: "#000000", icon: "🎵" },
+                { key: "twitter",   label: "X",         color: "#1DA1F2", icon: "𝕏" },
+                { key: "youtube",   label: "YouTube",   color: "#FF0000", icon: "▶" },
+                { key: "facebook",  label: "Facebook",  color: "#1877F2", icon: "f" },
+                { key: "snapchat",  label: "Snapchat",  color: "#FFFC00", icon: "👻" },
+              ].map(({ key, label, color, icon }) => {
+                const url = (meta.socials as any)?.[key];
+                if (!url) return null;
+                const href = url.startsWith("http") ? url : `https://${url}`;
+                return (
+                  <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
+                    style={{ backgroundColor: color === "#FFFC00" ? "#FFFC00" : `${color}18`, color: color === "#FFFC00" ? "#000" : color, border: `1px solid ${color}30` }}>
+                    <span>{icon}</span> {label}
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Highlight videos */}
