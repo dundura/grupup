@@ -191,10 +191,6 @@ export default function ProfilePage() {
 
   async function handleSave() {
     if (!meta.role) return;
-    if (!hasUploadedPhoto) {
-      if (fileRef.current) fileRef.current.click();
-      return;
-    }
     if (role !== "trainer" && form.selectedPlayerSports.length === 0) {
       alert("Please select at least one sport before saving.");
       return;
@@ -289,14 +285,9 @@ export default function ProfilePage() {
         )}
 
         {/* Photo upload */}
-        <div className={`bg-card border rounded-2xl p-6 ${!hasUploadedPhoto ? "border-red-300 bg-red-50/30" : ""}`}>
+        <div className="bg-card border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Profile Photo <span className="text-red-500 ml-0.5">*</span>
-            </h2>
-            {!hasUploadedPhoto && (
-              <span className="text-xs font-semibold text-red-600">Required</span>
-            )}
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Profile Photo</h2>
           </div>
           <div className="flex items-center gap-5">
             <button type="button" onClick={handleReCrop} disabled={uploadingPhoto}
@@ -802,14 +793,9 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {!hasUploadedPhoto && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center font-medium">
-            A profile photo is required — upload one above to save.
-          </p>
-        )}
-        <Button className="w-full" style={{ backgroundColor: !hasUploadedPhoto ? "#e5e7eb" : "#DC373E", color: !hasUploadedPhoto ? "#9ca3af" : "white" }}
+        <Button className="w-full" style={{ backgroundColor: "#DC373E" }}
           disabled={saving || uploadingPhoto} onClick={handleSave}>
-          {saving ? "Saving…" : !hasUploadedPhoto ? "Upload a photo to save" : "Save changes"}
+          {saving ? "Saving…" : "Save changes"}
         </Button>
       </div>
     </div>
