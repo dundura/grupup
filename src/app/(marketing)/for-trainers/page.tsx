@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { DollarSign, Users, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -59,21 +60,74 @@ const faqs = [
 export default function ForTrainersPage() {
   return (
     <div>
-      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/5 border-b">
-        <div className="container py-16 md:py-24 lg:py-32 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border bg-background/80 backdrop-blur px-4 py-1.5 text-xs font-semibold mb-6">
-            <span>Now accepting applications</span>
+      {/* Hero — matches homepage style */}
+      <section className="bg-[#f4f6f9] px-4 sm:px-6 lg:px-8 pt-6 pb-0">
+        <div className="relative rounded-[20px] max-w-7xl mx-auto" style={{ backgroundColor: "#0F3154" }}>
+          {/* Dot grid */}
+          <div className="absolute inset-0 opacity-5 rounded-[20px] overflow-hidden"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+
+          <div className="relative px-6 sm:px-8 lg:px-12 py-16 md:py-24">
+            <div className="flex items-center gap-12">
+
+              {/* Left */}
+              <div className="flex-1 min-w-0">
+                <p className="text-[#DC373E] font-semibold text-sm uppercase tracking-wider mb-4">
+                  Now accepting applications
+                </p>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
+                  Do what you love.{" "}
+                  <span style={{ color: "#DC373E" }}>Get paid for it.</span>
+                </h1>
+                <p className="text-white/70 text-lg md:text-xl mb-8 max-w-xl">
+                  Join a platform built for group sports coaches. We handle bookings, payments, and marketing — you just coach.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="#apply"
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Apply Now
+                  </Link>
+                  <Link href="/trainer/new-session"
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors">
+                    Create a Session →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right — photo + floating card */}
+              <div className="hidden lg:block relative w-[420px] shrink-0">
+                <div className="relative w-full h-[460px] rounded-2xl overflow-hidden">
+                  <Image
+                    src="https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg"
+                    alt="Coach leading a group training session"
+                    fill
+                    className="object-cover object-top"
+                    sizes="420px"
+                    unoptimized
+                  />
+                </div>
+                {/* Floating card — earnings */}
+                <div className="absolute -top-4 right-4 rounded-xl shadow-xl p-4 w-52"
+                  style={{ backgroundColor: "#0F3154", animation: "heroFloat 5s ease-in-out infinite" }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-green-400" />
+                    <p className="text-xs font-bold text-white/60 uppercase tracking-wide">Session payout</p>
+                  </div>
+                  <p className="text-sm font-semibold text-white">6 players × $25 = $150</p>
+                  <p className="text-xs text-white/60 mt-1">You keep $127 · 85% payout</p>
+                </div>
+                {/* Floating card — bookings */}
+                <div className="absolute -bottom-4 left-4 bg-white rounded-xl shadow-xl p-4 w-52"
+                  style={{ animation: "heroFloat 5s ease-in-out 2.5s infinite" }}>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">New booking</p>
+                  <p className="text-sm font-semibold text-gray-800">Tuesday Finishing Clinic</p>
+                  <p className="text-xs text-gray-500 mt-1">3 of 6 spots filled · Cary, NC</p>
+                </div>
+              </div>
+
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-            Do what you love.{" "}
-            <span className="text-primary">Get paid for it.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join a platform built for group sports coaches. We handle bookings, payments, and marketing. You do what you do best.
-          </p>
-          <Button size="lg" asChild>
-            <Link href="#apply">Apply Now</Link>
-          </Button>
         </div>
       </section>
 
