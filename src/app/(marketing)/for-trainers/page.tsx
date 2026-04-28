@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const benefits = [
   {
     problem: "Not enough clients?",
-    solution: "Families are already searching for group sessions on GrupUp. We bring them to you — no cold outreach, no social media hustle.",
+    solution: "Many families want quality coaching but struggle to justify the cost of private 1-on-1 sessions. Group training is exactly what they're looking for — and we connect them directly to you.",
   },
   {
     problem: "Hard to get discovered?",
