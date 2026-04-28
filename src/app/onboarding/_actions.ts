@@ -74,8 +74,8 @@ export async function completeOnboarding(formData: {
       lastName: formData.lastName,
     });
 
-    // Notify admin on first-time player signup
-    if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {
+    // Notify admin on first-time signup (any role)
+    if (formData.isNewSignup && !existingMeta.onboardingComplete) {
       const email = existing.emailAddresses?.[0]?.emailAddress ?? "";
       const name = `${formData.firstName} ${formData.lastName}`.trim();
       await sendAdminNewPlayerNotification({
@@ -83,6 +83,7 @@ export async function completeOnboarding(formData: {
         playerEmail: email,
         playerCity: formData.city,
         playerCountry: formData.country,
+        role: formData.role,
       });
     }
 

@@ -141,31 +141,36 @@ export async function sendAdminNewPlayerNotification({
   playerEmail,
   playerCity,
   playerCountry,
+  role = "player",
 }: {
   playerName: string;
   playerEmail: string;
   playerCity: string;
   playerCountry: string;
+  role?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
+  const roleLabel = role === "trainer" ? "Trainer / Coach" : role === "parent" ? "Parent" : "Player";
+  const emoji = role === "trainer" ? "🎯" : "🏅";
   await getResend().emails.send({
     from: FROM,
     to: "nmciq2@gmail.com",
-    subject: `New player signup: ${playerName}`,
+    subject: `New ${roleLabel} signup: ${playerName}`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
         <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 20px;">New Player Signup 🏅</h1>
-          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Pending your approval on GrupUp</p>
+          <h1 style="color: white; margin: 0; font-size: 20px;">New ${roleLabel} Signup ${emoji}</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Just completed onboarding on GrupUp</p>
         </div>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
           <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 80px;">Name</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${playerName}</td></tr>
           <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email</td><td style="padding: 8px 0; font-size: 14px;"><a href="mailto:${playerEmail}" style="color: #0F3154;">${playerEmail}</a></td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Role</td><td style="padding: 8px 0; font-size: 14px;">${roleLabel}</td></tr>
           <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Location</td><td style="padding: 8px 0; font-size: 14px;">${playerCity}${playerCountry ? `, ${playerCountry}` : ""}</td></tr>
         </table>
         <a href="https://www.grupup.app/admin"
           style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
-          Review &amp; Approve in Admin
+          Review in Admin
         </a>
       </div>
     `,
