@@ -186,7 +186,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                 {meta.availableForFreePlay && (
                   <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
                     style={{ backgroundColor: "#fef2f2", color: "#DC373E", border: "1px solid #fca5a5" }}>
-                    Free Play
+                    Seeking Free Play
                   </span>
                 )}
                 {meta.openToTrain && (

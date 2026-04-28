@@ -513,7 +513,7 @@ export default function ProfilePage() {
                 <label className="text-sm font-medium mb-2 block">Availability</label>
                 <div className="space-y-2">
                   {[
-                    { key: "availableForFreePlay", label: "Free Play", desc: "Show on your card that you're open for free play events" },
+                    { key: "availableForFreePlay", label: "Seeking Free Play", desc: "Show on your card that you're open for free play events" },
                     { key: "openToTrain", label: "Seeking Training", desc: "Show on your card that you're looking for training sessions" },
                   ].map(({ key, label, desc }) => (
                     <button key={key} type="button"

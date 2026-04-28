@@ -203,7 +203,7 @@ export default async function ConnectPage() {
                           )}
                           {p.availableForFreePlay && (
                             <span className="px-2.5 py-1 rounded-full bg-[#DC373E]/25 text-[#FF9EA2] text-[11px] font-semibold animate-pulse">
-                              Free Play
+                              Seeking Free Play
                             </span>
                           )}
                           {p.openToTrain && (
