@@ -100,7 +100,7 @@ export function Hero() {
               {/* Big soccer image with floating pills */}
               <div className="relative rounded-2xl overflow-hidden h-52">
                 <img
-                  src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=900&q=80"
+                  src="https://www.soccer-near-me.com/hero-soccer.webp"
                   alt="Soccer players training"
                   className="w-full h-full object-cover object-center"
                 />
@@ -134,7 +134,7 @@ export function Hero() {
               <div className="grid grid-cols-1 gap-2" style={{ height: "320px" }}>
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80"
+                    src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80"
                     alt="Basketball players"
                     className="w-full h-full object-cover"
                   />
@@ -143,7 +143,7 @@ export function Hero() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&q=80"
+                    src="https://images.unsplash.com/photo-1599676551100-b5d55dd2fb39?w=800&q=80"
                     alt="Football players"
                     className="w-full h-full object-cover"
                   />
