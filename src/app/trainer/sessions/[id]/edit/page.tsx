@@ -20,7 +20,7 @@ const sessionTypes = [
 function baseHourlyRate(spots: number): number {
   if (spots <= 3) return 35;
   if (spots <= 6) return 30;
-  return 20;
+  return 22;
 }
 function calcPrice(spots: number, durationMin: number): number {
   return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
@@ -33,12 +33,12 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [priceLocked, setPriceLocked] = useState(false);
+  const [priceLocked] = useState(false);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "",
-    sessionPhoto: "", videoUrl: "", firstClassFree: false,
+    sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false,
   });
 
   useEffect(() => {
@@ -46,8 +46,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       .then((r) => r.json())
       .then((s) => {
         if (s.error) { setError(s.error); setLoading(false); return; }
-        // Lock price if anyone has booked
-        if ((s.spotsTotal - s.spotsLeft) > 0) setPriceLocked(true);
         setForm({
           title: s.title ?? "",
           sport: s.sport ?? "",
@@ -67,6 +65,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           sessionPhoto: (s as any).sessionPhoto ?? "",
           videoUrl: (s as any).videoUrl ?? "",
           firstClassFree: (s as any).firstClassFree ?? false,
+          recurring: (s as any).recurring ?? false,
         });
         setLoading(false);
       })
@@ -77,7 +76,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     setForm((f) => {
       const next = { ...f, [key]: val };
       if (key === "spotsTotal") {
-        const spots = parseInt(val) || 1;
+        const spots = Math.max(2, parseInt(val) || 2);
         next.pricePerPlayer = String(calcPrice(spots, parseInt(f.duration) || 60));
         next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
       }
@@ -184,21 +183,15 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
-            {priceLocked && (
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                🔒 Price is locked — a player has already booked. Cancel the session to change pricing.
-              </p>
-            )}
             <div>
               <label className="text-sm font-medium mb-1.5 block">
                 Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
               </label>
-              <input type="range" min="1" max="20" value={form.spotsTotal}
-                onChange={(e) => !priceLocked && set("spotsTotal", e.target.value)}
-                disabled={priceLocked}
-                className={`w-full accent-[#0F3154] ${priceLocked ? "opacity-50 cursor-not-allowed" : ""}`} />
+              <input type="range" min="2" max="20" value={form.spotsTotal}
+                onChange={(e) => set("spotsTotal", e.target.value)}
+                className="w-full accent-[#0F3154]" />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>1</span><span>20</span>
+                <span>2</span><span>20</span>
               </div>
             </div>
             {(() => {
@@ -239,6 +232,25 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                   <p className="text-xs text-muted-foreground mt-0.5">A powerful tool to convert new players into recurring clients — they try for free, then book.</p>
                 </div>
               </label>
+            </div>
+
+            {/* Recurring toggle */}
+            <div className="border-t pt-3">
+              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !(f as any).recurring }))}
+                className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                style={(form as any).recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Recurring session</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {(form as any).recurring && form.dayOfWeek
+                      ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
+                      : "Runs every week on the selected day"}
+                  </p>
+                </div>
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).recurring ? "translate-x-4" : "translate-x-0"}`} />
+                </div>
+              </button>
             </div>
           </div>
 

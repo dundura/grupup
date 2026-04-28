@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { use } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Shield, Star, MapPin, Clock } from "lucide-react";
+import { ArrowLeft, Shield, Star, MapPin, Clock, Minus, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
@@ -16,13 +15,20 @@ interface TrainerProfile {
   sports: string[];
 }
 
+function getDiscount(count: number) {
+  if (count >= 8) return 20;
+  if (count >= 5) return 15;
+  if (count >= 3) return 10;
+  return 0;
+}
+
 export default function BookPrivatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
   const { user } = useUser();
   const [trainer, setTrainer] = useState<TrainerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [sessionCount, setSessionCount] = useState(1);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     athleteName: "", notes: "",
@@ -49,14 +55,19 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
     if (!trainer) return;
     setSubmitting(true);
     try {
-      const playerPrice = Math.round((trainer.hourlyRate) / 0.85);
+      const playerPrice = Math.round(trainer.hourlyRate / 0.85);
+      const discountPercent = getDiscount(sessionCount);
+      const totalPrice = Math.round(playerPrice * sessionCount * (1 - discountPercent / 100));
       const res = await fetch("/api/checkout/private", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           trainerId: trainer.id,
           trainerName: trainer.name,
-          pricePerHour: playerPrice,
+          pricePerSession: playerPrice,
+          sessionCount,
+          discountPercent,
+          totalPrice,
           contactName: `${form.firstName} ${form.lastName}`.trim(),
           firstName: form.firstName,
           lastName: form.lastName,
@@ -76,7 +87,9 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
   if (!trainer) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Trainer not found.</p></div>;
 
-  const playerPrice = Math.round((trainer.hourlyRate) / 0.85);
+  const playerPrice = Math.round(trainer.hourlyRate / 0.85);
+  const discountPercent = getDiscount(sessionCount);
+  const totalPrice = Math.round(playerPrice * sessionCount * (1 - discountPercent / 100));
   const location = [trainer.city, trainer.state].filter(Boolean).join(", ");
   const isValid = form.firstName.trim() && form.email.trim() && form.phone.trim() && form.athleteName.trim();
 
@@ -96,6 +109,45 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
           {/* Left — form */}
           <div className="space-y-5">
             <h1 className="text-2xl font-bold">Book a Private Session</h1>
+
+            {/* Session count */}
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <h2 className="font-semibold text-base mb-4">How many sessions?</h2>
+              <div className="flex items-center gap-4 flex-wrap">
+                <button
+                  onClick={() => setSessionCount((c) => Math.max(1, c - 1))}
+                  disabled={sessionCount <= 1}
+                  className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="text-2xl font-bold w-8 text-center">{sessionCount}</span>
+                <button
+                  onClick={() => setSessionCount((c) => Math.min(8, c + 1))}
+                  disabled={sessionCount >= 8}
+                  className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+                {discountPercent > 0 ? (
+                  <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200">
+                    🎉 Save {discountPercent}% — multi-session discount
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Book 3+ sessions to save 10%</span>
+                )}
+              </div>
+              {discountPercent === 0 && (
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  {[3, 5, 8].map((n) => (
+                    <button key={n} onClick={() => setSessionCount(n)}
+                      className="text-xs px-2.5 py-1 rounded-full border border-dashed text-muted-foreground hover:border-[#0F3154] hover:text-[#0F3154] transition-colors">
+                      {n} sessions — save {getDiscount(n)}%
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
               <h2 className="font-semibold text-base">Your contact info</h2>
@@ -139,7 +191,7 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
             <Button size="lg" className="w-full text-base" disabled={!isValid || submitting}
               onClick={handleCheckout}
               style={{ backgroundColor: "#DC373E" }}>
-              {submitting ? "Redirecting to checkout…" : `Reserve & Pay $${playerPrice}`}
+              {submitting ? "Redirecting to checkout…" : `Reserve & Pay $${totalPrice}`}
             </Button>
             <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
               <Shield className="h-3.5 w-3.5" /> Secure checkout · GrupUp Guarantee
@@ -174,16 +226,21 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
               </div>
               <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3.5 w-3.5" />1-on-1 session (1 hr)</span>
-                  <span className="font-bold" style={{ color: "#0F3154" }}>${playerPrice}</span>
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {sessionCount} × 1-on-1 session
+                  </span>
+                  <span className="text-muted-foreground">${playerPrice} ea</span>
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground border-t pt-2">
-                  <span>Platform fee (15%)</span>
-                  <span>${playerPrice - trainer.hourlyRate}</span>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{trainer.name.split(" ")[0]} earns</span>
-                  <span>${trainer.hourlyRate}/hr</span>
+                {discountPercent > 0 && (
+                  <div className="flex justify-between text-xs border-t pt-2">
+                    <span className="text-green-700 font-medium">Save {discountPercent}%</span>
+                    <span className="text-green-700 font-medium">−${Math.round(playerPrice * sessionCount * discountPercent / 100)}</span>
+                  </div>
+                )}
+                <div className={`flex justify-between text-sm font-bold border-t pt-2`} style={{ color: "#0F3154" }}>
+                  <span>Total</span>
+                  <span>${totalPrice}</span>
                 </div>
               </div>
             </div>

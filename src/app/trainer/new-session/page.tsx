@@ -79,7 +79,7 @@ export default function NewSessionPage() {
     setForm((f) => {
       const next = { ...f, [key]: val };
       if (key === "spotsTotal") {
-        const spots = parseInt(val) || 1;
+        const spots = Math.max(2, parseInt(val) || 2);
         const duration = parseInt(f.duration) || 60;
         next.pricePerPlayer = String(calcPrice(spots, duration));
         next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
@@ -162,11 +162,11 @@ export default function NewSessionPage() {
               <label className="text-sm font-medium mb-1.5 block">
                 Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
               </label>
-              <input type="range" min="1" max="20" value={form.spotsTotal}
+              <input type="range" min="2" max="20" value={form.spotsTotal}
                 onChange={(e) => set("spotsTotal", e.target.value)}
                 className="w-full accent-[#0F3154]" />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>1 (private)</span>
+                <span>2</span>
                 <span>20 (clinic)</span>
               </div>
             </div>
@@ -218,61 +218,58 @@ export default function NewSessionPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">Players will see a "First class free" callout and can message you to claim it.</p>
               </div>
             </label>
-          </div>
 
-          <div className="bg-white rounded-2xl border p-6 space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Options</label>
+            {/* Recurring + Training Plan */}
+            <div className="border-t pt-4 space-y-3">
+              {!form.isPlan && (
+                <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
+                  className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                  style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                  <div className="text-left">
+                    <p className="font-semibold text-sm">Recurring session</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {form.recurring && form.dayOfWeek ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}` : "Runs every week on the selected day"}
+                    </p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
+                  </div>
+                </button>
+              )}
 
-            {/* Recurring toggle */}
-            {!form.isPlan && (
-              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring }))}
+              <button type="button"
+                onClick={() => setForm((f) => ({ ...f, isPlan: !f.isPlan, recurring: false, planSessions: !f.isPlan ? buildPlanSessions(parseInt(f.planWeeks) || 4, undefined, f.time) : f.planSessions }))}
                 className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-                style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
                 <div className="text-left">
-                  <p className="font-semibold text-sm">Recurring session</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {form.recurring && form.dayOfWeek ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}` : "Runs every week on the selected day"}
-                  </p>
+                  <p className="font-semibold text-sm">Multiple weeks (Training Plan)</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Player pays upfront for multiple sessions · discount applied automatically</p>
                 </div>
-                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
                 </div>
               </button>
-            )}
 
-            {/* Training Plan toggle */}
-            <button type="button"
-              onClick={() => setForm((f) => ({ ...f, isPlan: !f.isPlan, recurring: false, planSessions: !f.isPlan ? buildPlanSessions(parseInt(f.planWeeks) || 4, undefined, f.time) : f.planSessions }))}
-              className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-              style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
-              <div className="text-left">
-                <p className="font-semibold text-sm">Make this a Training Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Player pays upfront for multiple sessions · discount applied automatically</p>
-              </div>
-              <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
-                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
-              </div>
-            </button>
-
-            {form.isPlan && (
-              <div className="space-y-2 pt-1">
-                <label className="text-sm font-medium block">Number of sessions in plan</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[2, 3, 4, 5, 6, 7, 8].map((w) => {
-                    const disc = planDiscount(w);
-                    return (
-                      <button key={w} type="button"
-                        onClick={() => setForm((f) => ({ ...f, planWeeks: String(w), planSessions: buildPlanSessions(w, f.planSessions[0]?.date, f.planSessions[0]?.time || f.time) }))}
-                        className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
-                        style={form.planWeeks === String(w) ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
-                        <span className="font-bold text-sm">{w}</span>
-                        <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
-                      </button>
-                    );
-                  })}
+              {form.isPlan && (
+                <div className="space-y-2 pt-1">
+                  <label className="text-sm font-medium block">Number of sessions in plan</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[2, 3, 4, 5, 6, 7, 8].map((w) => {
+                      const disc = planDiscount(w);
+                      return (
+                        <button key={w} type="button"
+                          onClick={() => setForm((f) => ({ ...f, planWeeks: String(w), planSessions: buildPlanSessions(w, f.planSessions[0]?.date, f.planSessions[0]?.time || f.time) }))}
+                          className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
+                          style={form.planWeeks === String(w) ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
+                          <span className="font-bold text-sm">{w}</span>
+                          <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* ── Schedule & Location (moved above Sport) ── */}

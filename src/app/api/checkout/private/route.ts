@@ -12,11 +12,20 @@ export async function POST(req: NextRequest) {
   try {
     const { userId: existingUserId } = await auth();
     const body = await req.json();
-    const { trainerId, trainerName, pricePerHour, firstName, lastName, email, phone, athleteName, notes } = body;
+    const {
+      trainerId, trainerName,
+      pricePerSession, sessionCount = 1, discountPercent = 0, totalPrice,
+      firstName, lastName, email, phone, athleteName, notes,
+    } = body;
     const userId = existingUserId ?? `guest-${Date.now()}`;
 
     const origin = req.headers.get("origin") ?? "https://www.grupup.app";
     const stripe = getStripe();
+
+    const sessionLabel = sessionCount === 1
+      ? `Private 1-on-1 with ${trainerName}`
+      : `${sessionCount} × Private Sessions with ${trainerName}`;
+    const discountNote = discountPercent > 0 ? ` (${discountPercent}% multi-session discount applied)` : "";
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -26,10 +35,10 @@ export async function POST(req: NextRequest) {
         {
           price_data: {
             currency: "usd",
-            unit_amount: pricePerHour * 100,
+            unit_amount: totalPrice * 100,
             product_data: {
-              name: `Private 1-on-1 with ${trainerName}`,
-              description: `60-min private session · ${athleteName}`,
+              name: sessionLabel,
+              description: `60-min session${sessionCount > 1 ? "s" : ""} · ${athleteName}${discountNote}`,
             },
           },
           quantity: 1,
@@ -45,6 +54,9 @@ export async function POST(req: NextRequest) {
         athleteName,
         phone: phone ?? "",
         notes: notes ?? "",
+        sessionCount: String(sessionCount),
+        discountPercent: String(discountPercent),
+        pricePerSession: String(pricePerSession),
       },
       success_url: `${origin}/booking-confirmed?type=private&trainer=${encodeURIComponent(trainerName)}`,
       cancel_url: `${origin}/trainers/${trainerId}/book-private`,
