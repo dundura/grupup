@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MapPin, Clock, Users, Star, Bell, Share2, Check } from "lucide-react";
 import type { GroupSession } from "@/lib/types";
 import { SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS } from "@/lib/types";
+import { useAuth } from "@clerk/nextjs";
 
 const skillColors: Record<string, string> = {
   Beginner: "bg-green-100 text-green-700",
@@ -21,11 +22,16 @@ interface SessionCardProps {
 export function SessionCard({ session }: SessionCardProps) {
   const [interested, setInterested] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { isSignedIn } = useAuth();
 
   function handleInterested(e: React.MouseEvent) {
     e.preventDefault();
-    setInterested((v) => !v);
-    // When marked interested, followers are notified so they can join together
+    if (!isSignedIn) { window.location.href = "/sign-in"; return; }
+    const next = !interested;
+    setInterested(next);
+    if (next) {
+      fetch(`/api/sessions/${session.id}/interested`, { method: "POST" }).catch(() => {});
+    }
   }
 
   function handleShare(e: React.MouseEvent) {

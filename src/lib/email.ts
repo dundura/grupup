@@ -215,6 +215,47 @@ export async function sendFollowRequest({
   });
 }
 
+export async function sendFollowerSessionAlert({
+  toEmail,
+  playerName,
+  sessionTitle,
+  sessionId,
+  action,
+  spotsLeft,
+}: {
+  toEmail: string;
+  playerName: string;
+  sessionTitle: string;
+  sessionId: string;
+  action: "interested" | "booked";
+  spotsLeft?: number;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const verb = action === "booked" ? "just booked a spot in" : "is interested in joining";
+  const spotsMsg = spotsLeft != null && spotsLeft > 0 ? `Only ${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left!` : "";
+  await getResend().emails.send({
+    from: FROM,
+    to: toEmail,
+    bcc: ADMIN_BCC,
+    subject: `${playerName} ${action === "booked" ? "joined" : "is interested in"} ${sessionTitle}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">${action === "booked" ? "🏃 Your connection just joined a session!" : "🔔 Your connection is interested in a session!"}</h1>
+        </div>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 8px;">
+          <strong>${playerName}</strong> ${verb} <strong>${sessionTitle}</strong>.
+        </p>
+        ${spotsMsg ? `<p style="color: #DC373E; font-weight: 600; font-size: 14px; margin: 0 0 24px;">⚡ ${spotsMsg}</p>` : "<br/>"}
+        <a href="https://www.grupup.app/sessions/${sessionId}"
+          style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+          View Session & Join Them
+        </a>
+      </div>
+    `,
+  });
+}
+
 export async function sendFollowApproved({
   toEmail,
   toName,

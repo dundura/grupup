@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/db";
 import { bookings, trainerSessions, trainers } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { sendBookingConfirmation, sendTrainerNewBooking } from "@/lib/email";
+import { eq, sql, and } from "drizzle-orm";
+import { sendBookingConfirmation, sendTrainerNewBooking, sendFollowerSessionAlert } from "@/lib/email";
+import { playerFollows } from "@/db/schema";
 import { clerkClient } from "@clerk/nextjs/server";
 
 const ADMIN_EMAIL = "neil@anytime-soccer.com";
@@ -152,6 +153,41 @@ export async function POST(req: NextRequest) {
       sessionTitle: session?.title ?? "Group Session",
       amount,
     });
+
+    // Notify the booking player's followers
+    if (userId && !userId.startsWith("guest-") && session) {
+      try {
+        const client = await clerkClient();
+        const [player, followerRows] = await Promise.all([
+          client.users.getUser(userId),
+          db.select({ followerClerkId: playerFollows.followerClerkId })
+            .from(playerFollows)
+            .where(and(eq(playerFollows.targetClerkId, userId), eq(playerFollows.status, "approved"))),
+        ]);
+        const playerMeta = player.publicMetadata as { playerName?: string };
+        const playerDisplayName = playerMeta.playerName?.trim()
+          || `${player.firstName ?? ""} ${player.lastName ?? ""}`.trim()
+          || userName
+          || "Someone";
+
+        for (const { followerClerkId } of followerRows) {
+          try {
+            const fu = await client.users.getUser(followerClerkId);
+            const email = fu.emailAddresses?.[0]?.emailAddress ?? "";
+            if (email) {
+              await sendFollowerSessionAlert({
+                toEmail: email,
+                playerName: playerDisplayName,
+                sessionTitle: session.title,
+                sessionId: String(session.id),
+                action: "booked",
+                spotsLeft: Math.max(0, session.spotsLeft - 1),
+              });
+            }
+          } catch {}
+        }
+      } catch {}
+    }
   }
 
   return NextResponse.json({ received: true });
