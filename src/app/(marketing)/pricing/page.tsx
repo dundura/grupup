@@ -64,7 +64,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <div className="py-16 md:py-24 border-b" style={{ backgroundColor: "#0F3154" }}>
+      <div className="py-10 md:py-14 border-b" style={{ backgroundColor: "#0F3154" }}>
         <div className="container text-center">
           <p className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "#DC373E" }}>
             No hidden fees. No surprises.
@@ -74,7 +74,6 @@ export default function PricingPage() {
           </h1>
           <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-8">
             Your player gets expert coaching. You split the cost with friends.
-            Same quality as private training — at a fraction of the price.
           </p>
         </div>
       </div>
