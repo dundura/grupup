@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
-  CalendarDays, Clock, Trash2, DollarSign,
+  CalendarDays, Clock, Trash2, DollarSign, Eye,
 } from "lucide-react";
 
 interface TrainerProfile {
@@ -333,6 +333,11 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5 shrink-0">
+                      <Link href={`/sessions/${s.id}`}
+                        className="p-1.5 rounded-lg hover:bg-green-50 text-muted-foreground hover:text-green-600 transition-colors"
+                        title="View session">
+                        <Eye className="h-4 w-4" />
+                      </Link>
                       <Link href={`/trainer/sessions/${s.id}/edit`}
                         className="p-1.5 rounded-lg hover:bg-blue-50 text-muted-foreground hover:text-blue-600 transition-colors"
                         title="Edit session">
