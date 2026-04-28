@@ -8,7 +8,9 @@ export async function completeOnboarding(formData: {
   firstName: string;
   lastName: string;
   country: string;
+  state?: string;
   city: string;
+  zipCode?: string;
   isNewSignup?: boolean;
   // player / parent
   sport?: string;
@@ -47,7 +49,9 @@ export async function completeOnboarding(formData: {
     const profileFields: Record<string, unknown> = {
       role: formData.role,
       country: formData.country,
+      state: formData.state ?? "",
       city: formData.city,
+      zipCode: formData.zipCode ?? "",
       onboardingComplete: true,
     };
 

@@ -41,6 +41,7 @@ export default function ProfilePage() {
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
     photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
+    state?: string; zipCode?: string;
     playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
   };
 
@@ -50,7 +51,9 @@ export default function ProfilePage() {
       firstName: u?.firstName ?? "",
       lastName: u?.lastName ?? "",
       country: m.country ?? "",
+      state: m.state ?? "",
       city: m.city ?? "",
+      zipCode: m.zipCode ?? "",
       sport: m.sport ?? "",
       selectedSports: (m.sports ?? []) as string[],
       selectedPlayerSports: (m.playerSports ?? (m.sport ? [m.sport] : [])) as string[],
@@ -133,7 +136,7 @@ export default function ProfilePage() {
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: form.childProfiles });
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode });
     setSaved(true);
     setSaving(false);
   }
@@ -142,6 +145,21 @@ export default function ProfilePage() {
 
   const role = meta.role ?? "player";
   const photoSrc = form.photo || user?.imageUrl || "";
+  const profileExists = !!(meta as any).onboardingComplete;
+
+  // If no onboarding done yet, show a simple prompt
+  if (!profileExists && !meta.role) {
+    return (
+      <div className="max-w-md mx-auto text-center py-20">
+        <div className="text-5xl mb-4">👤</div>
+        <h1 className="text-2xl font-bold mb-2">Add your profile</h1>
+        <p className="text-muted-foreground mb-6">Choose whether you're a player or a coach to get started.</p>
+        <Button style={{ backgroundColor: "#DC373E" }} asChild>
+          <Link href="/onboarding">Add Profile</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -177,7 +195,7 @@ export default function ProfilePage() {
         />
       )}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
+        <h1 className="text-3xl font-bold">{profileExists ? "My Profile" : "Add Profile"}</h1>
         <div className="flex items-center gap-3">
           {role !== "trainer" && user?.id && (
             <Link href={`/connect/${user.id}`} target="_blank"
@@ -244,9 +262,36 @@ export default function ProfilePage() {
               {countries.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
+          {(form as any).country && (form as any).country !== "Other" && (
+            <div className="mb-4">
+              <label className="text-sm font-medium mb-1.5 block">
+                {(form as any).country === "Canada" ? "Province / Territory" :
+                 (form as any).country === "United Kingdom" ? "Region" : "State / Province"}
+              </label>
+              {["United States","Canada","United Kingdom","Australia"].includes((form as any).country) ? (
+                <select value={(form as any).state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="">Select</option>
+                  {((form as any).country === "United States" ? ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."] :
+                    (form as any).country === "Canada" ? ["Alberta","British Columbia","Manitoba","New Brunswick","Newfoundland and Labrador","Northwest Territories","Nova Scotia","Nunavut","Ontario","Prince Edward Island","Quebec","Saskatchewan","Yukon"] :
+                    (form as any).country === "United Kingdom" ? ["England","Scotland","Wales","Northern Ireland"] :
+                    ["New South Wales","Victoria","Queensland","Western Australia","South Australia","Tasmania","Australian Capital Territory","Northern Territory"]
+                  ).map((s: string) => <option key={s}>{s}</option>)}
+                </select>
+              ) : (
+                <Input value={(form as any).state ?? ""} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                  placeholder="State / Province / Region" />
+              )}
+            </div>
+          )}
           <div className="mb-4">
             <label className="text-sm font-medium mb-1.5 block">City</label>
-            <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+            <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
+          </div>
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-1.5 block">Zip / Postal code</label>
+            <Input value={(form as any).zipCode ?? ""} onChange={(e) => setForm((f) => ({ ...f, zipCode: e.target.value }))}
+              placeholder="e.g. 27513" className="max-w-[180px]" />
           </div>
           <div className="mb-4">
             <label className="text-sm font-medium mb-2 block">Gender</label>

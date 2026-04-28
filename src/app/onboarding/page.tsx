@@ -21,15 +21,38 @@ const countries = [
   "Nigeria", "Ghana", "Jamaica", "Trinidad & Tobago", "Other",
 ];
 
+const usStates = [
+  "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
+  "Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
+  "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi",
+  "Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico",
+  "New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+  "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+  "Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C.",
+];
+
+const canadaProvinces = [
+  "Alberta","British Columbia","Manitoba","New Brunswick",
+  "Newfoundland and Labrador","Northwest Territories","Nova Scotia","Nunavut",
+  "Ontario","Prince Edward Island","Quebec","Saskatchewan","Yukon",
+];
+
+const ukRegions   = ["England","Scotland","Wales","Northern Ireland"];
+const ausStates   = ["New South Wales","Victoria","Queensland","Western Australia","South Australia","Tasmania","Australian Capital Territory","Northern Territory"];
+
 export default function OnboardingPage() {
   const router  = useRouter();
   const { user } = useUser();
   const [step,   setStep]   = useState(1);
   const [role,   setRole]   = useState<Role | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form,   setForm]   = useState({ firstName: "", lastName: "", country: "", city: "" });
+  const [form,   setForm]   = useState({
+    firstName: "", lastName: "", country: "", state: "", city: "", zipCode: "",
+  });
 
-  function set(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
+  function set(k: keyof typeof form, v: string) {
+    setForm((f) => ({ ...f, [k]: v, ...(k === "country" ? { state: "" } : {}) }));
+  }
 
   const step2Valid = form.firstName.trim() && form.country && form.city.trim();
 
@@ -50,6 +73,54 @@ export default function OnboardingPage() {
       setSaving(false);
     }
   }
+
+  function StateSelect() {
+    if (form.country === "United States") {
+      return (
+        <select value={form.state} onChange={(e) => set("state", e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+          <option value="">Select a state</option>
+          {usStates.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      );
+    }
+    if (form.country === "Canada") {
+      return (
+        <select value={form.state} onChange={(e) => set("state", e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+          <option value="">Select a province</option>
+          {canadaProvinces.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      );
+    }
+    if (form.country === "United Kingdom") {
+      return (
+        <select value={form.state} onChange={(e) => set("state", e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+          <option value="">Select a region</option>
+          {ukRegions.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      );
+    }
+    if (form.country === "Australia") {
+      return (
+        <select value={form.state} onChange={(e) => set("state", e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+          <option value="">Select a state</option>
+          {ausStates.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      );
+    }
+    if (!form.country || form.country === "Other") return null;
+    return (
+      <Input value={form.state} onChange={(e) => set("state", e.target.value)}
+        placeholder="State / Province / Region" />
+    );
+  }
+
+  const stateLabel =
+    form.country === "Canada" ? "Province / Territory" :
+    form.country === "United Kingdom" ? "Region" : "State / Province";
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center px-4 py-16">
@@ -130,9 +201,22 @@ export default function OnboardingPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">City</label>
-                  <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+                {form.country && form.country !== "Other" && (
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">{stateLabel}</label>
+                    <StateSelect />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">City</label>
+                    <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Zip / Postal code</label>
+                    <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
+                  </div>
                 </div>
               </div>
 
