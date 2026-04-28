@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { trainerSessions, bookings } from "@/db/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -55,14 +55,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       firstClassFree: body.firstClassFree ?? false,
       recurring: body.recurring ?? false,
       recurringWeeks: body.recurringWeeks ? parseInt(body.recurringWeeks) : null,
+      questionnaire: body.questionnaire ?? null,
     }).where(and(eq(trainerSessions.id, parseInt(id)), eq(trainerSessions.trainerClerkId, userId)));
-
-    // Save questionnaire via raw SQL (column added via migration)
-    if (body.questionnaire !== undefined) {
-      await db.execute(
-        sql`UPDATE trainer_sessions SET questionnaire = ${body.questionnaire ? JSON.stringify(body.questionnaire) : null}::json WHERE id = ${parseInt(id)} AND trainer_clerk_id = ${userId}`
-      );
-    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[PUT /api/trainer/sessions/[id]]", err);

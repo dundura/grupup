@@ -1,28 +1,34 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
+import { bookings, trainerSessions } from "@/db/schema";
+import { eq, and, isNotNull } from "drizzle-orm";
 
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const rows = await db.execute(sql`
-      SELECT b.id as booking_id, ts.title as session_title, ts.questionnaire
-      FROM bookings b
-      JOIN trainer_sessions ts ON ts.id = CAST(b.session_id AS INTEGER)
-      WHERE b.clerk_user_id = ${userId}
-        AND b.status = 'paid'
-        AND (b.questionnaire_completed IS NULL OR b.questionnaire_completed = false)
-        AND ts.questionnaire IS NOT NULL
-    `);
+    const playerBookings = await db.select().from(bookings)
+      .where(and(
+        eq(bookings.clerkUserId, userId),
+        eq(bookings.status, "paid"),
+        eq(bookings.questionnaireCompleted, false),
+      ));
 
-    const pending = (rows.rows ?? []).map((r: any) => ({
-      bookingId: r.booking_id,
-      sessionTitle: r.session_title,
-      questionnaire: typeof r.questionnaire === "string" ? JSON.parse(r.questionnaire) : r.questionnaire,
-    }));
+    const pending = [];
+    for (const b of playerBookings) {
+      if (!b.sessionId) continue;
+      const [session] = await db.select({
+        id: trainerSessions.id,
+        title: trainerSessions.title,
+        questionnaire: trainerSessions.questionnaire,
+      }).from(trainerSessions).where(
+        and(eq(trainerSessions.id, parseInt(b.sessionId)), isNotNull(trainerSessions.questionnaire))
+      );
+      if (!session?.questionnaire) continue;
+      pending.push({ bookingId: b.id, sessionTitle: session.title, questionnaire: session.questionnaire });
+    }
 
     return NextResponse.json({ pending });
   } catch {
