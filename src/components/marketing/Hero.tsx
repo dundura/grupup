@@ -100,7 +100,7 @@ export function Hero() {
               {/* Big soccer image */}
               <div className="relative rounded-2xl overflow-hidden h-52">
                 <img
-                  src="https://www.soccer-near-me.com/hero-soccer.webp"
+                  src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777378113162-feqi88.png"
                   alt="Soccer players training"
                   className="w-full h-full object-cover object-center"
                 />
