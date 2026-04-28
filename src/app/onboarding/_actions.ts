@@ -16,6 +16,7 @@ export async function completeOnboarding(formData: {
   sport?: string;
   selectedPlayerSports?: string[];
   profileSlug?: string;
+  customSlug?: string;
   level?: string;
   league?: string;
   team?: string;
@@ -92,6 +93,12 @@ export async function completeOnboarding(formData: {
       firstName: formData.firstName,
       lastName: formData.lastName,
     });
+
+    // Custom slug update (player edits their own slug)
+    if (formData.customSlug) {
+      const clean = formData.customSlug.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+      if (clean) profileFields.profileSlug = clean;
+    }
 
     // Generate profileSlug for players on first signup
     if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {

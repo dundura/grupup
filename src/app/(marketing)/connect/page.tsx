@@ -149,7 +149,6 @@ export default async function ConnectPage() {
               {approvedPlayers.map((p) => {
                 const initials = p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                 const bg = avatarColor(p.name);
-                const sportLabel = p.sports.join(" · ");
                 const initialFollowing = viewerFollows.includes(p.clerkId);
 
                 return (
@@ -186,7 +185,9 @@ export default async function ConnectPage() {
                             {[p.city, p.country].filter(Boolean).join(", ")}
                           </span>
                         )}
-                        {sportLabel && <span>{sportLabel}</span>}
+                        {p.sports.map((s) => (
+                          <span key={s}>{s}</span>
+                        ))}
                           {p.gender && <span>{p.gender}</span>}
                       </div>
                       {p.level && (

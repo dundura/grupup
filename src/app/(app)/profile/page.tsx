@@ -41,7 +41,7 @@ export default function ProfilePage() {
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
     photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
-    state?: string; zipCode?: string;
+    state?: string; zipCode?: string; profileSlug?: string;
     playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
   };
 
@@ -136,7 +136,7 @@ export default function ProfilePage() {
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode });
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode, customSlug: (form as any).customSlug });
     setSaved(true);
     setSaving(false);
   }
@@ -582,6 +582,30 @@ export default function ProfilePage() {
         )}
 
   
+        {/* Profile slug — players/parents only */}
+        {role !== "trainer" && (
+          <div className="bg-card border rounded-2xl p-5 space-y-3">
+            <div>
+              <label className="text-sm font-semibold block mb-1">Your Connect URL</label>
+              <p className="text-xs text-muted-foreground mb-2">
+                grupup.app/connect/<strong>{(meta.profileSlug ?? user?.id ?? "").slice(0, 28)}</strong>
+              </p>
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={(form as any).customSlug ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+                    setForm((f) => ({ ...f, customSlug: val }));
+                  }}
+                  placeholder="custom-url-slug"
+                  className="text-sm max-w-[240px]"
+                />
+                <span className="text-xs text-muted-foreground">Letters, numbers, hyphens only</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Visibility toggle — players/parents only */}
         {role !== "trainer" && (
           <div className="bg-card border rounded-2xl p-5">
