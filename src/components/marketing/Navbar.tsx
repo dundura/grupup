@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Zap, ChevronDown } from "lucide-react";
+import { Menu, X, Zap, ChevronDown, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
@@ -101,6 +101,9 @@ export function Navbar() {
             <>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/messages"><MessageSquare className="h-4 w-4" /></Link>
               </Button>
               <UserButton />
             </>

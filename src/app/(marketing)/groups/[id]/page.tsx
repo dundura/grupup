@@ -10,6 +10,7 @@ import { db } from "@/db";
 import { trainers, trainerSessions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { PackageBooking } from "@/components/trainers/PackageBooking";
+import MessageButton from "@/components/messaging/MessageButton";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +173,11 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                     <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{location}</p>
                   )}
                 </div>
+                {trainer.clerkId && (
+                  <div className="mt-2">
+                    <MessageButton toClerkId={trainer.clerkId} toName={trainer.name} />
+                  </div>
+                )}
                 {/* Private booking — only visible if trainer has at least one group session */}
                 {hasGroupSession && (trainer.hourlyRate ?? 0) > 0 && (
                   <div className="mt-3 pt-3 border-t space-y-2">

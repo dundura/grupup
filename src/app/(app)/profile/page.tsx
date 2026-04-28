@@ -36,7 +36,7 @@ export default function ProfilePage() {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
-    photo?: string; league?: string; team?: string; birthYear?: string;
+    photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
   };
 
   const [form, setForm] = useState({
@@ -60,6 +60,7 @@ export default function ProfilePage() {
     leagueOther: "",
     team: meta.team ?? "",
     birthYear: meta.birthYear ?? "",
+    gender: meta.gender ?? "",
   });
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
@@ -175,6 +176,20 @@ export default function ProfilePage() {
           <div className="mb-4">
             <label className="text-sm font-medium mb-1.5 block">City</label>
             <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
+          </div>
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-2 block">Gender</label>
+            <div className="flex gap-2 flex-wrap">
+              {["Male", "Female", "Non-binary", "Prefer not to say"].map((g) => (
+                <button key={g} type="button" onClick={() => set("gender", g)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.gender === g
+                    ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                    : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  {g}
+                </button>
+              ))}
+            </div>
           </div>
 
           {role !== "trainer" ? (

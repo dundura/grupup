@@ -1,7 +1,7 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Trophy, Users } from "lucide-react";
+import { MapPin, Trophy, Users, Calendar, Dumbbell } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ function avatarColor(name: string) {
 export default async function ConnectPage() {
   let approvedPlayers: {
     id: string; name: string; photo: string; city: string; country: string;
-    sport: string; level: string; league: string; bio: string; team: string;
+    sport: string; level: string; league: string; bio: string; team: string; birthYear: string;
   }[] = [];
 
   try {
@@ -34,7 +34,7 @@ export default async function ConnectPage() {
       .map((u) => {
         const meta = u.publicMetadata as {
           city?: string; country?: string; sport?: string; level?: string;
-          league?: string; bio?: string; photo?: string; team?: string;
+          league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
         };
         return {
           id: u.id,
@@ -47,10 +47,11 @@ export default async function ConnectPage() {
           league: meta.league ?? "",
           bio: meta.bio ?? "",
           team: meta.team ?? "",
+          birthYear: meta.birthYear ?? "",
         };
       });
   } catch {
-    // silently fail — show empty state
+    // silently fail
   }
 
   return (
@@ -58,9 +59,7 @@ export default async function ConnectPage() {
       <div className="border-b bg-secondary/20">
         <div className="container py-8 md:py-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-1">Connect</h1>
-          <p className="text-muted-foreground">
-            Find players looking for group training partners near you.
-          </p>
+          <p className="text-muted-foreground">Find players looking for group training partners near you.</p>
         </div>
       </div>
 
@@ -73,7 +72,7 @@ export default async function ConnectPage() {
             </div>
             <h2 className="text-2xl font-bold mb-3">No players yet</h2>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              Be the first to join! Create an account and get approved to appear here and find training partners.
+              Be the first to join! Create an account and get approved to appear here.
             </p>
             <Link href="/sign-up"
               className="inline-block px-6 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90"
@@ -90,68 +89,70 @@ export default async function ConnectPage() {
               {approvedPlayers.map((p) => {
                 const initials = p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                 const bg = avatarColor(p.name);
-                const tags = [p.team, p.league, p.level, p.sport].filter(Boolean);
                 return (
-                  <Link key={p.id} href={`/connect/${p.id}`}
-                    className="group block bg-card border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all">
+                  <Link key={p.id} href={`/connect/${p.id}`} className="block bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
 
-                    {/* Photo / avatar header */}
-                    <div className="relative aspect-[4/3] overflow-hidden">
+                    {/* Avatar / photo header */}
+                    <div className="relative h-36 overflow-hidden">
                       {p.photo ? (
-                        <Image src={p.photo} alt={p.name} fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                          unoptimized />
+                        <Image src={p.photo} alt={p.name} fill className="object-cover object-top"
+                          sizes="(max-width: 768px) 100vw, 25vw" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"
-                          style={{ background: `linear-gradient(135deg, ${bg} 0%, ${bg}cc 100%)` }}>
+                          style={{ background: `linear-gradient(135deg, ${bg} 0%, ${bg}bb 100%)` }}>
                           <span className="text-5xl font-extrabold text-white/90 select-none">{initials}</span>
                         </div>
                       )}
-                      {/* Sport pill top-right */}
                       {p.sport && (
-                        <div className="absolute top-3 right-3 bg-background/95 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold">
+                        <div className="absolute top-2.5 right-2.5 bg-white/95 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm"
+                          style={{ color: "#0F3154" }}>
                           {p.sport}
                         </div>
                       )}
                     </div>
 
-                    {/* Card body */}
-                    <div className="p-5">
-                      <h3 className="font-bold text-lg leading-tight mb-1">{p.name}</h3>
-
-                      {(p.city || p.country) && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
-                          <span>{[p.city, p.country].filter(Boolean).join(", ")}</span>
-                        </div>
-                      )}
+                    {/* Info */}
+                    <div className="p-4 space-y-2.5">
+                      <div>
+                        <h3 className="font-bold text-base leading-tight">{p.name}</h3>
+                        {(p.city || p.country) && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            <span>{[p.city, p.country].filter(Boolean).join(", ")}</span>
+                          </div>
+                        )}
+                      </div>
 
                       {p.bio && (
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-                          {p.bio}
-                        </p>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.bio}</p>
                       )}
 
-                      {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
+                      {/* Details row */}
+                      {(p.team || p.league || p.level || p.birthYear) && (
+                        <div className="space-y-1.5 pt-1 border-t border-gray-100">
                           {p.team && (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
-                              style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
-                              <Users className="h-3 w-3" /> {p.team}
-                            </span>
+                            <div className="flex items-center gap-2 text-xs">
+                              <Users className="h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="font-medium">{p.team}</span>
+                            </div>
                           )}
                           {p.league && (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
-                              style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>
-                              <Trophy className="h-3 w-3" /> {p.league}
-                            </span>
+                            <div className="flex items-center gap-2 text-xs">
+                              <Trophy className="h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="font-medium">{p.league}</span>
+                            </div>
                           )}
-                          {p.level && !p.league && (
-                            <span className="text-xs font-medium px-2.5 py-1 rounded-full"
-                              style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
-                              {p.level}
-                            </span>
+                          {p.level && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Dumbbell className="h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="font-medium">{p.level}</span>
+                            </div>
+                          )}
+                          {p.birthYear && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Calendar className="h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="font-medium">{p.birthYear}</span>
+                            </div>
                           )}
                         </div>
                       )}

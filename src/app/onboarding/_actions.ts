@@ -19,6 +19,7 @@ export async function completeOnboarding(formData: {
   playerName?: string;
   playerAge?: string;
   birthYear?: string;
+  gender?: string;
   isHidden?: boolean;
   photo?: string;
   // trainer
@@ -57,6 +58,7 @@ export async function completeOnboarding(formData: {
       if (formData.playerName !== undefined) profileFields.playerName = formData.playerName;
       if (formData.playerAge !== undefined) profileFields.playerAge = formData.playerAge;
       if (formData.birthYear !== undefined) profileFields.birthYear = formData.birthYear;
+      if (formData.gender !== undefined) profileFields.gender = formData.gender;
       if (!alreadyApproved) profileFields.isApproved = false;
     } else {
       // trainer

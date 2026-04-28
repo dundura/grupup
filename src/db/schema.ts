@@ -26,6 +26,7 @@ export const trainers = pgTable("trainers", {
   stripeAccountId: varchar("stripe_account_id", { length: 255 }),
   payoutMethod: varchar("payout_method", { length: 50 }),
   payoutHandle: varchar("payout_handle", { length: 255 }),
+  gender: varchar("gender", { length: 50 }),
   isApproved: boolean("is_approved").default(true),
   isArchived: boolean("is_archived").default(false),
   createdAt: timestamp("created_at").defaultNow(),
@@ -124,6 +125,22 @@ export const playerGroups = pgTable("player_groups", {
   maxPlayers: integer("max_players").default(8),
   description: text("description"),
   isPublic: boolean("is_public").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  fromClerkId: varchar("from_clerk_id", { length: 255 }).notNull(),
+  toClerkId: varchar("to_clerk_id", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const playerFollows = pgTable("player_follows", {
+  id: serial("id").primaryKey(),
+  followerClerkId: varchar("follower_clerk_id", { length: 255 }).notNull(),
+  targetClerkId: varchar("target_clerk_id", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
