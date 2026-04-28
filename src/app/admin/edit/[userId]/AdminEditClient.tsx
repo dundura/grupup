@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, CheckCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle, Camera, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { PhotoCropModal } from "@/components/ui/PhotoCropModal";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational", "Other"];
@@ -33,6 +34,33 @@ export default function AdminEditClient({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleFileSelect(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function handleCropApply(blob: Blob) {
+    setCropSrc(null);
+    setUploadingPhoto(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: "photo.jpg", contentType: "image/jpeg" }),
+      });
+      const { uploadUrl, cdnUrl } = await res.json();
+      await fetch(uploadUrl, { method: "PUT", body: blob, headers: { "Content-Type": "image/jpeg" } });
+      set("photo", cdnUrl);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   function set(key: string, val: any) { setForm((f) => ({ ...f, [key]: val })); }
 
@@ -93,19 +121,30 @@ export default function AdminEditClient({
           {/* Photo */}
           <div className="bg-white rounded-2xl border p-5">
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">Profile Photo</h2>
+            {cropSrc && (
+              <PhotoCropModal imageSrc={cropSrc} onApply={handleCropApply} onCancel={() => setCropSrc(null)} />
+            )}
             <div className="flex items-center gap-4">
-              {form.photo ? (
-                <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-gray-200">
-                  <Image src={form.photo} alt="Profile" fill className="object-cover" sizes="64px" unoptimized />
+              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploadingPhoto}
+                className="relative w-20 h-20 rounded-full overflow-hidden shrink-0 bg-[#f0f4f9] group cursor-pointer">
+                {form.photo ? (
+                  <Image src={form.photo} alt="Profile" fill className="object-cover" sizes="80px" unoptimized />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white bg-[#0F3154]">
+                    {form.firstName?.[0]?.toUpperCase() ?? "?"}
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-5 w-5 text-white" />
                 </div>
-              ) : (
-                <div className="w-16 h-16 rounded-full shrink-0 flex items-center justify-center text-white text-xl font-bold bg-[#0F3154]">
-                  {form.firstName?.[0]?.toUpperCase() ?? "?"}
-                </div>
-              )}
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-1.5 block">Photo URL</label>
-                <Input value={form.photo} onChange={(e) => set("photo", e.target.value)} placeholder="https://..." className="text-xs" />
+              </button>
+              <div>
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
+                <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={() => fileRef.current?.click()}>
+                  {uploadingPhoto ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Uploading…</> : <><Camera className="h-4 w-4 mr-1.5" /> Upload photo</>}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1.5">JPEG, PNG or WebP</p>
               </div>
             </div>
           </div>
