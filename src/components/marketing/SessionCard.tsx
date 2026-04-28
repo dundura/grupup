@@ -59,7 +59,7 @@ export function SessionCard({ session }: SessionCardProps) {
           <Image src={session.coverPhoto || session.trainer.photo} alt={session.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
           {session.recurring && (
             <span className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full text-white shadow" style={{ backgroundColor: "#0F3154" }}>
-              🔁 Weekly
+              🔁 {session.recurringWeeks ? `${session.recurringWeeks}-week series` : "Weekly"}
             </span>
           )}
         </div>

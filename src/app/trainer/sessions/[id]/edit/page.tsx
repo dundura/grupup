@@ -38,7 +38,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "",
-    sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false,
+    sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "",
   });
 
   useEffect(() => {
@@ -66,6 +66,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           videoUrl: (s as any).videoUrl ?? "",
           firstClassFree: (s as any).firstClassFree ?? false,
           recurring: (s as any).recurring ?? false,
+          recurringWeeks: (s as any).recurringWeeks != null ? String((s as any).recurringWeeks) : "",
         });
         setLoading(false);
       })
@@ -236,7 +237,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
             {/* Recurring toggle */}
             <div className="border-t pt-3">
-              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !(f as any).recurring }))}
+              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !(f as any).recurring, recurringWeeks: "" }))}
                 className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
                 style={(form as any).recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
                 <div className="text-left">
@@ -251,6 +252,31 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                   <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).recurring ? "translate-x-4" : "translate-x-0"}`} />
                 </div>
               </button>
+              {(form as any).recurring && (
+                <div className="mt-2 px-1">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">How many sessions?</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[2, 3, 4, 5, 6, 7, 8].map((w) => (
+                      <button key={w} type="button"
+                        onClick={() => setForm((f) => ({ ...f, recurringWeeks: (f as any).recurringWeeks === String(w) ? "" : String(w) }))}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
+                        style={(form as any).recurringWeeks === String(w)
+                          ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
+                          : { borderColor: "#e2e8f0", color: "#475569" }}>
+                        {w}
+                      </button>
+                    ))}
+                    <button type="button"
+                      onClick={() => setForm((f) => ({ ...f, recurringWeeks: "" }))}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
+                      style={(form as any).recurringWeeks === ""
+                        ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
+                        : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      Ongoing
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

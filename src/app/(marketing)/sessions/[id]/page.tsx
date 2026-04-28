@@ -125,7 +125,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
             {session.recurring && (
               <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
-                🔁 Weekly recurring session
+                🔁 {(session as any).recurringWeeks ? `${(session as any).recurringWeeks}-week series` : "Weekly recurring session"}
               </span>
             )}
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>

@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
       sessionPhoto: body.sessionPhoto ?? null,
       videoUrl: body.videoUrl ?? "",
       firstClassFree: body.firstClassFree ?? false,
+      recurring: body.recurring ?? false,
+      recurringWeeks: body.recurringWeeks ? parseInt(body.recurringWeeks) : null,
       isActive: true,
     }).returning();
 

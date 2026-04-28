@@ -99,6 +99,7 @@ export interface GroupSession {
   skillLevel: SkillLevel;
   ageRange: string;
   recurring: boolean;
+  recurringWeeks?: number | null;
   specialOffer?: {
     label: string;       // e.g. "First session free", "20% off this week"
     discountPct: number; // 0–100; 100 = free
