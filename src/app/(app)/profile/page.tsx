@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,32 +42,45 @@ export default function ProfilePage() {
     playerSports?: string[]; videoLinks?: string[];
   };
 
-  const [form, setForm] = useState({
-    firstName: user?.firstName ?? "",
-    lastName: user?.lastName ?? "",
-    country: meta.country ?? "",
-    city: meta.city ?? "",
-    sport: meta.sport ?? "",
-    selectedSports: meta.sports ?? [],
-    selectedPlayerSports: meta.playerSports ?? (meta.sport ? [meta.sport] : []),
-    level: meta.level ?? "",
-    bio: meta.bio ?? (meta.role !== "trainer" ? "Looking for group training sessions to improve my skills and connect with other players near me." : ""),
-    yearsExperience: meta.yearsExperience ?? "",
-    selectedSpecialties: meta.specialties ?? [],
-    selectedCerts: meta.certifications ?? [],
-    playerName: meta.playerName ?? "",
-    playerAge: meta.playerAge ?? "",
-    isHidden: meta.isHidden ?? false,
-    customSpecialty: "",
-    photo: meta.photo ?? "",
-    league: meta.league ?? "",
-    leagueOther: "",
-    team: meta.team ?? "",
-    birthYear: meta.birthYear ?? "",
-    gender: meta.gender ?? "",
-    videoLinks: meta.videoLinks ?? ["", "", "", "", "", ""],
-    disableMessages: (meta as any).disableMessages ?? false,
-  });
+  function buildForm(u: typeof user) {
+    const m = (u?.publicMetadata ?? {}) as typeof meta;
+    return {
+      firstName: u?.firstName ?? "",
+      lastName: u?.lastName ?? "",
+      country: m.country ?? "",
+      city: m.city ?? "",
+      sport: m.sport ?? "",
+      selectedSports: (m.sports ?? []) as string[],
+      selectedPlayerSports: (m.playerSports ?? (m.sport ? [m.sport] : [])) as string[],
+      level: m.level ?? "",
+      bio: m.bio ?? (m.role !== "trainer" ? "Looking for group training sessions to improve my skills and connect with other players near me." : ""),
+      yearsExperience: m.yearsExperience ?? "",
+      selectedSpecialties: (m.specialties ?? []) as string[],
+      selectedCerts: (m.certifications ?? []) as string[],
+      playerName: m.playerName ?? "",
+      playerAge: m.playerAge ?? "",
+      isHidden: m.isHidden ?? false,
+      customSpecialty: "",
+      photo: m.photo ?? "",
+      league: m.league ?? "",
+      leagueOther: "",
+      team: m.team ?? "",
+      birthYear: m.birthYear ?? "",
+      gender: m.gender ?? "",
+      videoLinks: ((m.videoLinks ?? ["", "", "", "", "", ""]) as string[]),
+      disableMessages: (m as any).disableMessages ?? false,
+    };
+  }
+
+  const [form, setForm] = useState(() => buildForm(user));
+
+  // Re-hydrate the form once Clerk has loaded the user
+  useEffect(() => {
+    if (isLoaded && user) {
+      setForm(buildForm(user));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
 
