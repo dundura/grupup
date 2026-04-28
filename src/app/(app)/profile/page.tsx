@@ -99,7 +99,7 @@ export default function ProfilePage() {
       selectedSports: (m.sports ?? []) as string[],
       selectedPlayerSports: (m.playerSports ?? (m.sport ? [m.sport] : [])) as string[],
       level: m.level ?? "",
-      bio: m.bio ?? (m.role !== "trainer" ? "Looking for group training sessions to improve my skills and connect with other players near me." : ""),
+      bio: m.bio || (m.role !== "trainer" ? "Looking for group training sessions to improve my skills and connect with other players near me." : ""),
       yearsExperience: m.yearsExperience ?? "",
       selectedSpecialties: (m.specialties ?? []) as string[],
       selectedCerts: (m.certifications ?? []) as string[],
