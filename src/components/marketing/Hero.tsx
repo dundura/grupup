@@ -50,7 +50,8 @@ export function Hero() {
               {/* Text block */}
               <div>
                 <p className="text-[#DC373E] font-semibold text-xs uppercase tracking-wider mb-2">
-                  The only platform built for group sports training
+                  <span className="sm:hidden">The only platform built for group training</span>
+                  <span className="hidden sm:inline">The only platform built for group sports training</span>
                 </p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-tight mb-1">
                   <span className="sm:hidden">Group training</span>
