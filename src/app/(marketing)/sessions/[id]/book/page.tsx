@@ -34,6 +34,8 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         skillLevel: session.skillLevel ?? "",
         ageRange: session.ageRange ?? "",
         notes: session.notes ?? "",
+        recurring: session.recurring ?? false,
+        recurringWeeks: (session as any).recurringWeeks ?? null,
       }}
       trainer={trainer ? {
         id: trainer.id,

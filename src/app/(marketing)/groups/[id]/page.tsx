@@ -178,7 +178,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">1-on-1 Private</span>
                       <span className="font-extrabold text-lg" style={{ color: "#0F3154" }}>
-                        ${Math.round((trainer.hourlyRate ?? 85) / 0.85)}<span className="text-xs font-medium text-muted-foreground">/hr</span>
+                        ${trainer.hourlyRate ?? 85}<span className="text-xs font-medium text-muted-foreground">/hr</span>
                       </span>
                     </div>
                     <Link href={`/trainers/${trainer.id}/book-private`}

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     const { userId: existingUserId } = await auth();
     const body = await req.json();
-    const { sessionId, athleteName, contactName, firstName, lastName, email, notes } = body;
+    const { sessionId, athleteName, contactName, firstName, lastName, email, notes, sessionCount = 1 } = body;
     const userId = existingUserId ?? `guest-${Date.now()}`;
 
     const [session] = await db
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: session.title,
+              name: sessionCount > 1 ? `${session.title} × ${sessionCount} sessions` : session.title,
               description: [
                 session.sessionType.replace(/-/g, " "),
                 session.city,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
             },
             unit_amount: session.pricePerPlayer * 100,
           },
-          quantity: 1,
+          quantity: sessionCount,
         },
       ],
       metadata: {
@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
         userEmail: email ?? "",
         athleteName: athleteName ?? "",
         notes: notes ?? "",
+        sessionCount: String(sessionCount),
       },
       success_url: `${origin}/sessions/${session.id}/book/success?checkout_session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/sessions/${session.id}/book`,

@@ -8,7 +8,7 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import {
   Star, MapPin, ShieldCheck, ChevronDown, ChevronRight,
-  CheckCircle, CalendarDays, Clock, Users,
+  CheckCircle, CalendarDays, Clock, Users, Minus, Plus,
 } from "lucide-react";
 
 interface Session {
@@ -16,6 +16,7 @@ interface Session {
   city: string; venue: string; dayOfWeek: string; time: string;
   duration: number; pricePerPlayer: number; spotsTotal: number;
   spotsLeft: number; skillLevel: string; ageRange: string; notes: string;
+  recurring: boolean; recurringWeeks: number | null;
 }
 interface Trainer {
   id: string; name: string; photo: string; bio: string; city: string;
@@ -49,6 +50,8 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
     notes: "",
   });
   const [confirmed, setConfirmed] = useState(false);
+  const [sessionCount, setSessionCount] = useState(1);
+  const maxSessions = session.recurring ? (session.recurringWeeks ?? 8) : 1;
 
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -71,6 +74,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
           email: form.email,
           phone: form.phone,
           notes: form.notes,
+          sessionCount,
           password: !user ? form.password : undefined,
         }),
       });
@@ -309,6 +313,33 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
               <div className="bg-white rounded-2xl border shadow-sm p-6">
                 <h2 className="text-lg font-bold mb-5">Checkout</h2>
 
+                {/* Session count picker — only for recurring sessions */}
+                {session.recurring && maxSessions > 1 && (
+                  <div className="rounded-xl border p-4 mb-5">
+                    <p className="text-sm font-semibold mb-3">How many sessions?</p>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setSessionCount((c) => Math.max(1, c - 1))}
+                        disabled={sessionCount <= 1}
+                        className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30">
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="text-2xl font-bold w-8 text-center">{sessionCount}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSessionCount((c) => Math.min(maxSessions, c + 1))}
+                        disabled={sessionCount >= maxSessions}
+                        className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                      <span className="text-xs text-muted-foreground">
+                        {sessionCount === 1 ? "Single session" : `${sessionCount} sessions · up to ${maxSessions} available`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Order summary */}
                 <div className="rounded-xl border overflow-hidden mb-5">
                   <div className="px-4 py-3 text-white text-sm font-semibold" style={{ backgroundColor: "#0F3154" }}>
@@ -316,8 +347,11 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                   </div>
                   <div className="p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{typeName} — {session.title}</span>
-                      <span className="font-semibold">${session.pricePerPlayer}.00</span>
+                      <span className="text-muted-foreground">
+                        {typeName} — {session.title}
+                        {sessionCount > 1 && <span className="ml-1 text-xs">× {sessionCount}</span>}
+                      </span>
+                      <span className="font-semibold">${session.pricePerPlayer}.00{sessionCount > 1 ? ` × ${sessionCount}` : ""}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Athlete</span>
@@ -331,7 +365,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     )}
                     <div className="flex justify-between font-bold text-base border-t pt-2 mt-1">
                       <span>Total due today</span>
-                      <span>${session.pricePerPlayer}.00</span>
+                      <span>${(session.pricePerPlayer * sessionCount).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -351,7 +385,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     disabled={submitting}
                     className="flex-1 py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-60 transition-opacity"
                     style={{ backgroundColor: "#DC373E" }}>
-                    {submitting ? "Redirecting to payment…" : `Pay $${session.pricePerPlayer} & Reserve Spot`}
+                    {submitting ? "Redirecting to payment…" : `Pay $${(session.pricePerPlayer * sessionCount).toFixed(2)} & Reserve${sessionCount > 1 ? ` ${sessionCount} Spots` : " Spot"}`}
                   </button>
                 </div>
               </div>

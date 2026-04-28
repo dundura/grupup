@@ -15,6 +15,7 @@ interface TrainerProfile {
   sports: string[];
 }
 
+// hourlyRate is the player-facing price; trainer earns 85%
 function getDiscount(count: number) {
   if (count >= 8) return 20;
   if (count >= 5) return 15;
@@ -55,7 +56,7 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
     if (!trainer) return;
     setSubmitting(true);
     try {
-      const playerPrice = Math.round(trainer.hourlyRate / 0.85);
+      const playerPrice = trainer.hourlyRate;
       const discountPercent = getDiscount(sessionCount);
       const totalPrice = Math.round(playerPrice * sessionCount * (1 - discountPercent / 100));
       const res = await fetch("/api/checkout/private", {
@@ -87,7 +88,7 @@ export default function BookPrivatePage({ params }: { params: Promise<{ id: stri
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
   if (!trainer) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Trainer not found.</p></div>;
 
-  const playerPrice = Math.round(trainer.hourlyRate / 0.85);
+  const playerPrice = trainer.hourlyRate;
   const discountPercent = getDiscount(sessionCount);
   const totalPrice = Math.round(playerPrice * sessionCount * (1 - discountPercent / 100));
   const location = [trainer.city, trainer.state].filter(Boolean).join(", ");
