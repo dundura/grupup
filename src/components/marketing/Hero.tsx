@@ -53,7 +53,7 @@ export function Hero() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
                 Group training for{" "}
                 <span className="text-[#DC373E] inline-block" style={{ animation: "textPulse 2.5s ease-in-out infinite" }}>every sport,</span>{" "}
-                every crew.
+                <span className="inline-block" style={{ animation: "textPulse 2.5s ease-in-out 1.25s infinite" }}>every crew.</span>
               </h1>
 
               <p className="text-white/70 text-lg md:text-xl mb-8 max-w-2xl">
