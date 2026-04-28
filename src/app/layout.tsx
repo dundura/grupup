@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Barlow_Condensed } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { PwaInit } from "@/components/PwaInit";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-barlow-condensed" });
 
 const OG_IMAGE = "https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777375447323-924k8k.png";
 
@@ -50,7 +51,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={inter.variable}>
+      <html lang="en" className={`${inter.variable} ${barlowCondensed.variable}`}>
         <head>
           <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
           <meta name="mobile-web-app-capable" content="yes" />

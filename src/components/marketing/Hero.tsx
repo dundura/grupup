@@ -50,7 +50,8 @@ export function Hero() {
               <h1 className="text-4xl md:text-5xl lg:text-[52px] font-extrabold text-white leading-tight mb-2">
                 Group sports training
               </h1>
-              <p className="text-[#DC373E] font-bold text-xs uppercase tracking-widest mb-2">
+              <p className="text-[#DC373E] uppercase leading-tight mb-2 text-4xl md:text-5xl lg:text-[52px]"
+                style={{ fontFamily: "var(--font-barlow-condensed)", fontWeight: 800 }}>
                 Convenient, Affordable, Social
               </p>
               <p className="text-white/60 text-sm mb-6">
