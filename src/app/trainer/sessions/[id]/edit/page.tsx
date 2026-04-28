@@ -130,6 +130,15 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Tuesday Finishing Clinic – Cary" className="text-base" />
           </div>
 
+          <div className="bg-white rounded-2xl border p-6 space-y-3">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Photo <span className="font-normal normal-case text-xs">(optional — defaults to your profile photo)</span></label>
+            <ImageUpload
+              currentUrl={(form as any).sessionPhoto}
+              onUploaded={(url) => setForm((f) => ({ ...f, sessionPhoto: url }))}
+              label="Upload a session preview photo"
+            />
+          </div>
+
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Schedule & Location</label>
             <div className="grid grid-cols-2 gap-3">
@@ -170,45 +179,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
               <Input value={form.venue} onChange={(e) => set("venue", e.target.value)} placeholder="e.g. WakeMed Soccer Park Field 3" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border p-6 space-y-5">
-            <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Sport</label>
-              <div className="flex flex-wrap gap-2">
-                {sports.map((s) => (
-                  <button key={s} type="button" onClick={() => set("sport", s)}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.sport === s ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Skill Level</label>
-              <div className="grid grid-cols-4 gap-2">
-                {levels.map((l) => (
-                  <button key={l} type="button" onClick={() => set("skillLevel", l)}
-                    className="py-2 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.skillLevel === l ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Age Range</label>
-              <div className="flex flex-wrap gap-2">
-                {ageRanges.map((a) => (
-                  <button key={a} type="button" onClick={() => set("ageRange", a)}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.ageRange === a ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
-                    {a}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -258,16 +228,59 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 </div>
               );
             })()}
+            {/* First class free */}
+            <div className="pt-2 border-t">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" checked={(form as any).firstClassFree}
+                  onChange={(e) => setForm((f) => ({ ...f, firstClassFree: e.target.checked }))}
+                  className="mt-0.5 h-4 w-4 accent-[#0F3154]" />
+                <div>
+                  <p className="font-semibold text-sm">Offer first class free</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">A powerful tool to convert new players into recurring clients — they try for free, then book.</p>
+                </div>
+              </label>
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl border p-6 space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Photo <span className="font-normal normal-case text-xs">(optional — defaults to your profile photo)</span></label>
-            <ImageUpload
-              currentUrl={(form as any).sessionPhoto}
-              onUploaded={(url) => setForm((f) => ({ ...f, sessionPhoto: url }))}
-              label="Upload a session preview photo"
-            />
+          <div className="bg-white rounded-2xl border p-6 space-y-5">
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Sport</label>
+              <div className="flex flex-wrap gap-2">
+                {sports.map((s) => (
+                  <button key={s} type="button" onClick={() => set("sport", s)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.sport === s ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Skill Level</label>
+              <div className="grid grid-cols-4 gap-2">
+                {levels.map((l) => (
+                  <button key={l} type="button" onClick={() => set("skillLevel", l)}
+                    className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.skillLevel === l ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Age Range</label>
+              <div className="flex flex-wrap gap-2">
+                {ageRanges.map((a) => (
+                  <button key={a} type="button" onClick={() => set("ageRange", a)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={form.ageRange === a ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    {a}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <div>
@@ -291,21 +304,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Video <span className="font-normal normal-case text-xs">(optional)</span></label>
             <p className="text-xs text-muted-foreground">Paste a YouTube or Vimeo link to show a preview video on your session page.</p>
             <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
-          </div>
-
-          <div className="bg-white rounded-2xl border p-6">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={(form as any).firstClassFree}
-                onChange={(e) => setForm((f) => ({ ...f, firstClassFree: e.target.checked }))}
-                className="mt-0.5 h-4 w-4 accent-[#0F3154]"
-              />
-              <div>
-                <p className="font-semibold text-sm">Offer first class free</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Players will see a "First class free" callout and can message you to claim it.</p>
-              </div>
-            </label>
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
