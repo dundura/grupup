@@ -53,7 +53,8 @@ export function Hero() {
                   The only platform built for group sports training
                 </p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-tight mb-1">
-                  Group sports training
+                  <span className="sm:hidden">Group training</span>
+                  <span className="hidden sm:inline">Group sports training</span>
                 </h1>
                 <p className="text-[#DC373E] uppercase leading-tight mb-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[56px]"
                   style={{ fontFamily: "var(--font-barlow-condensed)", fontWeight: 800 }}>
