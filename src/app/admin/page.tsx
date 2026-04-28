@@ -63,8 +63,8 @@ export default async function AdminPage() {
     if (meta.role === "trainer" || trainerClerkIds.has(u.id)) {
       const dbProfile = trainerProfiles.find((t) => t.clerkId === u.id);
       trainerList.push({ ...base, role: "trainer", trainerId: dbProfile?.id ?? null, isApproved: dbProfile?.isApproved ?? false });
-    } else {
-      playerList.push({ ...base, role: "player", isApproved: meta.isApproved ?? false });
+    } else if (meta.role === "player" || meta.role === "parent") {
+      playerList.push({ ...base, role: meta.role, isApproved: meta.isApproved ?? false });
     }
   }
 
