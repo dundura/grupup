@@ -136,7 +136,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
     <div>
       <div className="border-b bg-secondary/20">
         <div className="container py-8 md:py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-1">Connect</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-1">Connect with Players</h1>
           <p className="text-muted-foreground">Find players looking for group training partners near you.</p>
         </div>
       </div>

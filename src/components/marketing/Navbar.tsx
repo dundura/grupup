@@ -14,7 +14,7 @@ const findLinks = [
 ];
 
 const otherLinks = [
-  { href: "/connect",     label: "Connect"      },
+  { href: "/connect",     label: "Connect with Players" },
   { href: "/pricing",     label: "Group Pricing" },
   { href: "/for-trainers",label: "For Trainers" },
   { href: "/blog",        label: "Blog"         },
