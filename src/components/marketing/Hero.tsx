@@ -184,7 +184,7 @@ export function Hero() {
               </div>
 
               {/* Highlights card */}
-              <div className="bg-white rounded-2xl px-3 py-2 shadow-sm divide-y divide-gray-100">
+              <div className="relative z-20 bg-white rounded-2xl px-3 py-2 shadow-sm divide-y divide-gray-100">
                 {highlights.map((item) => (
                   <div key={item.title} className="flex items-center gap-2 py-1.5 first:pt-0 last:pb-0">
                     <span className="text-base shrink-0">{item.icon}</span>
