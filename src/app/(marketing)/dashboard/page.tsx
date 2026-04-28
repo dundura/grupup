@@ -251,7 +251,7 @@ export default function DashboardPage() {
         {/* Profile card */}
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold">My Profile</h2>
+            <h2 className="text-base font-bold">My Profiles</h2>
             <div className="flex items-center gap-3">
               {role === "trainer" && (
                 <Link href="/trainer/payout"
@@ -259,6 +259,11 @@ export default function DashboardPage() {
                   <DollarSign className="h-3.5 w-3.5" /> Payout
                 </Link>
               )}
+              <Link href="/onboarding"
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#f0f4f9]"
+                style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                <Plus className="h-3.5 w-3.5" /> Add Profile
+              </Link>
               <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit

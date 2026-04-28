@@ -48,6 +48,7 @@ export default async function ConnectPage() {
     id: string; clerkId: string; name: string; photo: string; city: string; country: string;
     sports: string[]; level: string; league: string; bio: string;
     team: string; birthYear: string; gender: string;
+    availableForFreePlay: boolean; openToTrain: boolean;
   }[] = [];
 
   try {
@@ -59,6 +60,7 @@ export default async function ConnectPage() {
         city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
         league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
         gender?: string; profileSlug?: string;
+        availableForFreePlay?: boolean; openToTrain?: boolean;
         childProfiles?: Array<{
           id: string; slug: string; name: string; photo: string; sports: string[];
           level: string; league: string; team: string; birthYear: string; gender: string;
@@ -88,6 +90,8 @@ export default async function ConnectPage() {
             team: child.team ?? "",
             birthYear: child.birthYear ?? "",
             gender: child.gender ?? "",
+            availableForFreePlay: meta.availableForFreePlay ?? false,
+            openToTrain: meta.openToTrain ?? false,
           });
         }
       }
@@ -109,6 +113,8 @@ export default async function ConnectPage() {
           team: meta.team ?? "",
           birthYear: meta.birthYear ?? "",
           gender: meta.gender ?? "",
+          availableForFreePlay: meta.availableForFreePlay ?? false,
+          openToTrain: meta.openToTrain ?? false,
         });
       }
     }
@@ -197,6 +203,20 @@ export default async function ConnectPage() {
                           </span>
                         </div>
                       )}
+                      {(p.availableForFreePlay || p.openToTrain) && (
+                        <div className="flex items-center justify-center flex-wrap gap-2 mt-3">
+                          {p.availableForFreePlay && (
+                            <span className="px-2.5 py-1 rounded-full bg-[#DC373E]/25 text-[#FF9EA2] text-[11px] font-semibold animate-pulse">
+                              Free Play
+                            </span>
+                          )}
+                          {p.openToTrain && (
+                            <span className="px-2.5 py-1 rounded-full bg-blue-500/25 text-blue-300 text-[11px] font-semibold animate-pulse">
+                              Seeking Training
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* White bottom */}
@@ -222,7 +242,7 @@ export default async function ConnectPage() {
                         )}
                       </div>
                       {p.bio && (
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-3 text-center">{p.bio}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-3 text-left">{p.bio}</p>
                       )}
                       <div className="flex gap-2">
                         <Link href={`/connect/${p.id}`}

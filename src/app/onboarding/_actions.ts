@@ -26,6 +26,8 @@ export async function completeOnboarding(formData: {
   birthYear?: string;
   gender?: string;
   videoLinks?: string[];
+  availableForFreePlay?: boolean;
+  openToTrain?: boolean;
   childProfiles?: any[];
   disableMessages?: boolean;
   isHidden?: boolean;
@@ -35,6 +37,9 @@ export async function completeOnboarding(formData: {
   yearsExperience?: string;
   selectedSpecialties?: string[];
   selectedCerts?: string[];
+  // player extras
+  position?: string;
+  improvementAreas?: string[];
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { userId } = await auth();
@@ -76,7 +81,13 @@ export async function completeOnboarding(formData: {
       if (formData.gender !== undefined) profileFields.gender = formData.gender;
       if (formData.videoLinks !== undefined) profileFields.videoLinks = formData.videoLinks;
       if (formData.childProfiles !== undefined) profileFields.childProfiles = formData.childProfiles;
+      if (formData.availableForFreePlay !== undefined) profileFields.availableForFreePlay = formData.availableForFreePlay;
+      if (formData.openToTrain !== undefined) profileFields.openToTrain = formData.openToTrain;
       if (formData.disableMessages !== undefined) profileFields.disableMessages = formData.disableMessages;
+      if (formData.position !== undefined) profileFields.position = formData.position;
+      if (formData.improvementAreas !== undefined) {
+        profileFields.improvementAreas = formData.improvementAreas.length ? formData.improvementAreas : ["Ball Skills"];
+      }
       if (!alreadyApproved) profileFields.isApproved = false;
     } else {
       // trainer

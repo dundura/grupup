@@ -2,7 +2,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Trophy, Users, Calendar, Dumbbell, ChevronLeft, Clock, UserPlus } from "lucide-react";
+import { MapPin, ChevronLeft, Clock } from "lucide-react";
 import { db } from "@/db";
 import { bookings, freePlayEvents, trainerSessions, playerFollows, userBlocks } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -40,6 +40,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
     league?: string; team?: string; bio?: string; birthYear?: string; gender?: string;
     videoLinks?: string[]; disableMessages?: boolean;
+    availableForFreePlay?: boolean; openToTrain?: boolean;
+    position?: string; improvementAreas?: string[];
   };
   const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
 
@@ -152,56 +154,75 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            {meta.bio && (
-              <p className="text-sm leading-relaxed text-muted-foreground mb-4">{meta.bio}</p>
-            )}
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Stats row */}
+            <div className="flex flex-wrap gap-3 mb-4">
               {playerSports.length > 0 && (
-                <div className="bg-[#f8fafc] rounded-xl p-3 col-span-2 sm:col-span-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Sports</p>
-                  <div className="flex flex-wrap gap-1">
-                    {playerSports.map((s) => (
-                      <span key={s} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white border" style={{ color: "#0F3154" }}>{s}</span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-1">
+                  {playerSports.map((s) => (
+                    <span key={s} className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f0f4f9] border" style={{ color: "#0F3154" }}>{s}</span>
+                  ))}
                 </div>
               )}
               {meta.gender && (
-                <div className="bg-[#f8fafc] rounded-xl p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Gender</p>
-                  <p className="text-sm font-semibold">{meta.gender}</p>
-                </div>
-              )}
-              {meta.level && (
-                <div className="bg-[#f8fafc] rounded-xl p-3">
-                  <Dumbbell className="h-3.5 w-3.5 text-muted-foreground mb-1" />
-                  <p className="text-sm font-semibold">{meta.level}</p>
-                </div>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">{meta.gender}</span>
               )}
               {meta.birthYear && (
-                <div className="bg-[#f8fafc] rounded-xl p-3">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground mb-1" />
-                  <p className="text-sm font-semibold">{meta.birthYear}</p>
-                </div>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">Born {meta.birthYear}</span>
+              )}
+              {meta.level && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.level}</span>
+              )}
+              {meta.league && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>{meta.league}</span>
+              )}
+              {meta.team && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.team}</span>
               )}
             </div>
 
-            {/* Team + League */}
-            {(meta.team || meta.league) && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {meta.team && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
-                    style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
-                    <Users className="h-3 w-3" /> {meta.team}
+            {/* Availability pills */}
+            {(meta.availableForFreePlay || meta.openToTrain) && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {meta.availableForFreePlay && (
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
+                    style={{ backgroundColor: "#fef2f2", color: "#DC373E", border: "1px solid #fca5a5" }}>
+                    Free Play
                   </span>
                 )}
-                {meta.league && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
-                    style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>
-                    <Trophy className="h-3 w-3" /> {meta.league}
+                {meta.openToTrain && (
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
+                    style={{ backgroundColor: "#eff6ff", color: "#3b82f6", border: "1px solid #93c5fd" }}>
+                    Seeking Training
                   </span>
+                )}
+              </div>
+            )}
+
+            {/* Table: bio / position / focus areas */}
+            {(meta.bio || meta.position || (meta.improvementAreas?.length ?? 0) > 0) && (
+              <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden">
+                {meta.bio && (
+                  <div className="flex gap-4 px-4 py-3">
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5 font-medium">Looking for</span>
+                    <p className="text-sm leading-relaxed text-foreground flex-1">{meta.bio}</p>
+                  </div>
+                )}
+                {meta.position && (
+                  <div className="flex gap-4 px-4 py-3 items-center">
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 font-medium">Position</span>
+                    <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>{meta.position}</p>
+                  </div>
+                )}
+                {(meta.improvementAreas?.length ?? 0) > 0 && (
+                  <div className="flex gap-4 px-4 py-3 items-start">
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-1 font-medium">Focus Areas</span>
+                    <div className="flex flex-wrap gap-1.5 flex-1">
+                      {(meta.improvementAreas ?? ["Ball Skills"]).map((area) => (
+                        <span key={area} className="text-xs font-medium px-2.5 py-1 rounded-full"
+                          style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{area}</span>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}

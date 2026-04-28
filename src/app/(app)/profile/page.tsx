@@ -15,6 +15,7 @@ import PlayerProfilesList from "@/components/profile/PlayerProfilesList";
 import type { ChildProfile } from "@/components/profile/PlayerProfilesList";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
+const improvementAreaOptions = ["Ball Skills", "Finishing", "Defending", "1v1", "Passing", "Shooting", "Speed & Agility", "Dribbling", "Heading", "Goalkeeping", "Game Sense", "Set Pieces"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational", "Other"];
 const countries = [
@@ -42,6 +43,8 @@ export default function ProfilePage() {
     playerName?: string; playerAge?: string; isHidden?: boolean;
     photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
     state?: string; zipCode?: string; profileSlug?: string;
+    availableForFreePlay?: boolean; openToTrain?: boolean;
+    position?: string; improvementAreas?: string[];
     playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
   };
 
@@ -74,7 +77,11 @@ export default function ProfilePage() {
       gender: m.gender ?? "",
       videoLinks: ((m.videoLinks ?? ["", "", "", "", "", ""]) as string[]),
       childProfiles: ((m.childProfiles ?? []) as ChildProfile[]),
+      availableForFreePlay: m.availableForFreePlay ?? false,
+      openToTrain: m.openToTrain ?? false,
       disableMessages: (m as any).disableMessages ?? false,
+      position: m.position ?? "",
+      improvementAreas: (m.improvementAreas ?? ["Ball Skills"]) as string[],
     };
   }
 
@@ -90,7 +97,7 @@ export default function ProfilePage() {
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
 
-  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports" | "selectedPlayerSports", val: string) {
+  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports" | "selectedPlayerSports" | "improvementAreas", val: string) {
     setForm((f) => ({
       ...f,
       [key]: (f[key] as string[]).includes(val)
@@ -103,8 +110,23 @@ export default function ProfilePage() {
     const reader = new FileReader();
     reader.onload = () => setCropSrc(reader.result as string);
     reader.readAsDataURL(file);
-    // Reset input so the same file can be re-selected
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function handleReCrop() {
+    if (!form.photo) { fileRef.current?.click(); return; }
+    try {
+      const res = await fetch(form.photo);
+      const blob = await res.blob();
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      setCropSrc(dataUrl);
+    } catch {
+      fileRef.current?.click();
+    }
   }
 
   async function handleCropApply(blob: Blob) {
@@ -136,7 +158,8 @@ export default function ProfilePage() {
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
-    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode, customSlug: (form as any).customSlug });
+    const improvementAreas = ((form as any).improvementAreas as string[]).filter(Boolean);
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue, videoLinks: cleanedVideos, childProfiles: (form as any).childProfiles, state: (form as any).state, zipCode: (form as any).zipCode, customSlug: (form as any).customSlug, position: (form as any).position, improvementAreas: improvementAreas.length ? improvementAreas : ["Ball Skills"] });
     setSaved(true);
     setSaving(false);
   }
@@ -228,22 +251,33 @@ export default function ProfilePage() {
             )}
           </div>
           <div className="flex items-center gap-5">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-[#f0f4f9] shrink-0">
+            <button type="button" onClick={handleReCrop} disabled={uploadingPhoto}
+              className="relative w-24 h-24 rounded-full overflow-hidden bg-[#f0f4f9] shrink-0 group cursor-pointer">
               {photoSrc ? (
-                <Image src={photoSrc} alt="Profile" fill className="object-cover" sizes="80px" unoptimized />
+                <Image src={photoSrc} alt="Profile" fill className="object-cover" sizes="96px" unoptimized />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
+                <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
                   style={{ backgroundColor: "#0F3154" }}>
                   {(form.firstName?.[0] ?? "?").toUpperCase()}
                 </div>
               )}
-            </div>
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-6 w-6 text-white" />
+              </div>
+            </button>
             <div>
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
-              <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={() => fileRef.current?.click()}>
-                {uploadingPhoto ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Uploading…</> : <><Camera className="h-4 w-4 mr-1.5" /> Change photo</>}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={() => fileRef.current?.click()}>
+                  {uploadingPhoto ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Uploading…</> : <><Camera className="h-4 w-4 mr-1.5" /> Change photo</>}
+                </Button>
+                {hasUploadedPhoto && (
+                  <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={handleReCrop}>
+                    Re-crop
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground mt-1.5">JPEG, PNG or WebP · max 5 MB</p>
             </div>
           </div>
@@ -449,6 +483,55 @@ export default function ProfilePage() {
                 <label className="text-sm font-medium mb-1.5 block">Team / Club</label>
                 <Input value={form.team} onChange={(e) => set("team", e.target.value)}
                   placeholder="e.g. NCFC, Charlotte Independence" />
+              </div>
+
+              {/* Position */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Position</label>
+                <Input value={(form as any).position ?? ""} onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
+                  placeholder="e.g. Striker, Midfielder, Defender…" />
+              </div>
+
+              {/* Focus Areas */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Focus Areas <span className="text-muted-foreground font-normal">(what you want to improve)</span></label>
+                <div className="flex flex-wrap gap-2">
+                  {improvementAreaOptions.map((a) => (
+                    <button key={a} type="button" onClick={() => toggleList("improvementAreas", a)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={(form as any).improvementAreas?.includes(a)
+                        ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                        : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Availability pills */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Availability</label>
+                <div className="space-y-2">
+                  {[
+                    { key: "availableForFreePlay", label: "Free Play", desc: "Show on your card that you're open for free play events" },
+                    { key: "openToTrain", label: "Seeking Training", desc: "Show on your card that you're looking for training sessions" },
+                  ].map(({ key, label, desc }) => (
+                    <button key={key} type="button"
+                      onClick={() => setForm((f) => ({ ...f, [key]: !(f as any)[key] }))}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all text-left"
+                      style={(form as any)[key]
+                        ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" }
+                        : { borderColor: "#e2e8f0" }}>
+                      <div>
+                        <p className="text-sm font-semibold">{label}</p>
+                        <p className="text-xs text-muted-foreground">{desc}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${(form as any)[key] ? "border-[#0F3154] bg-[#0F3154]" : "border-gray-300"}`}>
+                        {(form as any)[key] && <div className="w-2 h-2 rounded-full bg-white" />}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Bio */}
