@@ -42,11 +42,14 @@ export async function POST(req: NextRequest) {
     const senderMeta = sender.publicMetadata as {
       photo?: string; playerSports?: string[]; sport?: string; level?: string;
       city?: string; country?: string; bio?: string; profileSlug?: string;
+      playerName?: string;
     };
+    // Use playerName if set (parent accounts storing child's name), otherwise Clerk name
+    const displayName = senderMeta.playerName?.trim() || fromName;
     if (toEmail) await sendFollowRequest({
       toEmail,
       toName,
-      fromName,
+      fromName: displayName,
       fromPhoto: senderMeta.photo ?? sender.imageUrl ?? "",
       fromSports: senderMeta.playerSports?.length ? senderMeta.playerSports : (senderMeta.sport ? [senderMeta.sport] : []),
       fromLevel: senderMeta.level,
