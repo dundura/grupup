@@ -6,6 +6,8 @@ import { db } from "@/db";
 import { playerFollows } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
+import ConnectFilters from "./ConnectFilters";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +23,8 @@ function avatarColor(name: string) {
 
 const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
 
-export default async function ConnectPage() {
+export default async function ConnectPage({ searchParams }: { searchParams: Promise<{ sport?: string; city?: string; zip?: string }> }) {
+  const { sport: sportFilter, city: cityFilter, zip: zipFilter } = await searchParams;
   const { userId: viewerUserId } = await auth();
 
   // Single clerkClient instance for all Clerk calls on this page
@@ -46,7 +49,7 @@ export default async function ConnectPage() {
 
   let approvedPlayers: {
     id: string; clerkId: string; name: string; photo: string; city: string; country: string;
-    sports: string[]; level: string; league: string; bio: string;
+    zipCode: string; sports: string[]; level: string; league: string; bio: string;
     team: string; birthYear: string; gender: string;
     availableForFreePlay: boolean; openToTrain: boolean;
   }[] = [];
@@ -57,7 +60,7 @@ export default async function ConnectPage() {
     for (const u of clerkUsers) {
       const meta = u.publicMetadata as {
         role?: string; isApproved?: boolean; isHidden?: boolean;
-        city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
+        city?: string; country?: string; zipCode?: string; sport?: string; playerSports?: string[]; level?: string;
         league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
         gender?: string; profileSlug?: string;
         availableForFreePlay?: boolean; openToTrain?: boolean;
@@ -81,6 +84,7 @@ export default async function ConnectPage() {
             photo: child.photo || "",
             city: meta.city ?? "",
             country: meta.country ?? "",
+            zipCode: meta.zipCode ?? "",
             sports: child.sports ?? [],
             level: child.level ?? "",
             league: child.league ?? "",
@@ -104,6 +108,7 @@ export default async function ConnectPage() {
           photo: meta.photo ?? u.imageUrl ?? "",
           city: meta.city ?? "",
           country: meta.country ?? "",
+          zipCode: meta.zipCode ?? "",
           sports: playerSports,
           level: meta.level ?? "",
           league: meta.league ?? "",
@@ -118,6 +123,14 @@ export default async function ConnectPage() {
     }
   } catch (err) { console.error("[connect] failed to load players:", err); }
 
+  // Apply filters
+  const filtered = approvedPlayers.filter((p) => {
+    if (sportFilter && !p.sports.some((s) => s.toLowerCase() === sportFilter.toLowerCase())) return false;
+    if (cityFilter && !p.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
+    if (zipFilter && !p.zipCode.startsWith(zipFilter)) return false;
+    return true;
+  });
+
   return (
     <div>
       <div className="border-b bg-secondary/20">
@@ -128,29 +141,40 @@ export default async function ConnectPage() {
       </div>
 
       <div className="container py-10">
-        {approvedPlayers.length === 0 ? (
+        {/* Filters */}
+        <div className="mb-6">
+          <Suspense fallback={null}>
+            <ConnectFilters />
+          </Suspense>
+        </div>
+
+        {filtered.length === 0 ? (
           <div className="text-center max-w-md mx-auto py-20">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl mx-auto mb-6 bg-[#f0f4f9]">
               <Users className="h-8 w-8" style={{ color: "#0F3154" }} />
             </div>
-            <h2 className="text-2xl font-bold mb-3">No players yet</h2>
+            <h2 className="text-2xl font-bold mb-3">{approvedPlayers.length === 0 ? "No players yet" : "No matches"}</h2>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              Be the first to join! Create an account and get approved to appear here.
+              {approvedPlayers.length === 0
+                ? "Be the first to join! Create an account to appear here."
+                : "Try adjusting your filters."}
             </p>
-            <Link href="/sign-up"
-              className="inline-block px-6 py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#DC373E" }}>
-              Create your profile
-            </Link>
+            {approvedPlayers.length === 0 && (
+              <Link href="/sign-up"
+                className="inline-block px-6 py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: "#DC373E" }}>
+                Create your profile
+              </Link>
+            )}
           </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground mb-8">
-              {approvedPlayers.length} player{approvedPlayers.length !== 1 ? "s" : ""} looking for training partners
+              {filtered.length} player{filtered.length !== 1 ? "s" : ""} looking for training partners
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {approvedPlayers.map((p) => {
+              {filtered.map((p) => {
                 const initials = p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                 const bg = avatarColor(p.name);
                 const initialFollowing = viewerFollows.includes(p.clerkId);
