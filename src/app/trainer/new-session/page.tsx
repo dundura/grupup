@@ -262,8 +262,8 @@ export default function NewSessionPage() {
                 className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
                 style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
                 <div className="text-left">
-                  <p className="font-semibold text-sm">Multiple weeks (Training Plan)</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Player pays upfront for multiple sessions · discount applied automatically</p>
+                  <p className="font-semibold text-sm">Package</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Set custom dates &amp; times for each session · player pays upfront · discount applied automatically</p>
                 </div>
                 <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
@@ -272,7 +272,7 @@ export default function NewSessionPage() {
 
               {form.isPlan && (
                 <div className="space-y-2 pt-1">
-                  <label className="text-sm font-medium block">Number of sessions in plan</label>
+                  <label className="text-sm font-medium block">Number of sessions in package</label>
                   <div className="grid grid-cols-4 gap-2">
                     {[2, 3, 4, 5, 6, 7, 8].map((w) => {
                       const disc = planDiscount(w);
@@ -300,7 +300,7 @@ export default function NewSessionPage() {
               /* Plan mode: bulk time + per-session date pickers */
               <div className="space-y-3">
                 <p className="text-xs text-muted-foreground">
-                  Dates default to weekly — change any session freely.
+                  Set the date and time for each session — any schedule works (3 days in a row, weekends only, etc.)
                 </p>
 
                 {/* Apply one time to all sessions */}
