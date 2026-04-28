@@ -16,7 +16,24 @@ import type { ChildProfile } from "@/components/profile/PlayerProfilesList";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const improvementAreaOptions = ["Ball Skills", "Finishing", "Defending", "1v1", "Passing", "Shooting", "Speed & Agility", "Dribbling", "Heading", "Goalkeeping", "Game Sense", "Set Pieces"];
-const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
+const levelsBySport: Record<string, string[]> = {
+  Soccer:            ["Recreational", "Club", "Academy", "Elite"],
+  Basketball:        ["Recreational", "AAU", "Varsity", "Elite"],
+  Football:          ["Flag", "JV", "Varsity", "Elite"],
+  Baseball:          ["Recreational", "Travel Ball", "Select", "Elite"],
+  Tennis:            ["Beginner", "Intermediate", "Advanced", "Elite"],
+  Lacrosse:          ["Recreational", "Club", "Varsity", "Elite"],
+  Volleyball:        ["Recreational", "Club", "Varsity", "Elite"],
+  Swimming:          ["Recreational", "Competitive", "Advanced", "Elite"],
+  "Speed & Agility": ["Beginner", "Intermediate", "Advanced", "Elite"],
+};
+const defaultLevels = ["Beginner", "Intermediate", "Advanced", "Elite"];
+
+function getLevels(sports: string[]): string[] {
+  if (!sports.length) return defaultLevels;
+  // Use the first selected sport's levels
+  return levelsBySport[sports[0]] ?? defaultLevels;
+}
 const leaguesBySport: Record<string, string[]> = {
   Soccer:            ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational"],
   Basketball:        ["AAU", "NBA Academy", "Nike EYBL", "High School Varsity", "College", "Recreational"],
@@ -481,9 +498,9 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Skill level <span className="text-red-500">*</span></label>
                 <div className="grid grid-cols-4 gap-2">
-                  {levels.map((l) => (
+                  {getLevels(form.selectedPlayerSports).map((l) => (
                     <button key={l} type="button" onClick={() => set("level", l)}
-                      className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                      className="py-2 rounded-lg text-sm font-medium border transition-colors text-xs sm:text-sm"
                       style={form.level === l
                         ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
                         : { borderColor: "#e2e8f0", color: "#475569" }}>
