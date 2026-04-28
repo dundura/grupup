@@ -19,7 +19,7 @@ export async function GET() {
       const meta = u.publicMetadata as { photo?: string };
       return {
         followerClerkId: r.followerClerkId,
-        name: (`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim()) || u.emailAddresses?.[0]?.emailAddress ?? "User",
+        name: (`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim()) || (u.emailAddresses?.[0]?.emailAddress ?? "User"),
         photo: meta.photo ?? u.imageUrl ?? "",
         status: r.status,
       };
