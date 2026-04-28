@@ -56,7 +56,7 @@ export default function FollowCardButton({
   const Icon = status === "approved" ? UserCheck : status === "pending" ? Clock : UserPlus;
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       <button onClick={toggle} disabled={loading}
         title={status !== "none" ? "Unfollow" : "Follow"}
         className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl border transition-colors disabled:opacity-50"
