@@ -118,20 +118,6 @@ export function Hero() {
                 ))}
               </div>
 
-              {/* Sport pills — mobile only */}
-              <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden scrollbar-none">
-                {[
-                  { label: "⚽ Soccer",      href: "/groups?sport=soccer" },
-                  { label: "🏀 Basketball", href: "/groups?sport=basketball" },
-                  { label: "🏈 Football",   href: "/groups?sport=football" },
-                  { label: "🎾 Tennis",     href: "/groups?sport=tennis" },
-                ].map((s) => (
-                  <a key={s.href} href={s.href}
-                    className="shrink-0 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white font-medium text-sm whitespace-nowrap hover:bg-white/20 transition-all">
-                    {s.label}
-                  </a>
-                ))}
-              </div>
 
             </div>
 
