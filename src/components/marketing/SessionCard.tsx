@@ -57,6 +57,11 @@ export function SessionCard({ session }: SessionCardProps) {
       {(session.coverPhoto || session.trainer.photo) && (
         <div className="relative w-full aspect-[4/3] overflow-hidden">
           <Image src={session.coverPhoto || session.trainer.photo} alt={session.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
+          {session.recurring && (
+            <span className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full text-white shadow" style={{ backgroundColor: "#0F3154" }}>
+              🔁 Weekly
+            </span>
+          )}
         </div>
       )}
 
@@ -151,9 +156,6 @@ export function SessionCard({ session }: SessionCardProps) {
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel]}`}>
             {session.skillLevel}
           </span>
-          {session.recurring && (
-            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">Weekly</span>
-          )}
         </div>
 
         {/* Spots progress */}

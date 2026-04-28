@@ -64,7 +64,7 @@ export async function GET() {
         pricePerPlayer: s.pricePerPlayer,
         skillLevel: s.skillLevel ?? "",
         ageRange: s.ageRange ?? "",
-        recurring: false,
+        recurring: s.recurring ?? false,
         specialOffer: undefined,
         trainer: {
           id: s.trainerClerkId,

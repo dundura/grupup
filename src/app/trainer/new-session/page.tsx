@@ -459,9 +459,10 @@ export default function NewSessionPage() {
                 About this session <span style={{ color: "#DC373E" }}>*</span>
               </label>
               <p className="text-xs text-muted-foreground mb-2">Describe what players will work on and what makes your session great.</p>
-              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3}
+              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value.slice(0, 400))} rows={3}
                 placeholder="e.g. This session focuses on ball mastery and finishing in small groups. Players will get real reps in a competitive environment..."
                 className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+              <p className="text-xs text-muted-foreground text-right mt-1">{form.notes.length}/400</p>
             </div>
             <div>
               <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
