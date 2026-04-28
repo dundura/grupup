@@ -37,10 +37,10 @@ export default function OnboardingPage() {
     if (!role) return;
     setSaving(true);
     try {
-      const result = await completeOnboarding({ role, ...form });
+      const result = await completeOnboarding({ role, ...form, isNewSignup: true });
       if (result?.success) {
         await user?.reload();
-        router.push(role === "trainer" ? "/trainer/setup" : "/dashboard");
+        router.push(role === "trainer" ? "/trainer/setup" : "/pending-approval");
       } else {
         alert(result?.error ?? "Something went wrong. Please try again.");
         setSaving(false);

@@ -136,6 +136,84 @@ export async function sendTrainerNewFollower({
   });
 }
 
+export async function sendAdminNewPlayerNotification({
+  playerName,
+  playerEmail,
+  playerCity,
+  playerCountry,
+}: {
+  playerName: string;
+  playerEmail: string;
+  playerCity: string;
+  playerCountry: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: "nmciq2@gmail.com",
+    subject: `New player signup: ${playerName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">New Player Signup 🏅</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Pending your approval on GrupUp</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 80px;">Name</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${playerName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email</td><td style="padding: 8px 0; font-size: 14px;"><a href="mailto:${playerEmail}" style="color: #0F3154;">${playerEmail}</a></td></tr>
+          <tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Location</td><td style="padding: 8px 0; font-size: 14px;">${playerCity}${playerCountry ? `, ${playerCountry}` : ""}</td></tr>
+        </table>
+        <a href="https://www.grupup.app/admin"
+          style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+          Review &amp; Approve in Admin
+        </a>
+      </div>
+    `,
+  });
+}
+
+export async function sendPlayerApproved({
+  playerEmail,
+  playerName,
+}: {
+  playerEmail: string;
+  playerName: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: playerEmail,
+    subject: "You're approved on GrupUp! 🎉",
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">You're approved, ${playerName}! 🎉</h1>
+          <p style="color: rgba(255,255,255,0.75); margin: 8px 0 0; font-size: 15px;">Welcome to the GrupUp community.</p>
+        </div>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
+          Your account has been approved. You can now join group training sessions, create and join free play events, and connect with other players near you.
+        </p>
+        <div style="background: #f8fafc; border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <p style="margin: 0 0 10px; font-weight: 700; color: #0F3154; font-size: 15px;">What you can do now:</p>
+          <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 2;">
+            <li>Book group training sessions with elite coaches</li>
+            <li>Join or create free play events near you</li>
+            <li>Connect with other players on the Connect page</li>
+          </ul>
+        </div>
+        <a href="https://www.grupup.app/groups"
+          style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 12px;">
+          Find a Session Near You
+        </a>
+        <a href="https://www.grupup.app/free-play"
+          style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+          Browse Free Play Events
+        </a>
+      </div>
+    `,
+  });
+}
+
 export async function sendTrainerNewBooking({
   trainerEmail,
   trainerName,

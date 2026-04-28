@@ -1,6 +1,7 @@
 "use server";
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { sendAdminNewPlayerNotification } from "@/lib/email";
 
 export async function completeOnboarding(formData: {
   role: string;
@@ -8,23 +9,82 @@ export async function completeOnboarding(formData: {
   lastName: string;
   country: string;
   city: string;
+  isNewSignup?: boolean;
+  // player / parent
+  sport?: string;
+  level?: string;
+  league?: string;
+  team?: string;
+  bio?: string;
+  playerName?: string;
+  playerAge?: string;
+  birthYear?: string;
+  isHidden?: boolean;
+  photo?: string;
+  // trainer
+  selectedSports?: string[];
+  yearsExperience?: string;
+  selectedSpecialties?: string[];
+  selectedCerts?: string[];
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { userId } = await auth();
     if (!userId) return { success: false, error: "Not authenticated" };
 
     const client = await clerkClient();
+    const existing = await client.users.getUser(userId);
+    const existingMeta = existing.publicMetadata as { isApproved?: boolean; onboardingComplete?: boolean };
+
+    const isPlayer = formData.role === "player" || formData.role === "parent";
+    const alreadyApproved = existingMeta.isApproved === true;
+
+    const profileFields: Record<string, unknown> = {
+      role: formData.role,
+      country: formData.country,
+      city: formData.city,
+      onboardingComplete: true,
+    };
+
+    if (formData.photo !== undefined) profileFields.photo = formData.photo;
+
+    if (isPlayer) {
+      if (formData.sport !== undefined) profileFields.sport = formData.sport;
+      if (formData.level !== undefined) profileFields.level = formData.level;
+      if (formData.league !== undefined) profileFields.league = formData.league;
+      if (formData.team !== undefined) profileFields.team = formData.team;
+      if (formData.bio !== undefined) profileFields.bio = formData.bio;
+      if (formData.isHidden !== undefined) profileFields.isHidden = formData.isHidden;
+      if (formData.playerName !== undefined) profileFields.playerName = formData.playerName;
+      if (formData.playerAge !== undefined) profileFields.playerAge = formData.playerAge;
+      if (formData.birthYear !== undefined) profileFields.birthYear = formData.birthYear;
+      if (!alreadyApproved) profileFields.isApproved = false;
+    } else {
+      // trainer
+      if (formData.selectedSports !== undefined) profileFields.sports = formData.selectedSports;
+      if (formData.yearsExperience !== undefined) profileFields.yearsExperience = formData.yearsExperience;
+      if (formData.selectedSpecialties !== undefined) profileFields.specialties = formData.selectedSpecialties;
+      if (formData.selectedCerts !== undefined) profileFields.certifications = formData.selectedCerts;
+      if (formData.bio !== undefined) profileFields.bio = formData.bio;
+      if (formData.isHidden !== undefined) profileFields.isHidden = formData.isHidden;
+    }
 
     await client.users.updateUser(userId, {
-      publicMetadata: {
-        role: formData.role,
-        country: formData.country,
-        city: formData.city,
-        onboardingComplete: true,
-      },
+      publicMetadata: { ...existingMeta, ...profileFields },
       firstName: formData.firstName,
       lastName: formData.lastName,
     });
+
+    // Notify admin on first-time player signup
+    if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {
+      const email = existing.emailAddresses?.[0]?.emailAddress ?? "";
+      const name = `${formData.firstName} ${formData.lastName}`.trim();
+      await sendAdminNewPlayerNotification({
+        playerName: name || email,
+        playerEmail: email,
+        playerCity: formData.city,
+        playerCountry: formData.country,
+      });
+    }
 
     return { success: true };
   } catch (err) {

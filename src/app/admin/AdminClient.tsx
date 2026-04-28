@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink } from "lucide-react";
+import { useSignIn } from "@clerk/nextjs";
+import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink, LogIn, Eye, EyeOff } from "lucide-react";
 
 interface AdminUser {
   id: string; name: string; email: string; photo: string; role: string;
@@ -29,6 +30,7 @@ export default function AdminClient({
 }: {
   trainers: AdminUser[]; players: AdminUser[]; bookings: AdminBooking[]; sessions: AdminSession[];
 }) {
+  const { signIn, isLoaded: signInLoaded } = useSignIn();
   const [tab, setTab] = useState<"trainers" | "players" | "sessions" | "payouts">("trainers");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState({ trainers, players });
@@ -36,6 +38,10 @@ export default function AdminClient({
   const [confirming, setConfirming] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [payoutFilter, setPayoutFilter] = useState<"unpaid" | "paid" | "all">("unpaid");
+  const [impersonateModal, setImpersonateModal] = useState<{ userId: string; name: string } | null>(null);
+  const [superPwd, setSuperPwd] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
 
   const list = (tab === "trainers" ? users.trainers : users.players)
     .filter((u) => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
@@ -73,6 +79,32 @@ export default function AdminClient({
     await fetch(`/api/admin/bookings/${bookingId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trainerPaid: paid }) });
     setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, trainerPaid: paid, trainerPaidAt: paid ? new Date().toISOString() : null } : b));
     setLoading(null);
+  }
+
+  async function handleApprovePlayer(userId: string, approved: boolean) {
+    setLoading(userId);
+    await fetch(`/api/admin/players/${userId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved }) });
+    setUsers((prev) => ({ ...prev, players: prev.players.map((u) => u.id === userId ? { ...u, isApproved: approved } : u) }));
+    setLoading(null);
+  }
+
+  async function handleImpersonate() {
+    if (!impersonateModal || !signInLoaded) return;
+    setImpersonating(true);
+    try {
+      const res = await fetch("/api/admin/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUserId: impersonateModal.userId, superPassword: superPwd }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || "Failed"); setImpersonating(false); return; }
+      await signIn!.create({ strategy: "ticket", ticket: data.token });
+      window.location.href = "/dashboard";
+    } catch (e: any) {
+      alert(e.message || "Failed");
+      setImpersonating(false);
+    }
   }
 
   return (
@@ -158,6 +190,12 @@ export default function AdminClient({
                               {tab === "trainers" && u.trainerId && u.isApproved && (
                                 <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Approved</span>
                               )}
+                              {tab === "players" && !u.isApproved && (
+                                <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Pending</span>
+                              )}
+                              {tab === "players" && u.isApproved && (
+                                <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Approved</span>
+                              )}
                               {u.archived && <span className="text-xs text-muted-foreground">(archived)</span>}
                             </div>
                             <p className="text-xs text-muted-foreground">{u.email}</p>
@@ -173,6 +211,13 @@ export default function AdminClient({
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2">
                           {tab === "trainers" && u.trainerId && (
+                            <Link href={`/groups/${u.trainerId}`} target="_blank"
+                              title="View profile"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-[#f0f4f9] transition-colors">
+                              <ExternalLink className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                            </Link>
+                          )}
+                          {tab === "trainers" && u.trainerId && (
                             u.isApproved ? (
                               <button onClick={() => handleApprove(u.trainerId!, u.id, false)} disabled={loading === u.id} title="Revoke approval"
                                 className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-red-50 hover:border-red-300 transition-colors">
@@ -185,6 +230,24 @@ export default function AdminClient({
                               </button>
                             )
                           )}
+                          {tab === "players" && (
+                            u.isApproved ? (
+                              <button onClick={() => handleApprovePlayer(u.id, false)} disabled={loading === u.id} title="Revoke approval"
+                                className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-red-50 hover:border-red-300 transition-colors">
+                                <XCircle className="h-3.5 w-3.5 text-red-500" />
+                              </button>
+                            ) : (
+                              <button onClick={() => handleApprovePlayer(u.id, true)} disabled={loading === u.id} title="Approve player"
+                                className="flex items-center justify-center w-8 h-8 rounded-lg border border-green-300 bg-green-50 hover:bg-green-100 transition-colors">
+                                <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                              </button>
+                            )
+                          )}
+                          <button onClick={() => { setImpersonateModal({ userId: u.id, name: u.name }); setSuperPwd(""); setShowPwd(false); }}
+                            title="Login as this user"
+                            className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-[#f0f4f9] transition-colors">
+                            <LogIn className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                          </button>
                           <button onClick={() => handleArchive(u.id, !u.archived)} disabled={loading === u.id} title={u.archived ? "Unarchive" : "Archive"}
                             className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-amber-50 hover:border-amber-300 transition-colors">
                             {u.archived ? <ArchiveRestore className="h-3.5 w-3.5 text-amber-500" /> : <Archive className="h-3.5 w-3.5 text-amber-500" />}
@@ -358,6 +421,41 @@ export default function AdminClient({
           </div>
         )}
       </div>
+
+      {/* Impersonate modal */}
+      {impersonateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <h2 className="text-lg font-bold mb-1">Login as {impersonateModal.name}</h2>
+            <p className="text-sm text-muted-foreground mb-4">Enter the admin super password to sign in as this user.</p>
+            <div className="relative mb-4">
+              <input
+                type={showPwd ? "text" : "password"}
+                placeholder="Super password"
+                value={superPwd}
+                onChange={(e) => setSuperPwd(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && superPwd && handleImpersonate()}
+                className="w-full px-3 py-2 pr-10 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <button type="button" onClick={() => setShowPwd((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setImpersonateModal(null)}
+                className="flex-1 py-2 rounded-lg border text-sm font-semibold text-muted-foreground hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleImpersonate} disabled={!superPwd || impersonating}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: "#0F3154" }}>
+                {impersonating ? "Signing in…" : "Login as them"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

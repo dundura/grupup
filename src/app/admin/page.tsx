@@ -47,13 +47,13 @@ export default async function AdminPage() {
 
   for (const u of clerkUsers) {
     const email = u.emailAddresses?.[0]?.emailAddress ?? "";
-    const meta = u.publicMetadata as { role?: string; archived?: boolean };
+    const meta = u.publicMetadata as { role?: string; archived?: boolean; isApproved?: boolean; photo?: string };
     const name = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || email;
     const base = {
       id: u.id,
       name,
       email,
-      photo: u.imageUrl ?? "",
+      photo: meta.photo ?? u.imageUrl ?? "",
       joinedAt: new Date(u.createdAt).toISOString(),
       archived: meta.archived ?? false,
       sessionCount: sessionCounts[u.id] ?? 0,
@@ -64,7 +64,7 @@ export default async function AdminPage() {
       const dbProfile = trainerProfiles.find((t) => t.clerkId === u.id);
       trainerList.push({ ...base, role: "trainer", trainerId: dbProfile?.id ?? null, isApproved: dbProfile?.isApproved ?? false });
     } else {
-      playerList.push({ ...base, role: "player" });
+      playerList.push({ ...base, role: "player", isApproved: meta.isApproved ?? false });
     }
   }
 

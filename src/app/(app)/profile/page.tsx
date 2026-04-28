@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { completeOnboarding } from "@/app/onboarding/_actions";
-import { CheckCircle, Plus, X } from "lucide-react";
+import { CheckCircle, Plus, X, Camera, Loader2, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
+const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational", "Other"];
 const countries = [
   "United States", "Canada", "United Kingdom", "Australia", "Ireland",
   "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa",
@@ -19,23 +22,26 @@ const countries = [
 const specialties = ["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"];
 const certOptions = ["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"];
 
+const currentYear = new Date().getFullYear();
+const birthYears = Array.from({ length: 30 }, (_, i) => currentYear - 5 - i);
+
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
-    bio?: string; yearsExperience?: string;
-    specialties?: string[]; certifications?: string[];
+    bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
+    photo?: string; league?: string; team?: string; birthYear?: string;
   };
 
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
-    customSpecialty: "",
     lastName: user?.lastName ?? "",
-    isHidden: meta.isHidden ?? false,
     country: meta.country ?? "",
     city: meta.city ?? "",
     sport: meta.sport ?? "",
@@ -47,41 +53,105 @@ export default function ProfilePage() {
     selectedCerts: meta.certifications ?? [],
     playerName: meta.playerName ?? "",
     playerAge: meta.playerAge ?? "",
+    isHidden: meta.isHidden ?? false,
+    customSpecialty: "",
+    photo: meta.photo ?? "",
+    league: meta.league ?? "",
+    leagueOther: "",
+    team: meta.team ?? "",
+    birthYear: meta.birthYear ?? "",
   });
 
-  function set(key: string, val: string) { setForm((f) => ({ ...f, [key]: val })); }
+  function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
 
   function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports", val: string) {
     setForm((f) => ({
       ...f,
-      [key]: f[key].includes(val) ? f[key].filter((v) => v !== val) : [...f[key], val],
+      [key]: (f[key] as string[]).includes(val)
+        ? (f[key] as string[]).filter((v) => v !== val)
+        : [...(f[key] as string[]), val],
     }));
+  }
+
+  async function handlePhotoUpload(file: File) {
+    setUploadingPhoto(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      });
+      const { uploadUrl, cdnUrl } = await res.json();
+      await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+      set("photo", cdnUrl);
+    } finally {
+      setUploadingPhoto(false);
+    }
   }
 
   async function handleSave() {
     if (!meta.role) return;
     setSaving(true);
-    await completeOnboarding({ role: meta.role, ...form });
+    const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
+    await completeOnboarding({ role: meta.role, ...form, league: leagueValue });
     setSaved(true);
     setSaving(false);
+    setTimeout(() => setSaved(false), 3000);
   }
 
   if (!isLoaded) return <div className="py-12 text-muted-foreground">Loading…</div>;
 
   const role = meta.role ?? "player";
+  const photoSrc = form.photo || user?.imageUrl || "";
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">My Profile</h1>
-        {saved && (
-          <div className="flex items-center gap-1.5 text-green-700 text-sm font-medium">
-            <CheckCircle className="h-4 w-4" /> Saved
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {role !== "trainer" && user?.id && (
+            <Link href={`/connect/${user.id}`} target="_blank"
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#f0f4f9]"
+              style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+              <ExternalLink className="h-3.5 w-3.5" /> View profile
+            </Link>
+          )}
+          {saved && (
+            <div className="flex items-center gap-1.5 text-green-700 text-sm font-medium">
+              <CheckCircle className="h-4 w-4" /> Saved
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-6">
+
+        {/* Photo upload */}
+        <div className="bg-card border rounded-2xl p-6">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Profile Photo</h2>
+          <div className="flex items-center gap-5">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-[#f0f4f9] shrink-0">
+              {photoSrc ? (
+                <Image src={photoSrc} alt="Profile" fill className="object-cover" sizes="80px" unoptimized />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
+                  style={{ backgroundColor: "#0F3154" }}>
+                  {(form.firstName?.[0] ?? "?").toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div>
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])} />
+              <Button variant="outline" size="sm" disabled={uploadingPhoto} onClick={() => fileRef.current?.click()}>
+                {uploadingPhoto ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Uploading…</> : <><Camera className="h-4 w-4 mr-1.5" /> Change photo</>}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1.5">JPEG, PNG or WebP · max 5 MB</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Basic info */}
         <div className="bg-card border rounded-2xl p-6">
           <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Basic Info</h2>
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -106,6 +176,7 @@ export default function ProfilePage() {
             <label className="text-sm font-medium mb-1.5 block">City</label>
             <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary, London, Lagos" />
           </div>
+
           {role !== "trainer" ? (
             <div>
               <label className="text-sm font-medium mb-2 block">Sport</label>
@@ -135,46 +206,93 @@ export default function ProfilePage() {
                   </button>
                 ))}
               </div>
-              {form.selectedSports.length === 0 && (
-                <p className="text-xs text-muted-foreground mt-1.5">Don't see your sport? Contact us to add it.</p>
-              )}
             </div>
           )}
         </div>
 
-        {role === "player" && (
-          <div className="bg-card border rounded-2xl p-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Skill Level</h2>
-            <div className="grid grid-cols-4 gap-2">
-              {levels.map((l) => (
-                <button key={l} type="button" onClick={() => set("level", l)}
-                  className="py-2 rounded-lg text-sm font-medium border transition-colors"
-                  style={form.level === l
-                    ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
-                    : { borderColor: "#e2e8f0", color: "#475569" }}>
-                  {l}
-                </button>
-              ))}
+        {/* Player-specific fields */}
+        {role !== "trainer" && (
+          <>
+            <div className="bg-card border rounded-2xl p-6 space-y-5">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Player Details</h2>
+
+              {/* Birth year */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Birth year</label>
+                <select value={form.birthYear} onChange={(e) => set("birthYear", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="">Select year</option>
+                  {birthYears.map((y) => <option key={y}>{y}</option>)}
+                </select>
+              </div>
+
+              {/* Skill level */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Skill level</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {levels.map((l) => (
+                    <button key={l} type="button" onClick={() => set("level", l)}
+                      className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                      style={form.level === l
+                        ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                        : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Competitive league */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Competitive level / league</label>
+                <select value={form.league} onChange={(e) => set("league", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="">Select league</option>
+                  {leagues.map((l) => <option key={l}>{l}</option>)}
+                </select>
+                {form.league === "Other" && (
+                  <Input className="mt-2" value={form.leagueOther} onChange={(e) => set("leagueOther", e.target.value)}
+                    placeholder="Type your league…" />
+                )}
+              </div>
+
+              {/* Team */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Team / Club</label>
+                <Input value={form.team} onChange={(e) => set("team", e.target.value)}
+                  placeholder="e.g. NCFC, Charlotte Independence" />
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">What are you looking for? <span className="text-muted-foreground font-normal">(short bio)</span></label>
+                <textarea value={form.bio} onChange={(e) => set("bio", e.target.value)}
+                  placeholder="e.g. Looking for weekly soccer training sessions to improve my finishing and 1v1 skills…"
+                  rows={3} maxLength={300}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                <p className="text-xs text-muted-foreground mt-1">{form.bio.length}/300 characters</p>
+              </div>
             </div>
-          </div>
+
+            {role === "parent" && (
+              <div className="bg-card border rounded-2xl p-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Player Details</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Player name</label>
+                    <Input value={form.playerName} onChange={(e) => set("playerName", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Age</label>
+                    <Input type="number" min="4" max="18" value={form.playerAge} onChange={(e) => set("playerAge", e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
-        {role === "parent" && (
-          <div className="bg-card border rounded-2xl p-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Player Details</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Player name</label>
-                <Input value={form.playerName} onChange={(e) => set("playerName", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Age</label>
-                <Input type="number" min="4" max="18" value={form.playerAge} onChange={(e) => set("playerAge", e.target.value)} />
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* Trainer coaching profile */}
         {role === "trainer" && (
           <div className="bg-card border rounded-2xl p-6 space-y-5">
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Coaching Profile</h2>
@@ -276,7 +394,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Archive toggle — trainers only */}
+        {/* Archive — trainers only */}
         {role === "trainer" && (
           <div className="bg-card border rounded-2xl p-5 border-amber-200" style={{ backgroundColor: "#fffbeb" }}>
             <p className="text-sm font-semibold mb-1">Archive your profile</p>
@@ -294,7 +412,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <Button className="w-full" style={{ backgroundColor: "#DC373E" }} disabled={saving} onClick={handleSave}>
+        <Button className="w-full" style={{ backgroundColor: "#DC373E" }} disabled={saving || uploadingPhoto} onClick={handleSave}>
           {saving ? "Saving…" : "Save changes"}
         </Button>
       </div>
