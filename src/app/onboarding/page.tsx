@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { User, Shield, ChevronRight } from "lucide-react";
 import { completeOnboarding } from "./_actions";
 
-type Role = "player" | "trainer";
+type Role = "player" | "trainer" | "parent";
 
 const roles: { value: Role; label: string; desc: string; icon: typeof User }[] = [
   { value: "player",  label: "Player",         icon: User,   desc: "I want to find and join group sessions near me" },
