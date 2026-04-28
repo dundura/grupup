@@ -30,7 +30,7 @@ export default function AdminClient({
 }: {
   trainers: AdminUser[]; players: AdminUser[]; bookings: AdminBooking[]; sessions: AdminSession[];
 }) {
-  const { signIn, isLoaded: signInLoaded } = useSignIn();
+  const { signIn } = useSignIn();
   const [tab, setTab] = useState<"trainers" | "players" | "sessions" | "payouts">("trainers");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState({ trainers, players });
@@ -89,7 +89,7 @@ export default function AdminClient({
   }
 
   async function handleImpersonate() {
-    if (!impersonateModal || !signInLoaded) return;
+    if (!impersonateModal || !signIn) return;
     setImpersonating(true);
     try {
       const res = await fetch("/api/admin/impersonate", {
