@@ -75,7 +75,9 @@ export default function DashboardPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setStripeError(data.error ?? "Something went wrong. Please try again.");
+        const msg = data.error ?? "Something went wrong. Please try again.";
+        setStripeError(msg);
+        alert("Stripe error: " + msg);
         setConnectingStripe(false);
       }
     } catch {
