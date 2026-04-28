@@ -105,8 +105,15 @@ export default function ProfilePage() {
     }
   }
 
+  // Photo is valid only if it's an explicit CloudFront upload (not a Clerk default avatar)
+  const hasUploadedPhoto = form.photo.includes("cloudfront.net");
+
   async function handleSave() {
     if (!meta.role) return;
+    if (!hasUploadedPhoto) {
+      if (fileRef.current) fileRef.current.click();
+      return;
+    }
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
@@ -118,21 +125,19 @@ export default function ProfilePage() {
 
   if (!isLoaded) return <div className="py-12 text-muted-foreground">Loading…</div>;
 
-  if (cropSrc) {
-    return (
-      <PhotoCropModal
-        imageSrc={cropSrc}
-        onApply={handleCropApply}
-        onCancel={() => setCropSrc(null)}
-      />
-    );
-  }
-
   const role = meta.role ?? "player";
   const photoSrc = form.photo || user?.imageUrl || "";
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Crop modal — rendered as fixed overlay */}
+      {cropSrc && (
+        <PhotoCropModal
+          imageSrc={cropSrc}
+          onApply={handleCropApply}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">My Profile</h1>
         <div className="flex items-center gap-3">
@@ -154,8 +159,15 @@ export default function ProfilePage() {
       <div className="space-y-6">
 
         {/* Photo upload */}
-        <div className="bg-card border rounded-2xl p-6">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Profile Photo</h2>
+        <div className={`bg-card border rounded-2xl p-6 ${!hasUploadedPhoto ? "border-red-300 bg-red-50/30" : ""}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Profile Photo <span className="text-red-500 ml-0.5">*</span>
+            </h2>
+            {!hasUploadedPhoto && (
+              <span className="text-xs font-semibold text-red-600">Required</span>
+            )}
+          </div>
           <div className="flex items-center gap-5">
             <div className="relative w-20 h-20 rounded-full overflow-hidden bg-[#f0f4f9] shrink-0">
               {photoSrc ? (
@@ -520,8 +532,14 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <Button className="w-full" style={{ backgroundColor: "#DC373E" }} disabled={saving || uploadingPhoto} onClick={handleSave}>
-          {saving ? "Saving…" : "Save changes"}
+        {!hasUploadedPhoto && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center font-medium">
+            A profile photo is required — upload one above to save.
+          </p>
+        )}
+        <Button className="w-full" style={{ backgroundColor: !hasUploadedPhoto ? "#e5e7eb" : "#DC373E", color: !hasUploadedPhoto ? "#9ca3af" : "white" }}
+          disabled={saving || uploadingPhoto} onClick={handleSave}>
+          {saving ? "Saving…" : !hasUploadedPhoto ? "Upload a photo to save" : "Save changes"}
         </Button>
       </div>
     </div>
