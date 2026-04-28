@@ -56,7 +56,7 @@ export function Hero() {
                   Group sports training
                 </h1>
                 <p
-                  className="text-[#DC373E] uppercase leading-tight mb-3 text-5xl md:text-6xl lg:text-7xl"
+                  className="text-[#DC373E] uppercase leading-tight mb-3 text-4xl md:text-5xl lg:text-[56px]"
                   style={{ fontFamily: "var(--font-barlow-condensed)", fontWeight: 800 }}
                 >
                   Convenient, Affordable, Social
