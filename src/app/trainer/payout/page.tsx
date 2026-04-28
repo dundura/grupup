@@ -133,13 +133,17 @@ export default function PayoutSettingsPage() {
 
         {/* Stripe note */}
         {selected === "stripe" && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-5 text-sm">
-            <p className="font-semibold text-blue-800 mb-1">Stripe Connect setup required</p>
-            <p className="text-blue-700 leading-relaxed">
-              To receive payouts via direct deposit, you'll need to complete Stripe's identity verification. This takes about 5 minutes.
-              Once your account is approved, payouts arrive automatically 1–2 business days after a session.
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-5 text-sm">
+            <p className="font-semibold text-green-800 mb-1">Stripe Connect is live ✓</p>
+            <p className="text-green-700 leading-relaxed">
+              Connect your bank account via Stripe and get paid automatically after every booking — no manual requests needed.
+              Setup takes about 2 minutes and payouts arrive 1–2 business days after a session.
             </p>
-            <p className="text-blue-600 text-xs mt-2 font-medium">Coming soon — we'll email you when Stripe Connect is live.</p>
+            <a href="/dashboard"
+              className="inline-block mt-3 px-4 py-2 rounded-lg text-white text-xs font-semibold"
+              style={{ backgroundColor: "#0F3154" }}>
+              Connect Stripe on your dashboard →
+            </a>
           </div>
         )}
 
