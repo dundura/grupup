@@ -107,6 +107,16 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
+            {/* About section */}
+            {bioText && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About {trainer.name.split(" ")[0]}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {bioText.length > 400 ? `${bioText.slice(0, 400)}…` : bioText}
+                </p>
+              </div>
+            )}
+
             {/* Package booking — client component */}
             <PackageBooking
               trainerId={trainer.id}
