@@ -194,15 +194,13 @@ export default async function ConnectPage() {
                         ))}
                           {p.gender && <span>{p.gender}</span>}
                       </div>
-                      {p.level && (
-                        <div className="mt-3">
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white">
-                            {p.level}
-                          </span>
-                        </div>
-                      )}
-                      {(p.availableForFreePlay || p.openToTrain) && (
+                      {(p.level || p.availableForFreePlay || p.openToTrain) && (
                         <div className="flex items-center justify-center flex-wrap gap-2 mt-3">
+                          {p.level && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white">
+                              {p.level}
+                            </span>
+                          )}
                           {p.availableForFreePlay && (
                             <span className="px-2.5 py-1 rounded-full bg-[#DC373E]/25 text-[#FF9EA2] text-[11px] font-semibold animate-pulse">
                               Free Play
