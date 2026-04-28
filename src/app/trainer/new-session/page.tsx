@@ -148,7 +148,7 @@ export default function NewSessionPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
 
           <div className="bg-white rounded-2xl border p-6">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Session Title</label>
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Session Title <span style={{ color: "#DC373E" }}>*</span></label>
             <Input value={form.title} onChange={(e) => set("title", e.target.value)}
               placeholder="e.g. Tuesday Finishing Clinic – Cary" className="text-base" />
           </div>
