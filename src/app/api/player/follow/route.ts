@@ -39,7 +39,22 @@ export async function POST(req: NextRequest) {
     const fromName = `${sender.firstName ?? ""} ${sender.lastName ?? ""}`.trim() || "Someone";
     const toName = `${target.firstName ?? ""} ${target.lastName ?? ""}`.trim() || "there";
     const toEmail = target.emailAddresses?.[0]?.emailAddress ?? "";
-    if (toEmail) await sendFollowRequest({ toEmail, toName, fromName });
+    const senderMeta = sender.publicMetadata as {
+      photo?: string; playerSports?: string[]; sport?: string; level?: string;
+      city?: string; country?: string; bio?: string; profileSlug?: string;
+    };
+    if (toEmail) await sendFollowRequest({
+      toEmail,
+      toName,
+      fromName,
+      fromPhoto: senderMeta.photo ?? sender.imageUrl ?? "",
+      fromSports: senderMeta.playerSports?.length ? senderMeta.playerSports : (senderMeta.sport ? [senderMeta.sport] : []),
+      fromLevel: senderMeta.level,
+      fromCity: senderMeta.city,
+      fromCountry: senderMeta.country,
+      fromBio: senderMeta.bio,
+      fromProfileId: senderMeta.profileSlug ?? sender.id,
+    });
   } catch {}
 
   return NextResponse.json({ status: "pending" });

@@ -144,12 +144,31 @@ export async function sendFollowRequest({
   toEmail,
   toName,
   fromName,
+  fromPhoto,
+  fromSports,
+  fromLevel,
+  fromCity,
+  fromCountry,
+  fromBio,
+  fromProfileId,
 }: {
   toEmail: string;
   toName: string;
   fromName: string;
+  fromPhoto?: string;
+  fromSports?: string[];
+  fromLevel?: string;
+  fromCity?: string;
+  fromCountry?: string;
+  fromBio?: string;
+  fromProfileId?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
+
+  const location = [fromCity, fromCountry].filter(Boolean).join(", ");
+  const sports = (fromSports ?? []).join(" · ");
+  const profileUrl = fromProfileId ? `https://www.grupup.app/connect/${fromProfileId}` : "https://www.grupup.app/dashboard";
+
   await getResend().emails.send({
     from: FROM,
     to: toEmail,
@@ -161,13 +180,33 @@ export async function sendFollowRequest({
           <h1 style="color: white; margin: 0; font-size: 20px;">New follow request 👋</h1>
           <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Someone wants to connect with you on GrupUp</p>
         </div>
-        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
-          <strong>${fromName}</strong> sent you a follow request on GrupUp. Approve it to let them message you and see your profile activity.
-        </p>
-        <a href="https://www.grupup.app/dashboard"
-          style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 12px;">
-          Approve or Deny on Dashboard
-        </a>
+
+        <!-- Player card -->
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+          <div style="background: #0F3154; padding: 20px 24px; text-align: center;">
+            ${fromPhoto
+              ? `<img src="${fromPhoto}" alt="${fromName}" width="80" height="80" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.3);margin-bottom:12px;" />`
+              : `<div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:800;color:white;">${fromName[0]?.toUpperCase() ?? "?"}</div>`
+            }
+            <div style="color:white;font-size:18px;font-weight:700;letter-spacing:0.5px;">${fromName.toUpperCase()}</div>
+            ${location ? `<div style="color:rgba(255,255,255,0.65);font-size:13px;margin-top:4px;">📍 ${location}</div>` : ""}
+            ${sports ? `<div style="color:rgba(255,255,255,0.65);font-size:13px;margin-top:4px;">${sports}</div>` : ""}
+            ${fromLevel ? `<div style="display:inline-block;background:rgba(255,255,255,0.15);color:white;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-top:8px;">${fromLevel}</div>` : ""}
+          </div>
+          ${fromBio ? `<div style="padding:16px 20px;background:white;"><p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">${fromBio}</p></div>` : ""}
+        </div>
+
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <a href="https://www.grupup.app/dashboard"
+            style="flex:1;display:block;background:#0F3154;color:white;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+            Approve Request
+          </a>
+          <a href="${profileUrl}"
+            style="flex:1;display:block;background:white;color:#0F3154;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;border:2px solid #0F3154;">
+            View Profile
+          </a>
+        </div>
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">Go to your dashboard to approve or deny this request.</p>
       </div>
     `,
   });
