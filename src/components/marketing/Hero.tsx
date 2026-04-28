@@ -121,7 +121,7 @@ export function Hero() {
               {/* Floating card — top right */}
               <div
                 className="absolute -top-4 right-4 rounded-xl shadow-xl p-4 w-52"
-                style={{ backgroundColor: "#0F3154", animation: "heroFloat 4s ease-in-out infinite" }}
+                style={{ backgroundColor: "#0F3154", animation: "heroFloat 5s ease-in-out infinite" }}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -133,7 +133,7 @@ export function Hero() {
               {/* Floating card — bottom left */}
               <div
                 className="absolute -bottom-4 left-4 bg-white rounded-xl shadow-xl p-4 w-56"
-                style={{ animation: "heroFloat 4s ease-in-out 2s infinite" }}
+                style={{ animation: "heroFloat 5s ease-in-out 2s infinite" }}
               >
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Why group?</p>
                 <p className="text-sm font-semibold text-gray-800">Up to 60% less than private training</p>
