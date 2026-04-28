@@ -110,22 +110,22 @@ export default async function ConnectPage() {
                 const initialFollowing = viewerFollows.includes(p.clerkId);
 
                 return (
-                  <div key={p.id} className="relative pt-[72px]">
+                  <div key={p.id} className="relative pt-[80px]">
                     {/* Circular photo */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-36 h-36 rounded-full border-4 border-white shadow-md overflow-hidden"
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-40 h-40 rounded-full border-4 border-white shadow-md overflow-hidden"
                       style={{ backgroundColor: bg }}>
                       {p.photo ? (
-                        <Image src={p.photo} alt={p.name} fill className="object-cover" sizes="144px" unoptimized />
+                        <Image src={p.photo} alt={p.name} fill className="object-cover" sizes="160px" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"
                           style={{ background: `linear-gradient(135deg, ${bg} 0%, ${bg}cc 100%)` }}>
-                          <span className="text-4xl font-extrabold text-white/90 select-none">{initials}</span>
+                          <span className="text-5xl font-extrabold text-white/90 select-none">{initials}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Dark navy top */}
-                    <div className="rounded-t-2xl pt-[72px] pb-5 px-5 text-center" style={{ backgroundColor: "#0F3154" }}>
+                    <div className="rounded-t-2xl pt-[80px] pb-5 px-5 text-center" style={{ backgroundColor: "#0F3154" }}>
                       <h3 className="text-lg font-bold text-white uppercase tracking-wide mt-2 leading-tight">{p.name}</h3>
                       <div className="flex items-center justify-center flex-wrap gap-3 mt-3 text-white/70 text-xs">
                         {(p.city || p.country) && (
@@ -164,7 +164,7 @@ export default async function ConnectPage() {
                         {p.team && (
                           <>
                             <span className="text-muted-foreground">·</span>
-                            <span className="font-bold" style={{ color: "#0F3154" }}>🏆 {p.team}</span>
+                            <span className="font-bold" style={{ color: "#0F3154" }}>{p.team}</span>
                           </>
                         )}
                       </div>
