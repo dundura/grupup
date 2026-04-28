@@ -1,9 +1,20 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
-import { Users, MapPin, Trophy } from "lucide-react";
+import { MapPin, Trophy, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const COLORS = [
+  "#0F3154", "#1a4a7a", "#1e3a5f", "#0d2d4a", "#163d6b",
+  "#2d5986", "#1b4170", "#0e3560",
+];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
 
 export default async function ConnectPage() {
   let approvedPlayers: {
@@ -23,7 +34,7 @@ export default async function ConnectPage() {
       .map((u) => {
         const meta = u.publicMetadata as {
           city?: string; country?: string; sport?: string; level?: string;
-          league?: string; bio?: string; photo?: string;
+          league?: string; bio?: string; photo?: string; team?: string;
         };
         return {
           id: u.id,
@@ -35,7 +46,7 @@ export default async function ConnectPage() {
           level: meta.level ?? "",
           league: meta.league ?? "",
           bio: meta.bio ?? "",
-          team: (meta as any).team ?? "",
+          team: meta.team ?? "",
         };
       });
   } catch {
@@ -48,7 +59,7 @@ export default async function ConnectPage() {
         <div className="container py-8 md:py-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-1">Connect</h1>
           <p className="text-muted-foreground">
-            Find players and parents looking for group training partners near you.
+            Find players looking for group training partners near you.
           </p>
         </div>
       </div>
@@ -62,7 +73,7 @@ export default async function ConnectPage() {
             </div>
             <h2 className="text-2xl font-bold mb-3">No players yet</h2>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              Be the first to join! Create a free account and get approved to appear here and find training partners.
+              Be the first to join! Create an account and get approved to appear here and find training partners.
             </p>
             <Link href="/sign-up"
               className="inline-block px-6 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90"
@@ -72,66 +83,82 @@ export default async function ConnectPage() {
           </div>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground mb-6">{approvedPlayers.length} player{approvedPlayers.length !== 1 ? "s" : ""} looking for training partners</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {approvedPlayers.map((p) => (
-                <div key={p.id} className="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 bg-[#f0f4f9]">
+            <p className="text-sm text-muted-foreground mb-6">
+              {approvedPlayers.length} player{approvedPlayers.length !== 1 ? "s" : ""} looking for training partners
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {approvedPlayers.map((p) => {
+                const initials = p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+                const bg = avatarColor(p.name);
+                const tags = [p.team, p.league, p.level, p.sport].filter(Boolean);
+                return (
+                  <Link key={p.id} href={`/connect/${p.id}`}
+                    className="group block bg-card border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all">
+
+                    {/* Photo / avatar header */}
+                    <div className="relative aspect-[4/3] overflow-hidden">
                       {p.photo ? (
-                        <Image src={p.photo} alt={p.name} fill className="object-cover" sizes="48px" unoptimized />
+                        <Image src={p.photo} alt={p.name} fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                          unoptimized />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-lg font-bold text-white"
-                          style={{ backgroundColor: "#0F3154" }}>
-                          {p.name?.[0] ?? "?"}
+                        <div className="w-full h-full flex items-center justify-center"
+                          style={{ background: `linear-gradient(135deg, ${bg} 0%, ${bg}cc 100%)` }}>
+                          <span className="text-5xl font-extrabold text-white/90 select-none">{initials}</span>
+                        </div>
+                      )}
+                      {/* Sport pill top-right */}
+                      {p.sport && (
+                        <div className="absolute top-3 right-3 bg-background/95 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold">
+                          {p.sport}
                         </div>
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate">{p.name}</p>
+
+                    {/* Card body */}
+                    <div className="p-5">
+                      <h3 className="font-bold text-lg leading-tight mb-1">{p.name}</h3>
+
                       {(p.city || p.country) && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{[p.city, p.country].filter(Boolean).join(", ")}</span>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          <span>{[p.city, p.country].filter(Boolean).join(", ")}</span>
+                        </div>
+                      )}
+
+                      {p.bio && (
+                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+                          {p.bio}
                         </p>
                       )}
+
+                      {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {p.team && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
+                              style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
+                              <Users className="h-3 w-3" /> {p.team}
+                            </span>
+                          )}
+                          {p.league && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
+                              style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>
+                              <Trophy className="h-3 w-3" /> {p.league}
+                            </span>
+                          )}
+                          {p.level && !p.league && (
+                            <span className="text-xs font-medium px-2.5 py-1 rounded-full"
+                              style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>
+                              {p.level}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  {p.bio && (
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{p.bio}</p>
-                  )}
-
-                  <div className="flex flex-wrap gap-1.5 mt-auto">
-                    {p.sport && (
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>
-                        {p.sport}
-                      </span>
-                    )}
-                    {p.level && (
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>
-                        {p.level}
-                      </span>
-                    )}
-                    {p.team && (
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>
-                        {p.team}
-                      </span>
-                    )}
-                    {p.league && (
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1"
-                        style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>
-                        <Trophy className="h-3 w-3" /> {p.league}
-                      </span>
-                    )}
-                  </div>
-                  <Link href={`/connect/${p.id}`}
-                    className="mt-2 block w-full text-center py-2 rounded-xl border text-xs font-semibold transition-colors hover:bg-[#f0f4f9]"
-                    style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                    View profile
                   </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

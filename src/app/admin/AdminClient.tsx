@@ -231,6 +231,13 @@ export default function AdminClient({
                             )
                           )}
                           {tab === "players" && (
+                            <Link href={`/connect/${u.id}`} target="_blank"
+                              title="View profile"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-[#f0f4f9] transition-colors">
+                              <ExternalLink className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                            </Link>
+                          )}
+                          {tab === "players" && (
                             u.isApproved ? (
                               <button onClick={() => handleApprovePlayer(u.id, false)} disabled={loading === u.id} title="Revoke approval"
                                 className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-red-50 hover:border-red-300 transition-colors">
