@@ -6,7 +6,8 @@ import type { Area } from "react-easy-crop";
 import { X, ZoomIn, ZoomOut, Loader2 } from "lucide-react";
 import { Button } from "./button";
 
-const Cropper = dynamic(() => import("react-easy-crop"), { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Cropper = dynamic(() => import("react-easy-crop"), { ssr: false }) as any;
 
 async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = await new Promise<HTMLImageElement>((resolve, reject) => {
