@@ -33,6 +33,8 @@ export default function DashboardPage() {
   const [deleteModal, setDeleteModal]         = useState<number | null>(null);
   const [deleting, setDeleting]               = useState(false);
   const [trainerBookings, setTrainerBookings] = useState<any[]>([]);
+  const [archiving, setArchiving] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -51,12 +53,24 @@ export default function DashboardPage() {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
+        setIsArchived(profile?.isArchived ?? false);
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [isLoaded, role]);
+
+  async function handleArchive(archive: boolean) {
+    setArchiving(true);
+    const res = await fetch("/api/user/archive", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archive }),
+    });
+    if (res.ok) setIsArchived(archive);
+    setArchiving(false);
+  }
 
   async function confirmDelete() {
     if (!deleteModal) return;
@@ -429,6 +443,40 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Account */}
+        <div className="bg-white rounded-2xl border p-6">
+          <h2 className="text-base font-bold mb-1">Account</h2>
+          <p className="text-xs text-muted-foreground mb-5">Manage your account visibility.</p>
+
+          {isArchived ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm text-amber-800">Your account is hidden</p>
+                  <p className="text-xs text-amber-700 mt-0.5">Your profile and sessions are not visible to anyone. Reactivate to appear in search results.</p>
+                </div>
+              </div>
+              <button onClick={() => handleArchive(false)} disabled={archiving}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border-2 transition-colors disabled:opacity-50"
+                style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+                {archiving ? "Reactivating…" : "Reactivate my account"}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Archiving hides your profile and all sessions from search results. Your data is preserved and you can reactivate at any time.
+              </p>
+              <button onClick={() => handleArchive(true)} disabled={archiving}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border-2 transition-colors disabled:opacity-50 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                style={{ borderColor: "#e2e8f0", color: "#6b7280" }}>
+                {archiving ? "Archiving…" : "Archive my account"}
+              </button>
+            </div>
+          )}
+        </div>
 
       </div>
     </div>

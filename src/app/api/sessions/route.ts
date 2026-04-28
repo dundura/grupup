@@ -17,11 +17,13 @@ export async function GET() {
       .select()
       .from(trainers)
       .where(eq(trainers.isApproved, true))
+      .then((rows) => rows.filter((r) => !r.isArchived))
       .then((rows) => {
         const map: Record<string, typeof rows[number]> = {};
         for (const r of rows) { if (r.clerkId) map[r.clerkId] = r; }
         return map;
       });
+
 
     // Fall back to Clerk for name/photo if DB profile not yet created
     const client = await clerkClient();
