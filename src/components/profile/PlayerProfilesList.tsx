@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Plus, Pencil, Trash2, Camera, Loader2, ChevronDown, ChevronUp, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Pencil, Trash2, Camera, Loader2, ChevronDown, ChevronUp, X, User, Shield } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,10 +51,12 @@ export default function PlayerProfilesList({
   initialProfiles: ChildProfile[];
   onChange: (profiles: ChildProfile[]) => void;
 }) {
+  const router = useRouter();
   const [profiles, setProfiles] = useState<ChildProfile[]>(initialProfiles);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ profileId: string; src: string } | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [showRoleSelect, setShowRoleSelect] = useState(false);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   function update(id: string, patch: Partial<ChildProfile>) {
@@ -68,13 +71,18 @@ export default function PlayerProfilesList({
     update(id, { sports: next });
   }
 
-  function addProfile() {
+  function addPlayerProfile() {
     if (profiles.length >= MAX_PROFILES) return;
+    setShowRoleSelect(false);
     const p = emptyProfile();
     const updated = [...profiles, p];
     setProfiles(updated);
     onChange(updated);
     setExpandedId(p.id);
+  }
+
+  function addProfile() {
+    setShowRoleSelect(true);
   }
 
   function removeProfile(id: string) {
@@ -103,21 +111,59 @@ export default function PlayerProfilesList({
 
   return (
     <div className="bg-card border rounded-2xl p-6">
+      {/* Role selector modal */}
+      {showRoleSelect && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <h2 className="text-lg font-bold mb-1">Add a profile</h2>
+            <p className="text-sm text-muted-foreground mb-5">What type of profile do you want to add?</p>
+            <div className="space-y-3 mb-5">
+              <button onClick={addPlayerProfile}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:border-[#0F3154] hover:bg-[#f0f4f9]"
+                style={{ borderColor: "#e2e8f0" }}>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f4f9]">
+                  <User className="h-5 w-5" style={{ color: "#0F3154" }} />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Player</p>
+                  <p className="text-xs text-muted-foreground">Add a player profile to appear on Connect</p>
+                </div>
+              </button>
+              <button onClick={() => { setShowRoleSelect(false); router.push("/trainer/setup"); }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:border-[#0F3154] hover:bg-[#f0f4f9]"
+                style={{ borderColor: "#e2e8f0" }}>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f4f9]">
+                  <Shield className="h-5 w-5" style={{ color: "#0F3154" }} />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Coach / Trainer</p>
+                  <p className="text-xs text-muted-foreground">Create and run group training sessions</p>
+                </div>
+              </button>
+            </div>
+            <button onClick={() => setShowRoleSelect(false)}
+              className="w-full py-2 rounded-xl border text-sm font-semibold text-muted-foreground hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Players</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Profiles</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{profiles.length}/{MAX_PROFILES} profiles</p>
         </div>
         {profiles.length < MAX_PROFILES && (
           <Button variant="outline" size="sm" onClick={addProfile}>
-            <Plus className="h-4 w-4 mr-1" /> Add player
+            <Plus className="h-4 w-4 mr-1" /> Add profile
           </Button>
         )}
       </div>
 
       {profiles.length === 0 && (
         <div className="text-center py-8 text-muted-foreground text-sm">
-          No player profiles yet. Click "Add player" to get started.
+          No profiles yet. Click "Add profile" to get started.
         </div>
       )}
 
