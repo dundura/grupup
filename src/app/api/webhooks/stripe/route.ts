@@ -3,10 +3,21 @@ import Stripe from "stripe";
 import { db } from "@/db";
 import { bookings, trainerSessions, trainers } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { sendBookingConfirmation } from "@/lib/email";
+import { sendBookingConfirmation, sendTrainerNewBooking } from "@/lib/email";
+import { clerkClient } from "@clerk/nextjs/server";
+
+const ADMIN_EMAIL = "neil@anytime-soccer.com";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
+}
+
+async function getTrainerEmail(clerkId: string): Promise<string> {
+  try {
+    const client = await clerkClient();
+    const u = await client.users.getUser(clerkId);
+    return u.emailAddresses?.[0]?.emailAddress ?? "";
+  } catch { return ""; }
 }
 
 export async function POST(req: NextRequest) {
@@ -22,10 +33,57 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const cs = event.data.object as Stripe.Checkout.Session;
-    const { trainerSessionId, userId, userName, userEmail, athleteName, notes } = cs.metadata ?? {};
+    const { trainerSessionId, userId, userName, userEmail, athleteName, notes, sessionCount, type, trainerId } = cs.metadata ?? {};
+    const amount = (cs.amount_total ?? 0) / 100;
+
+    // Private bookings
+    if (type === "private" && trainerId) {
+      const [trainerRow] = await db.select().from(trainers).where(eq(trainers.id, trainerId));
+      await db.insert(bookings).values({
+        sessionId: null,
+        clerkUserId: userId ?? "",
+        userName: userName ?? "",
+        userEmail: userEmail ?? "",
+        athleteName: athleteName ?? "",
+        status: "paid",
+        stripeSessionId: cs.id,
+        amountPaid: amount,
+        bookingType: "private",
+        trainerClerkId: trainerRow?.clerkId ?? null,
+        sessionCount: parseInt(sessionCount ?? "1") || 1,
+        trainerPaid: false,
+      });
+
+      // Notify trainer
+      if (trainerRow?.clerkId) {
+        const trainerEmail = await getTrainerEmail(trainerRow.clerkId);
+        if (trainerEmail) {
+          await sendTrainerNewBooking({
+            trainerEmail,
+            trainerName: trainerRow.name,
+            playerName: userName ?? "Someone",
+            sessionTitle: "Private Session",
+            amount,
+          });
+        }
+      }
+
+      // Notify admin
+      await sendTrainerNewBooking({
+        trainerEmail: ADMIN_EMAIL,
+        trainerName: "Admin",
+        playerName: `${userName ?? "Someone"} booked a private session with ${trainerRow?.name ?? "a trainer"}`,
+        sessionTitle: "Private Session",
+        amount,
+      });
+
+      return NextResponse.json({ received: true });
+    }
 
     const sessionIdInt = parseInt(trainerSessionId ?? "");
     if (isNaN(sessionIdInt)) return NextResponse.json({ received: true });
+
+    const [sessionRow] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
 
     // Record booking
     await db.insert(bookings).values({
@@ -33,12 +91,17 @@ export async function POST(req: NextRequest) {
       clerkUserId: userId ?? "",
       userName: userName ?? "",
       userEmail: userEmail ?? "",
+      athleteName: athleteName ?? "",
       status: "paid",
       stripeSessionId: cs.id,
-      amountPaid: (cs.amount_total ?? 0) / 100,
+      amountPaid: amount,
+      bookingType: "group",
+      trainerClerkId: sessionRow?.trainerClerkId ?? null,
+      sessionCount: parseInt(sessionCount ?? "1") || 1,
+      trainerPaid: false,
     });
 
-    // Decrement spots and auto-deactivate if full
+    // Decrement spots
     await db
       .update(trainerSessions)
       .set({ spotsLeft: sql`GREATEST(${trainerSessions.spotsLeft} - 1, 0)` })
@@ -46,14 +109,14 @@ export async function POST(req: NextRequest) {
 
     const [session] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
 
-    // Auto-deactivate when full
     if (session && session.spotsLeft <= 0) {
       await db.update(trainerSessions).set({ isActive: false }).where(eq(trainerSessions.id, sessionIdInt));
     }
 
-    // Send confirmation email
+    const [trainer] = await db.select().from(trainers).where(eq(trainers.clerkId, session?.trainerClerkId ?? ""));
+
+    // Email player
     if (session && userEmail) {
-      const [trainer] = await db.select().from(trainers).where(eq(trainers.clerkId, session.trainerClerkId));
       await sendBookingConfirmation({
         toEmail: userEmail,
         toName: userName ?? "there",
@@ -63,9 +126,32 @@ export async function POST(req: NextRequest) {
         time: session.time ?? "",
         venue: session.venue ?? "",
         city: session.city ?? "",
-        amount: (cs.amount_total ?? 0) / 100,
+        amount,
       });
     }
+
+    // Email trainer
+    if (trainer?.clerkId) {
+      const trainerEmail = await getTrainerEmail(trainer.clerkId);
+      if (trainerEmail) {
+        await sendTrainerNewBooking({
+          trainerEmail,
+          trainerName: trainer.name,
+          playerName: userName ?? "Someone",
+          sessionTitle: session?.title ?? "your session",
+          amount,
+        });
+      }
+    }
+
+    // Email admin
+    await sendTrainerNewBooking({
+      trainerEmail: ADMIN_EMAIL,
+      trainerName: "Admin",
+      playerName: `${userName ?? "Someone"} → ${session?.title ?? "session"} (${trainer?.name ?? "unknown trainer"})`,
+      sessionTitle: session?.title ?? "Group Session",
+      amount,
+    });
   }
 
   return NextResponse.json({ received: true });

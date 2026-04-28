@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const [loading, setLoading]                 = useState(true);
   const [deleteModal, setDeleteModal]         = useState<number | null>(null);
   const [deleting, setDeleting]               = useState(false);
+  const [trainerBookings, setTrainerBookings] = useState<any[]>([]);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -45,9 +46,11 @@ export default function DashboardPage() {
       Promise.all([
         fetch("/api/trainer/profile").then((r) => r.json()),
         fetch("/api/trainer/sessions").then((r) => r.json()),
-      ]).then(([profile, sess]) => {
+        fetch("/api/trainer/bookings").then((r) => r.json()),
+      ]).then(([profile, sess, bkgs]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
+        setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
@@ -355,6 +358,52 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Trainer: Earnings / Bookings */}
+        {role === "trainer" && trainerBookings.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-bold">Earnings</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {trainerBookings.filter((b) => !b.trainerPaid).length > 0
+                    ? `$${trainerBookings.filter((b) => !b.trainerPaid).reduce((s: number, b: any) => s + b.trainerAmount, 0)} pending payout`
+                    : "All paid out"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>
+                  ${trainerBookings.reduce((s: number, b: any) => s + b.trainerAmount, 0)}
+                </p>
+                <p className="text-xs text-muted-foreground">total earned</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {trainerBookings.slice(0, 10).map((b: any) => (
+                <div key={b.id} className="flex items-center justify-between py-2.5 border-b last:border-0">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{b.sessionTitle}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {b.userName}{b.athleteName && b.athleteName !== b.userName ? ` · ${b.athleteName}` : ""}
+                      {b.sessionCount > 1 ? ` · ${b.sessionCount} sessions` : ""}
+                      {" · "}{new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-3">
+                    <span className="font-bold text-sm" style={{ color: "#0F3154" }}>${b.trainerAmount}</span>
+                    {b.trainerPaid ? (
+                      <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" /> Paid
+                      </span>
+                    ) : (
+                      <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Pending</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

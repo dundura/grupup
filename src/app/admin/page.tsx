@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { trainers, trainerSessions, bookings } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import AdminClient from "./AdminClient";
 
 export const dynamic = "force-dynamic";
@@ -71,5 +71,40 @@ export default async function AdminPage() {
   trainerList.sort((a, b) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime());
   playerList.sort((a, b) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime());
 
-  return <AdminClient trainers={trainerList} players={playerList} />;
+  // Fetch paid bookings with session + trainer info
+  const allBookings = await db.select().from(bookings).where(eq(bookings.status, "paid")).orderBy(desc(bookings.createdAt));
+  const sessionIds = [...new Set(allBookings.map((b) => b.sessionId).filter(Boolean).map((id) => parseInt(id!)).filter((n) => !isNaN(n)))];
+  const sessionMap: Record<number, { title: string; trainerClerkId: string }> = {};
+  if (sessionIds.length) {
+    const rows = await db.select({ id: trainerSessions.id, title: trainerSessions.title, trainerClerkId: trainerSessions.trainerClerkId }).from(trainerSessions).where(inArray(trainerSessions.id, sessionIds));
+    for (const r of rows) sessionMap[r.id] = { title: r.title, trainerClerkId: r.trainerClerkId };
+  }
+  const bookingTrainerClerkIds = [...new Set([...allBookings.map((b) => b.trainerClerkId).filter(Boolean) as string[], ...Object.values(sessionMap).map((s) => s.trainerClerkId).filter(Boolean)])];
+  const trainerNameMap: Record<string, string> = {};
+  if (bookingTrainerClerkIds.length) {
+    const rows = await db.select({ clerkId: trainers.clerkId, name: trainers.name }).from(trainers).where(inArray(trainers.clerkId, bookingTrainerClerkIds));
+    for (const r of rows) if (r.clerkId) trainerNameMap[r.clerkId] = r.name;
+  }
+  const bookingList = allBookings.map((b) => {
+    const sid = b.sessionId ? parseInt(b.sessionId) : null;
+    const session = sid ? sessionMap[sid] : null;
+    const trainerClerkId = b.trainerClerkId ?? session?.trainerClerkId ?? null;
+    return {
+      id: b.id,
+      createdAt: b.createdAt?.toISOString() ?? "",
+      userName: b.userName ?? "",
+      userEmail: b.userEmail ?? "",
+      athleteName: b.athleteName ?? "",
+      sessionTitle: session?.title ?? (b.bookingType === "private" ? "Private Session" : "Unknown"),
+      bookingType: b.bookingType ?? "group",
+      sessionCount: b.sessionCount ?? 1,
+      amountPaid: b.amountPaid ?? 0,
+      trainerAmount: Math.round((b.amountPaid ?? 0) * 0.85),
+      trainerName: trainerClerkId ? (trainerNameMap[trainerClerkId] ?? "Unknown") : "Unknown",
+      trainerPaid: b.trainerPaid,
+      trainerPaidAt: b.trainerPaidAt?.toISOString() ?? null,
+    };
+  });
+
+  return <AdminClient trainers={trainerList} players={playerList} bookings={bookingList} />;
 }

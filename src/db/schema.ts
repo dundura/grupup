@@ -77,9 +77,15 @@ export const bookings = pgTable("bookings", {
   clerkUserId: varchar("clerk_user_id", { length: 255 }).notNull(),
   userName: varchar("user_name", { length: 200 }),
   userEmail: varchar("user_email", { length: 255 }),
+  athleteName: varchar("athlete_name", { length: 200 }),
   status: varchar("status", { length: 50 }).notNull().default("pending"),
   stripeSessionId: varchar("stripe_session_id", { length: 255 }),
   amountPaid: integer("amount_paid"),
+  sessionCount: integer("session_count").default(1),
+  bookingType: varchar("booking_type", { length: 20 }).default("group"),
+  trainerClerkId: varchar("trainer_clerk_id", { length: 255 }),
+  trainerPaid: boolean("trainer_paid").default(false).notNull(),
+  trainerPaidAt: timestamp("trainer_paid_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

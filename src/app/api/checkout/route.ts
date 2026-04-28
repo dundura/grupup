@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
         athleteName: athleteName ?? "",
         notes: notes ?? "",
         sessionCount: String(sessionCount),
+        type: "group",
       },
       success_url: `${origin}/sessions/${session.id}/book/success?checkout_session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/sessions/${session.id}/book`,
