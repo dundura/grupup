@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { playerFollows } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
+import { sendFollowRequest } from "@/lib/email";
 
 // POST: follow (creates pending) / unfollow
 export async function POST(req: NextRequest) {
@@ -27,6 +28,20 @@ export async function POST(req: NextRequest) {
   if (existing.length) return NextResponse.json({ status: existing[0].status });
 
   await db.insert(playerFollows).values({ followerClerkId: userId, targetClerkId, status: "pending" });
+
+  // Email notification to the target player
+  try {
+    const client = await clerkClient();
+    const [sender, target] = await Promise.all([
+      client.users.getUser(userId),
+      client.users.getUser(targetClerkId),
+    ]);
+    const fromName = `${sender.firstName ?? ""} ${sender.lastName ?? ""}`.trim() || "Someone";
+    const toName = `${target.firstName ?? ""} ${target.lastName ?? ""}`.trim() || "there";
+    const toEmail = target.emailAddresses?.[0]?.emailAddress ?? "";
+    if (toEmail) await sendFollowRequest({ toEmail, toName, fromName });
+  } catch {}
+
   return NextResponse.json({ status: "pending" });
 }
 

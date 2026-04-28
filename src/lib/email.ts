@@ -5,6 +5,7 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 const FROM = "GrupUp <bookings@soccer-near-me.com>";
+const ADMIN_BCC = "neil@anytime-soccer.com";
 
 export async function sendBookingConfirmation({
   toEmail,
@@ -32,6 +33,7 @@ export async function sendBookingConfirmation({
   await getResend().emails.send({
     from: FROM,
     to: toEmail,
+    bcc: ADMIN_BCC,
     subject: `Booking confirmed: ${sessionTitle}`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
@@ -74,6 +76,7 @@ export async function sendWelcomeEmail({
   await getResend().emails.send({
     from: FROM,
     to: toEmail,
+    bcc: ADMIN_BCC,
     subject: "Welcome to GrupUp 👋",
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
@@ -121,6 +124,7 @@ export async function sendTrainerNewFollower({
   await getResend().emails.send({
     from: FROM,
     to: trainerEmail,
+    bcc: ADMIN_BCC,
     subject: `${followerName} is now following you on GrupUp`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
@@ -130,6 +134,39 @@ export async function sendTrainerNewFollower({
         </p>
         <a href="https://grupup.app/dashboard" style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600;">
           View Dashboard
+        </a>
+      </div>
+    `,
+  });
+}
+
+export async function sendFollowRequest({
+  toEmail,
+  toName,
+  fromName,
+}: {
+  toEmail: string;
+  toName: string;
+  fromName: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: toEmail,
+    bcc: ADMIN_BCC,
+    subject: `${fromName} wants to follow you on GrupUp`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">New follow request 👋</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Someone wants to connect with you on GrupUp</p>
+        </div>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
+          <strong>${fromName}</strong> sent you a follow request on GrupUp. Approve it to let them message you and see your profile activity.
+        </p>
+        <a href="https://www.grupup.app/dashboard"
+          style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 12px;">
+          Approve or Deny on Dashboard
         </a>
       </div>
     `,
@@ -154,7 +191,7 @@ export async function sendAdminNewPlayerNotification({
   const emoji = role === "trainer" ? "🎯" : "🏅";
   await getResend().emails.send({
     from: FROM,
-    to: "nmciq2@gmail.com",
+    to: ["nmciq2@gmail.com", "neil@anytime-soccer.com"],
     subject: `New ${roleLabel} signup: ${playerName}`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
@@ -188,6 +225,7 @@ export async function sendPlayerApproved({
   await getResend().emails.send({
     from: FROM,
     to: playerEmail,
+    bcc: ADMIN_BCC,
     subject: "You're approved on GrupUp! 🎉",
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
@@ -237,6 +275,7 @@ export async function sendTrainerNewBooking({
   await getResend().emails.send({
     from: FROM,
     to: trainerEmail,
+    bcc: ADMIN_BCC,
     subject: `New booking: ${sessionTitle}`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
