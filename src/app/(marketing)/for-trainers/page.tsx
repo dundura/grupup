@@ -81,7 +81,7 @@ export default function ForTrainersPage() {
                   <span className="inline-block" style={{ color: "#DC373E", animation: "textPulse 2.5s ease-in-out infinite" }}>Get paid for it.</span>
                 </h1>
                 <p className="text-white/70 text-xl md:text-2xl mb-8 max-w-xl">
-                  Join a platform built for group sports coaches. We handle bookings, payments, and marketing — you just coach.
+                  Run group sessions to build your client base — then convert them to privates. We handle the bookings, payments, and marketing.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/sign-up"
