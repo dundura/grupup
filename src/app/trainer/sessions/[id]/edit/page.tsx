@@ -33,6 +33,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [priceLocked, setPriceLocked] = useState(false);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
@@ -45,6 +46,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       .then((r) => r.json())
       .then((s) => {
         if (s.error) { setError(s.error); setLoading(false); return; }
+        // Lock price if anyone has booked
+        if ((s.spotsTotal - s.spotsLeft) > 0) setPriceLocked(true);
         setForm({
           title: s.title ?? "",
           sport: s.sport ?? "",
@@ -74,7 +77,9 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     setForm((f) => {
       const next = { ...f, [key]: val };
       if (key === "spotsTotal") {
-        next.pricePerPlayer = String(calcPrice(parseInt(val) || 1, parseInt(f.duration) || 60));
+        const spots = parseInt(val) || 1;
+        next.pricePerPlayer = String(calcPrice(spots, parseInt(f.duration) || 60));
+        next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
       }
       if (key === "duration") {
         next.pricePerPlayer = String(calcPrice(parseInt(f.spotsTotal) || 1, parseInt(val) || 60));
@@ -123,20 +128,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           <div className="bg-white rounded-2xl border p-6">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Session Title</label>
             <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Tuesday Finishing Clinic – Cary" className="text-base" />
-          </div>
-
-          <div className="bg-white rounded-2xl border p-6 space-y-3">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Type</label>
-            {sessionTypes.map((t) => (
-              <button key={t.value} type="button" onClick={() => set("sessionType", t.value)}
-                className="w-full flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all"
-                style={form.sessionType === t.value ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
-                <div>
-                  <p className="font-semibold">{t.label}</p>
-                  <p className="text-sm text-muted-foreground">{t.desc}</p>
-                </div>
-              </button>
-            ))}
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
@@ -223,13 +214,19 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
+            {priceLocked && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                🔒 Price is locked — a player has already booked. Cancel the session to change pricing.
+              </p>
+            )}
             <div>
               <label className="text-sm font-medium mb-1.5 block">
                 Total spots available <span className="text-foreground font-bold">{form.spotsTotal}</span>
               </label>
               <input type="range" min="1" max="20" value={form.spotsTotal}
-                onChange={(e) => set("spotsTotal", e.target.value)}
-                className="w-full accent-[#0F3154]" />
+                onChange={(e) => !priceLocked && set("spotsTotal", e.target.value)}
+                disabled={priceLocked}
+                className={`w-full accent-[#0F3154] ${priceLocked ? "opacity-50 cursor-not-allowed" : ""}`} />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>1</span><span>20</span>
               </div>
