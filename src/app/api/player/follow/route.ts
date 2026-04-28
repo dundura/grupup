@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       playerName?: string;
     };
     const displayName = senderMeta.playerName?.trim() || fromName;
-    const accountOwnerName = senderMeta.playerName?.trim() ? fromName : undefined;
+    const accountOwnerName = (senderMeta.playerName?.trim() && senderMeta.playerName.trim() !== fromName) ? fromName : undefined;
     if (toEmail) await sendFollowRequest({
       toEmail,
       toName,
