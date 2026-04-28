@@ -185,6 +185,8 @@ export const trainerSessions = pgTable("trainer_sessions", {
   instructions: text("instructions"),
   videoUrl: text("video_url"),
   firstClassFree: boolean("first_class_free").default(false).notNull(),
+  discountPct: integer("discount_pct").default(0),
+  discountLabel: varchar("discount_label", { length: 100 }),
   questionnaire: json("questionnaire").$type<{
     title: string;
     questions: Array<{

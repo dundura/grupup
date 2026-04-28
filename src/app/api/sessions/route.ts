@@ -68,7 +68,9 @@ export async function GET() {
         ageRange: s.ageRange ?? "",
         recurring: s.recurring ?? false,
         recurringWeeks: (s as any).recurringWeeks ?? null,
-        specialOffer: undefined,
+        specialOffer: (s.discountPct && s.discountPct > 0)
+          ? { label: s.discountLabel || `${s.discountPct}% Off`, discountPct: s.discountPct }
+          : undefined,
         trainer: {
           id: s.trainerClerkId,
           name: dbProfile?.name ?? clerkFallback?.name ?? "Trainer",

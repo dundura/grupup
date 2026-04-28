@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
     const origin = req.headers.get("origin") ?? "https://www.grupup.app";
     const stripe = getStripe();
 
-    const totalAmount = session.pricePerPlayer * sessionCount;
+    const discountedPrice = (session.discountPct && session.discountPct > 0)
+      ? Math.round(session.pricePerPlayer * (1 - session.discountPct / 100))
+      : session.pricePerPlayer;
+    const totalAmount = discountedPrice * sessionCount;
     const platformFee = Math.round(totalAmount * 0.15 * 100); // 15% in cents
 
     const checkoutParams: Stripe.Checkout.SessionCreateParams = {
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
                 session.dayOfWeek && session.time ? `${session.dayOfWeek}s at ${session.time}` : null,
               ].filter(Boolean).join(" · "),
             },
-            unit_amount: session.pricePerPlayer * 100,
+            unit_amount: discountedPrice * 100,
           },
           quantity: sessionCount,
         },

@@ -56,6 +56,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       recurring: body.recurring ?? false,
       recurringWeeks: body.recurringWeeks ? parseInt(body.recurringWeeks) : null,
       questionnaire: body.questionnaire ?? null,
+      discountPct: body.discountPct ? parseInt(body.discountPct) : 0,
+      discountLabel: body.discountLabel ?? "",
     }).where(and(eq(trainerSessions.id, parseInt(id)), eq(trainerSessions.trainerClerkId, userId)));
     return NextResponse.json({ ok: true });
   } catch (err) {

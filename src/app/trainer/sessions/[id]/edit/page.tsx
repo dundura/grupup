@@ -51,6 +51,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     recurring: false, recurringWeeks: "",
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
+    discountPct: 0, discountLabel: "",
   });
 
   function buildPlanSessions(count: number, startTime?: string): { date: string; time: string }[] {
@@ -98,6 +99,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           isPlan: false,
           planWeeks: "4",
           planSessions: [],
+          discountPct: (s as any).discountPct ?? 0,
+          discountLabel: (s as any).discountLabel ?? "",
         });
         setQuestionnaire((s as any).questionnaire ?? null);
         setLoading(false);
@@ -439,6 +442,68 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Video <span className="font-normal normal-case text-xs">(optional)</span></label>
             <p className="text-xs text-muted-foreground">Paste a YouTube or Vimeo link to show a preview video on your session page.</p>
             <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
+          </div>
+
+          {/* Discount */}
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Discount</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Offer a limited-time discount — up to 50% off</p>
+              </div>
+              <button type="button"
+                onClick={() => setForm((f) => ({ ...f, discountPct: (f as any).discountPct > 0 ? 0 : 10 }))}
+                className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).discountPct > 0 ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).discountPct > 0 ? "translate-x-4" : "translate-x-0"}`} />
+              </button>
+            </div>
+
+            {(form as any).discountPct > 0 && (
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Discount amount</label>
+                    <span className="text-xl font-extrabold" style={{ color: "#DC373E" }}>{(form as any).discountPct}% off</span>
+                  </div>
+                  <input type="range" min={5} max={50} step={5}
+                    value={(form as any).discountPct}
+                    onChange={(e) => setForm((f) => ({ ...f, discountPct: parseInt(e.target.value) }))}
+                    className="w-full accent-[#DC373E]" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>5%</span><span>50%</span>
+                  </div>
+                </div>
+
+                {(() => {
+                  const original = parseInt((form as any).pricePerPlayer) || 0;
+                  const pct = (form as any).discountPct;
+                  const discounted = Math.round(original * (1 - pct / 100));
+                  return (
+                    <div className="rounded-xl p-4 bg-red-50 border border-red-100 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Players pay</p>
+                        <p className="text-muted-foreground text-sm line-through">${original}/player</p>
+                        <p className="text-xl font-extrabold" style={{ color: "#DC373E" }}>${discounted}/player</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">You earn (85%)</p>
+                        <p className="text-xl font-bold" style={{ color: "#0F3154" }}>${Math.round(discounted * 0.85)}/player</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Promo label <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
+                  <Input
+                    value={(form as any).discountLabel}
+                    onChange={(e) => setForm((f) => ({ ...f, discountLabel: e.target.value.slice(0, 40) }))}
+                    placeholder='e.g. "Early Bird", "Summer Special", "Limited Time"'
+                    maxLength={40}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Questionnaire builder */}
