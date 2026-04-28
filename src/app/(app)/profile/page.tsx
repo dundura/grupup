@@ -573,10 +573,10 @@ export default function ProfilePage() {
           </div>
         )}
 
-          {/* Players section — available for non-trainers */}
-        {role !== "trainer" && (
+          {/* Players section — parents only (managing multiple kids) */}
+        {role === "parent" && (
           <PlayerProfilesList
-            initialProfiles={form.childProfiles}
+            initialProfiles={(form as any).childProfiles ?? []}
             onChange={(profiles) => setForm((f) => ({ ...f, childProfiles: profiles }))}
           />
         )}
