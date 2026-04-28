@@ -11,11 +11,6 @@ const benefits = [
     description: "Sports families actively search our platform for group training sessions. No more cold outreach.",
   },
   {
-    icon: Calendar,
-    title: "Control your schedule",
-    description: "Set your own availability. Accept or decline bookings. Work as much or little as you want.",
-  },
-  {
     icon: TrendingUp,
     title: "Grow your reputation",
     description: "Build a public profile with reviews that follows you. Top-rated trainers get featured.",
