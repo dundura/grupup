@@ -28,10 +28,11 @@ const benefits = [
 ];
 
 const steps = [
-  "Apply with proof of coaching certifications and experience",
-  "Complete a short onboarding call with our team",
-  "Set up your Stripe account for secure payouts",
-  "Build your profile, set your rates, start booking sessions",
+  { n: 1, title: "Create your account", desc: "Sign up in 30 seconds. No credit card required." },
+  { n: 2, title: "Build your trainer profile", desc: "Add your photo, bio, sport, location, and experience. This is what players see." },
+  { n: 3, title: "Post at least one group session", desc: "Create your first semi-private, small group, or clinic session. This is required to be listed on the platform." },
+  { n: 4, title: "Submit for approval", desc: "Our team reviews your profile within 1–2 business days. Once approved, your sessions go live." },
+  { n: 5, title: "Get booked & get paid", desc: "Players book directly. Stripe deposits land in your account 24 hours after each session." },
 ];
 
 const faqs = [
@@ -83,7 +84,7 @@ export default function ForTrainersPage() {
                   Join a platform built for group sports coaches. We handle bookings, payments, and marketing — you just coach.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="#apply"
+                  <Link href="/sign-up"
                     className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base"
                     style={{ backgroundColor: "#DC373E" }}>
                     Apply Now
@@ -171,12 +172,15 @@ export default function ForTrainersPage() {
         <div className="container max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">How to get started</h2>
           <div className="space-y-4">
-            {steps.map((step, i) => (
-              <div key={i} className="flex items-start gap-4 bg-card border rounded-xl p-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold shrink-0">
-                  {i + 1}
+            {steps.map((step) => (
+              <div key={step.n} className="flex items-start gap-4 bg-card border rounded-xl p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full font-bold shrink-0 text-white" style={{ backgroundColor: "#0F3154" }}>
+                  {step.n}
                 </div>
-                <p className="text-lg pt-1.5">{step}</p>
+                <div>
+                  <p className="font-semibold text-base">{step.title}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{step.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -203,7 +207,11 @@ export default function ForTrainersPage() {
           <p className="text-lg text-muted-foreground mb-8">
             Applications reviewed within 3 business days. Start earning in 1-2 weeks.
           </p>
-          <Button size="lg">Start Application</Button>
+          <Link href="/sign-up"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-base"
+            style={{ backgroundColor: "#DC373E" }}>
+            Create Your Account
+          </Link>
         </div>
       </section>
     </div>

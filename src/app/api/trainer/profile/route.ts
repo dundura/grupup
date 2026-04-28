@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       skillLevels: body.skillLevels ?? [],
       rating: 5.0,
       reviewCount: 0,
-      isApproved: true,
+      isApproved: false,
     });
 
     return NextResponse.json({ id }, { status: 201 });

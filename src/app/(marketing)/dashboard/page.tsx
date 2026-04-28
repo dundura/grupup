@@ -15,7 +15,7 @@ interface TrainerProfile {
   id: string; photo: string; bio: string; city: string; state: string;
   sport: string; sports: string[]; specialties: string[]; certifications: string[];
   skillLevels: string[]; yearsExperience: number; hourlyRate: number;
-  rating: number; reviewCount: number; isArchived: boolean;
+  rating: number; reviewCount: number; isArchived: boolean; isApproved: boolean;
 }
 
 interface TrainerSession {
@@ -76,8 +76,19 @@ export default function DashboardPage() {
     return t.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  const isPending = role === "trainer" && trainerProfile && !trainerProfile.isApproved;
+
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
+
+      {/* Pending approval banner */}
+      {isPending && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 text-center">
+          <p className="text-sm font-medium text-amber-800">
+            ⏳ Your trainer profile is pending approval. We review applications within 1–2 business days.
+          </p>
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ backgroundColor: "#0F3154" }} className="px-4 py-8">

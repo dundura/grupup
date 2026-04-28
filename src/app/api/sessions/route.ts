@@ -12,10 +12,11 @@ export async function GET() {
 
     const clerkIds = [...new Set(trainerRows.map((s) => s.trainerClerkId))];
 
-    // Fetch trainer DB profiles (has the uploaded S3 photo + name)
+    // Fetch approved trainer DB profiles only
     const trainerProfiles = await db
       .select()
       .from(trainers)
+      .where(eq(trainers.isApproved, true))
       .then((rows) => {
         const map: Record<string, typeof rows[number]> = {};
         for (const r of rows) { if (r.clerkId) map[r.clerkId] = r; }
@@ -37,7 +38,10 @@ export async function GET() {
       }
     }
 
-    const result = trainerRows.map((s) => {
+    const result = trainerRows
+      .filter((s) => trainerProfiles[s.trainerClerkId] || clerkUsers[s.trainerClerkId])
+      .filter((s) => !trainerProfiles[s.trainerClerkId] || trainerProfiles[s.trainerClerkId].isApproved)
+      .map((s) => {
       const dbProfile = trainerProfiles[s.trainerClerkId];
       const clerkFallback = clerkUsers[s.trainerClerkId];
       return {

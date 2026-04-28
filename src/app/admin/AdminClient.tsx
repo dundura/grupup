@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Trash2, Archive, ArchiveRestore, Search } from "lucide-react";
+import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle } from "lucide-react";
 
 interface AdminUser {
   id: string;
@@ -14,6 +14,8 @@ interface AdminUser {
   sessionCount: number;
   bookingCount: number;
   archived: boolean;
+  trainerId?: string | null;
+  isApproved?: boolean;
 }
 
 export default function AdminClient({ trainers, players }: { trainers: AdminUser[]; players: AdminUser[] }) {
@@ -25,6 +27,20 @@ export default function AdminClient({ trainers, players }: { trainers: AdminUser
 
   const list = (tab === "trainers" ? users.trainers : users.players)
     .filter((u) => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()));
+
+  async function handleApprove(trainerId: string, userId: string, approved: boolean) {
+    setLoading(userId);
+    await fetch(`/api/admin/trainers/${trainerId}/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ approved }),
+    });
+    setUsers((prev) => ({
+      ...prev,
+      trainers: prev.trainers.map((u) => u.id === userId ? { ...u, isApproved: approved } : u),
+    }));
+    setLoading(null);
+  }
 
   async function handleArchive(userId: string, archived: boolean) {
     setLoading(userId);
@@ -109,7 +125,16 @@ export default function AdminClient({ trainers, players }: { trainers: AdminUser
                           )}
                         </div>
                         <div>
-                          <p className="font-semibold">{u.name} {u.archived && <span className="text-xs text-muted-foreground">(archived)</span>}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold">{u.name}</p>
+                          {tab === "trainers" && u.trainerId && !u.isApproved && (
+                            <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Pending</span>
+                          )}
+                          {tab === "trainers" && u.trainerId && u.isApproved && (
+                            <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Approved</span>
+                          )}
+                          {u.archived && <span className="text-xs text-muted-foreground">(archived)</span>}
+                        </div>
                           <p className="text-xs text-muted-foreground">{u.email}</p>
                         </div>
                       </div>
@@ -122,6 +147,21 @@ export default function AdminClient({ trainers, players }: { trainers: AdminUser
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center justify-end gap-2">
+                        {tab === "trainers" && u.trainerId && (
+                          u.isApproved ? (
+                            <button onClick={() => handleApprove(u.trainerId!, u.id, false)} disabled={loading === u.id}
+                              title="Revoke approval"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg border hover:bg-red-50 hover:border-red-300 transition-colors">
+                              <XCircle className="h-3.5 w-3.5 text-red-500" />
+                            </button>
+                          ) : (
+                            <button onClick={() => handleApprove(u.trainerId!, u.id, true)} disabled={loading === u.id}
+                              title="Approve trainer"
+                              className="flex items-center justify-center w-8 h-8 rounded-lg border border-green-300 bg-green-50 hover:bg-green-100 transition-colors">
+                              <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                            </button>
+                          )
+                        )}
                         <button
                           onClick={() => handleArchive(u.id, !u.archived)}
                           disabled={loading === u.id}
