@@ -62,6 +62,8 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
         certifications: ((meta.certifications ?? trainerDbProfile?.certifications ?? []) as string[]),
         videoLinks: ((meta.videoLinks ?? []) as string[]),
         improvementAreas: ((meta.improvementAreas ?? ["Ball Skills"]) as string[]),
+        availableForFreePlay: (meta.availableForFreePlay ?? false) as boolean,
+        openToTrain: (meta.openToTrain ?? false) as boolean,
         isApproved: (meta.isApproved ?? false) as boolean,
         isHidden: (meta.isHidden ?? false) as boolean,
       }}

@@ -28,6 +28,7 @@ export default function AdminEditClient({
     team: string; birthYear: string; gender: string; yearsExperience: string;
     specialties: string[]; certifications: string[]; videoLinks: string[];
     improvementAreas: string[];
+    availableForFreePlay: boolean; openToTrain: boolean;
     isApproved: boolean; isHidden: boolean;
   };
 }) {
@@ -276,6 +277,22 @@ export default function AdminEditClient({
                   ))}
                 </div>
               </div>
+              {[
+                { key: "availableForFreePlay", label: "Seeking Free Play", desc: "Shows pill on their connect card" },
+                { key: "openToTrain", label: "Seeking Training", desc: "Shows pill on their connect card" },
+              ].map(({ key, label, desc }) => (
+                <div key={key} className="flex items-center justify-between border-t pt-3">
+                  <div>
+                    <p className="text-sm font-semibold">{label}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                  <button type="button" onClick={() => set(key, !(form as any)[key])}
+                    className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any)[key] ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any)[key] ? "translate-x-4" : "translate-x-0"}`} />
+                  </button>
+                </div>
+              ))}
+
               <div className="flex items-center justify-between pt-2 border-t">
                 <div>
                   <p className="text-sm font-semibold">Active on Connect</p>
