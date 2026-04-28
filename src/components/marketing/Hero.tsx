@@ -116,7 +116,7 @@ export function Hero() {
                   src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777378113162-feqi88.png"
                   alt="Soccer players training"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "center 55%" }}
+                  style={{ objectPosition: "center 35%" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <p className="absolute bottom-3 left-4 text-white font-bold text-base drop-shadow">Soccer</p>
