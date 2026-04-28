@@ -159,6 +159,10 @@ export default function ProfilePage() {
       alert("Please select at least one sport before saving.");
       return;
     }
+    if (role !== "trainer" && !form.level) {
+      alert("Please select a skill level before saving.");
+      return;
+    }
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
@@ -454,7 +458,7 @@ export default function ProfilePage() {
 
               {/* Skill level */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Skill level</label>
+                <label className="text-sm font-medium mb-2 block">Skill level <span className="text-red-500">*</span></label>
                 <div className="grid grid-cols-4 gap-2">
                   {levels.map((l) => (
                     <button key={l} type="button" onClick={() => set("level", l)}
