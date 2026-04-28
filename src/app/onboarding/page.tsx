@@ -38,6 +38,8 @@ const canadaProvinces = [
 ];
 
 const ukRegions   = ["England","Scotland","Wales","Northern Ireland"];
+
+const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const ausStates   = ["New South Wales","Victoria","Queensland","Western Australia","South Australia","Tasmania","Australian Capital Territory","Northern Territory"];
 
 export default function OnboardingPage() {
@@ -48,19 +50,31 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [form,   setForm]   = useState({
     firstName: "", lastName: "", country: "", state: "", city: "", zipCode: "",
+    selectedPlayerSports: [] as string[],
   });
 
   function set(k: keyof typeof form, v: string) {
     setForm((f) => ({ ...f, [k]: v, ...(k === "country" ? { state: "" } : {}) }));
   }
 
-  const step2Valid = form.firstName.trim() && form.country && form.city.trim();
+  function toggleSport(s: string) {
+    setForm((f) => ({
+      ...f,
+      selectedPlayerSports: f.selectedPlayerSports.includes(s)
+        ? f.selectedPlayerSports.filter((x) => x !== s)
+        : [...f.selectedPlayerSports, s],
+    }));
+  }
+
+  const isPlayer = role === "player" || role === "parent";
+  const step2Valid = form.firstName.trim() && form.country && form.city.trim() &&
+    (!isPlayer || form.selectedPlayerSports.length > 0);
 
   async function handleFinish() {
     if (!role) return;
     setSaving(true);
     try {
-      const result = await completeOnboarding({ role, ...form, isNewSignup: true });
+      const result = await completeOnboarding({ role, ...form, selectedPlayerSports: form.selectedPlayerSports, isNewSignup: true });
       if (result?.success) {
         await user?.reload();
         router.push(role === "trainer" ? "/trainer/setup" : "/pending-approval");
@@ -191,6 +205,25 @@ export default function OnboardingPage() {
                     <Input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} placeholder="Smith" />
                   </div>
                 </div>
+
+                {isPlayer && (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Sport <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {sports.map((s) => (
+                        <button key={s} type="button" onClick={() => toggleSport(s)}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                          style={form.selectedPlayerSports.includes(s)
+                            ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                            : { borderColor: "#e2e8f0", color: "#475569" }}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Country</label>
