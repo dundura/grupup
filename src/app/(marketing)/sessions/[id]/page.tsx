@@ -123,6 +123,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           {/* Left column: title + description + booking */}
           <div className="space-y-5">
 
+            {session.recurring && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
+                🔁 Weekly recurring session
+              </span>
+            )}
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
             {/* About + Booking side by side */}
