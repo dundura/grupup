@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
-  CalendarDays, Clock, Trash2, DollarSign, Eye, ClipboardList, X,
+  CalendarDays, Clock, Trash2, DollarSign, Eye, ClipboardList, X, Ban,
 } from "lucide-react";
 
 interface TrainerProfile {
@@ -102,6 +102,24 @@ export default function DashboardPage() {
       setFollowRequests((r) => r.filter((x) => x.followerClerkId !== followerClerkId));
       setFollowers((f) => f.filter((x) => x.followerClerkId !== followerClerkId));
     }
+    setFollowLoading(null);
+  }
+
+  async function handleBlock(clerkId: string) {
+    setFollowLoading(clerkId);
+    await fetch("/api/user/block", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ blockedClerkId: clerkId, action: "block" }),
+    });
+    // Also remove any follow relationship
+    await fetch("/api/player/follow", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ followerClerkId: clerkId, action: "reject" }),
+    });
+    setFollowRequests((r) => r.filter((x) => x.followerClerkId !== clerkId));
+    setFollowers((f) => f.filter((x) => x.followerClerkId !== clerkId));
     setFollowLoading(null);
   }
 
@@ -497,6 +515,12 @@ export default function DashboardPage() {
                           className="px-3 py-1.5 rounded-lg text-xs font-semibold border text-muted-foreground hover:bg-gray-50 transition-colors">
                           Deny
                         </button>
+                        <button onClick={() => handleBlock(r.followerClerkId)}
+                          disabled={followLoading === r.followerClerkId}
+                          title="Block user"
+                          className="p-1.5 rounded-lg border text-muted-foreground hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+                          <Ban className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -522,8 +546,15 @@ export default function DashboardPage() {
                       <p className="flex-1 font-semibold text-sm">{f.name}</p>
                       <button onClick={() => handleFollowAction(f.followerClerkId, "remove")}
                         disabled={followLoading === f.followerClerkId}
+                        title="Remove follower"
                         className="p-1.5 rounded-lg border text-muted-foreground hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => handleBlock(f.followerClerkId)}
+                        disabled={followLoading === f.followerClerkId}
+                        title="Block user"
+                        className="p-1.5 rounded-lg border text-muted-foreground hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+                        <Ban className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ))}

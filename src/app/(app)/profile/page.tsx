@@ -155,6 +155,10 @@ export default function ProfilePage() {
       if (fileRef.current) fileRef.current.click();
       return;
     }
+    if (role !== "trainer" && form.selectedPlayerSports.length === 0) {
+      alert("Please select at least one sport before saving.");
+      return;
+    }
     setSaving(true);
     const leagueValue = form.league === "Other" ? form.leagueOther : form.league;
     const cleanedVideos = form.videoLinks.map((v) => v.trim()).filter(Boolean);
