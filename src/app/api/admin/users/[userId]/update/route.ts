@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
   const metaUpdates: Record<string, unknown> = {};
   const allowedMetaFields = [
     "city", "country", "sport", "playerSports", "level", "league", "team",
-    "bio", "birthYear", "gender", "videoLinks", "isApproved", "isHidden",
+    "bio", "birthYear", "gender", "videoLinks", "photo", "isApproved", "isHidden",
     "sports", "specialties", "certifications", "yearsExperience",
   ];
   for (const field of allowedMetaFields) {

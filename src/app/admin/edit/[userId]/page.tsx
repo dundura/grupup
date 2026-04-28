@@ -1,5 +1,6 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import { db } from "@/db";
 import { trainers } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -10,6 +11,7 @@ const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
 export const dynamic = "force-dynamic";
 
 export default async function AdminEditPage({ params }: { params: Promise<{ userId: string }> }) {
+  noStore(); // prevent any caching of this page
   const { userId: adminId } = await auth();
   if (!adminId) redirect("/sign-in");
 
@@ -30,6 +32,11 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
     trainerDbProfile = row ?? null;
   }
 
+  // playerSports: support both old single-sport and new array format
+  const playerSports: string[] = meta.playerSports?.length
+    ? (meta.playerSports as string[])
+    : meta.sport ? [meta.sport as string] : [];
+
   return (
     <AdminEditClient
       userId={userId}
@@ -43,16 +50,17 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
         country: (meta.country ?? "") as string,
         bio: (meta.bio ?? trainerDbProfile?.bio ?? "") as string,
         sport: (meta.sport ?? trainerDbProfile?.sport ?? "") as string,
-        playerSports: (meta.playerSports ?? []) as string[],
-        sports: (meta.sports ?? trainerDbProfile?.sports ?? []) as string[],
+        playerSports,
+        sports: ((meta.sports ?? trainerDbProfile?.sports ?? []) as string[]),
         level: (meta.level ?? "") as string,
         league: (meta.league ?? "") as string,
         team: (meta.team ?? "") as string,
         birthYear: (meta.birthYear ?? "") as string,
         gender: (meta.gender ?? "") as string,
         yearsExperience: String(meta.yearsExperience ?? trainerDbProfile?.yearsExperience ?? ""),
-        specialties: (meta.specialties ?? trainerDbProfile?.specialties ?? []) as string[],
-        certifications: (meta.certifications ?? trainerDbProfile?.certifications ?? []) as string[],
+        specialties: ((meta.specialties ?? trainerDbProfile?.specialties ?? []) as string[]),
+        certifications: ((meta.certifications ?? trainerDbProfile?.certifications ?? []) as string[]),
+        videoLinks: ((meta.videoLinks ?? []) as string[]),
         isApproved: (meta.isApproved ?? false) as boolean,
         isHidden: (meta.isHidden ?? false) as boolean,
       }}

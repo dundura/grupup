@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
@@ -23,7 +23,7 @@ export default function AdminEditClient({
     city: string; country: string; bio: string; sport: string;
     playerSports: string[]; sports: string[]; level: string; league: string;
     team: string; birthYear: string; gender: string; yearsExperience: string;
-    specialties: string[]; certifications: string[];
+    specialties: string[]; certifications: string[]; videoLinks: string[];
     isApproved: boolean; isHidden: boolean;
   };
 }) {
@@ -85,6 +85,26 @@ export default function AdminEditClient({
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Last name</label>
                 <Input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Photo */}
+          <div className="bg-white rounded-2xl border p-5">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">Profile Photo</h2>
+            <div className="flex items-center gap-4">
+              {form.photo ? (
+                <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-gray-200">
+                  <Image src={form.photo} alt="Profile" fill className="object-cover" sizes="64px" unoptimized />
+                </div>
+              ) : (
+                <div className="w-16 h-16 rounded-full shrink-0 flex items-center justify-center text-white text-xl font-bold bg-[#0F3154]">
+                  {form.firstName?.[0]?.toUpperCase() ?? "?"}
+                </div>
+              )}
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-1.5 block">Photo URL</label>
+                <Input value={form.photo} onChange={(e) => set("photo", e.target.value)} placeholder="https://..." className="text-xs" />
               </div>
             </div>
           </div>
@@ -218,9 +238,26 @@ export default function AdminEditClient({
                 <label className="text-sm font-medium mb-1.5 block">Years of experience</label>
                 <Input type="number" value={form.yearsExperience} onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Photo URL</label>
-                <Input value={form.photo} onChange={(e) => set("photo", e.target.value)} placeholder="https://..." />
+            </div>
+          )}
+
+          {/* Video links — players only */}
+          {isPlayer && (
+            <div className="bg-white rounded-2xl border p-5">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">Highlight Videos</h2>
+              <div className="space-y-2">
+                {[0,1,2,3,4,5].map((i) => (
+                  <Input key={i}
+                    value={form.videoLinks[i] ?? ""}
+                    onChange={(e) => {
+                      const updated = [...form.videoLinks];
+                      updated[i] = e.target.value;
+                      setForm((f) => ({ ...f, videoLinks: updated }));
+                    }}
+                    placeholder={`Video ${i + 1} — YouTube or Vimeo URL`}
+                    className="text-sm"
+                  />
+                ))}
               </div>
             </div>
           )}
