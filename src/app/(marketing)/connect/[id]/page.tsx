@@ -11,24 +11,35 @@ import MessageButton from "@/components/messaging/MessageButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function PlayerProfilePage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { userId: viewerUserId } = await auth();
-  const { userId: targetUserId } = await params;
+  const { id } = await params;
 
   const client = await clerkClient();
 
   let target: Awaited<ReturnType<typeof client.users.getUser>>;
-  try {
-    target = await client.users.getUser(targetUserId);
-  } catch {
-    notFound();
+  let targetUserId: string;
+
+  // Resolve: if it looks like a Clerk userId use directly, otherwise search by profileSlug
+  if (id.startsWith("user_")) {
+    try {
+      target = await client.users.getUser(id);
+      targetUserId = id;
+    } catch { notFound(); }
+  } else {
+    const { data: allUsers } = await client.users.getUserList({ limit: 500 });
+    const found = allUsers.find((u) => (u.publicMetadata as { profileSlug?: string }).profileSlug === id);
+    if (!found) notFound();
+    target = found;
+    targetUserId = found.id;
   }
 
   const meta = target.publicMetadata as {
     role?: string; isApproved?: boolean; isHidden?: boolean; photo?: string;
-    city?: string; country?: string; sport?: string; level?: string;
+    city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
     league?: string; team?: string; bio?: string; birthYear?: string; gender?: string;
   };
+  const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
 
   const isOwner = viewerUserId === targetUserId;
   const isPlayer = meta.role === "player" || meta.role === "parent";
@@ -93,7 +104,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
           {/* Header image */}
           <div className="relative h-40 overflow-hidden bg-[#0F3154]">
             {photo ? (
-              <Image src={photo} alt={name} fill className="object-cover object-top" sizes="672px" unoptimized />
+              <Image src={photo} alt={name} fill className="object-contain" sizes="672px" unoptimized />
             ) : (
               <div className="w-full h-full flex items-end justify-center pb-0">
                 {/* Silhouette SVG */}
@@ -119,7 +130,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                   <span className="font-semibold text-foreground">{followerCount}</span> follower{followerCount !== 1 ? "s" : ""}
                 </p>
               </div>
-              {!isOwner && viewerUserId && (
+              {!isOwner && (
                 <div className="flex items-center gap-2">
                   <FollowPlayerButton targetClerkId={targetUserId} initialFollowing={isFollowing} />
                   <MessageButton toClerkId={targetUserId} toName={name} />
@@ -140,10 +151,14 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {meta.sport && (
-                <div className="bg-[#f8fafc] rounded-xl p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Sport</p>
-                  <p className="text-sm font-semibold">{meta.sport}</p>
+              {playerSports.length > 0 && (
+                <div className="bg-[#f8fafc] rounded-xl p-3 col-span-2 sm:col-span-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Sports</p>
+                  <div className="flex flex-wrap gap-1">
+                    {playerSports.map((s) => (
+                      <span key={s} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white border" style={{ color: "#0F3154" }}>{s}</span>
+                    ))}
+                  </div>
                 </div>
               )}
               {meta.gender && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { UserPlus, UserCheck } from "lucide-react";
 
 export default function FollowPlayerButton({
@@ -10,10 +11,12 @@ export default function FollowPlayerButton({
   targetClerkId: string;
   initialFollowing: boolean;
 }) {
+  const { isSignedIn } = useAuth();
   const [following, setFollowing] = useState(initialFollowing);
   const [loading, setLoading] = useState(false);
 
   async function toggle() {
+    if (!isSignedIn) { window.location.href = "/sign-in"; return; }
     setLoading(true);
     const res = await fetch("/api/player/follow", {
       method: "POST",

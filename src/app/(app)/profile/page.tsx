@@ -36,7 +36,7 @@ export default function ProfilePage() {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
     bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[];
     playerName?: string; playerAge?: string; isHidden?: boolean;
-    photo?: string; league?: string; team?: string; birthYear?: string; gender?: string;
+    photo?: string; league?: string; team?: string; birthYear?: string; gender?: string; playerSports?: string[];
   };
 
   const [form, setForm] = useState({
@@ -46,8 +46,9 @@ export default function ProfilePage() {
     city: meta.city ?? "",
     sport: meta.sport ?? "",
     selectedSports: meta.sports ?? [],
+    selectedPlayerSports: meta.playerSports ?? (meta.sport ? [meta.sport] : []),
     level: meta.level ?? "",
-    bio: meta.bio ?? "",
+    bio: meta.bio ?? (meta.role !== "trainer" ? "Looking for group training sessions to improve my skills and connect with other players near me." : ""),
     yearsExperience: meta.yearsExperience ?? "",
     selectedSpecialties: meta.specialties ?? [],
     selectedCerts: meta.certifications ?? [],
@@ -65,7 +66,7 @@ export default function ProfilePage() {
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
 
-  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports", val: string) {
+  function toggleList(key: "selectedCerts" | "selectedSpecialties" | "selectedSports" | "selectedPlayerSports", val: string) {
     setForm((f) => ({
       ...f,
       [key]: (f[key] as string[]).includes(val)
@@ -118,8 +119,8 @@ export default function ProfilePage() {
             </Link>
           )}
           {saved && (
-            <div className="flex items-center gap-1.5 text-green-700 text-sm font-medium">
-              <CheckCircle className="h-4 w-4" /> Saved
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-semibold px-3 py-1.5 rounded-lg">
+              <CheckCircle className="h-4 w-4 text-green-600" /> Profile saved!
             </div>
           )}
         </div>
@@ -194,12 +195,12 @@ export default function ProfilePage() {
 
           {role !== "trainer" ? (
             <div>
-              <label className="text-sm font-medium mb-2 block">Sport</label>
+              <label className="text-sm font-medium mb-2 block">Sports <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
               <div className="flex flex-wrap gap-2">
                 {sports.map((s) => (
-                  <button key={s} type="button" onClick={() => set("sport", s)}
+                  <button key={s} type="button" onClick={() => toggleList("selectedPlayerSports", s)}
                     className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.sport === s
+                    style={form.selectedPlayerSports.includes(s)
                       ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
                       : { borderColor: "#e2e8f0", color: "#475569" }}>
                     {s}

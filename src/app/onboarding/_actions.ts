@@ -12,6 +12,8 @@ export async function completeOnboarding(formData: {
   isNewSignup?: boolean;
   // player / parent
   sport?: string;
+  selectedPlayerSports?: string[];
+  profileSlug?: string;
   level?: string;
   league?: string;
   team?: string;
@@ -49,7 +51,12 @@ export async function completeOnboarding(formData: {
     if (formData.photo !== undefined) profileFields.photo = formData.photo;
 
     if (isPlayer) {
-      if (formData.sport !== undefined) profileFields.sport = formData.sport;
+      if (formData.selectedPlayerSports !== undefined) {
+        profileFields.playerSports = formData.selectedPlayerSports;
+        profileFields.sport = formData.selectedPlayerSports[0] ?? "";
+      } else if (formData.sport !== undefined) {
+        profileFields.sport = formData.sport;
+      }
       if (formData.level !== undefined) profileFields.level = formData.level;
       if (formData.league !== undefined) profileFields.league = formData.league;
       if (formData.team !== undefined) profileFields.team = formData.team;
@@ -75,6 +82,14 @@ export async function completeOnboarding(formData: {
       firstName: formData.firstName,
       lastName: formData.lastName,
     });
+
+    // Generate profileSlug for players on first signup
+    if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {
+      const slugBase = `${formData.firstName} ${formData.lastName}`.trim()
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
+      const suffix = Math.random().toString(36).slice(2, 6);
+      profileFields.profileSlug = `${slugBase}-${suffix}`;
+    }
 
     // Notify admin on first-time signup (any role)
     if (formData.isNewSignup && !existingMeta.onboardingComplete) {

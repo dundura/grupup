@@ -19,7 +19,7 @@ function avatarColor(name: string) {
 export default async function ConnectPage() {
   let approvedPlayers: {
     id: string; name: string; photo: string; city: string; country: string;
-    sport: string; level: string; league: string; bio: string; team: string; birthYear: string;
+    sports: string[]; level: string; league: string; bio: string; team: string; birthYear: string;
   }[] = [];
 
   try {
@@ -33,16 +33,17 @@ export default async function ConnectPage() {
       })
       .map((u) => {
         const meta = u.publicMetadata as {
-          city?: string; country?: string; sport?: string; level?: string;
-          league?: string; bio?: string; photo?: string; team?: string; birthYear?: string;
+          city?: string; country?: string; sport?: string; playerSports?: string[]; level?: string;
+          league?: string; bio?: string; photo?: string; team?: string; birthYear?: string; profileSlug?: string;
         };
+        const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
         return {
-          id: u.id,
+          id: meta.profileSlug ?? u.id,
           name: (`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim()) || (u.emailAddresses?.[0]?.emailAddress ?? "Player"),
           photo: meta.photo ?? u.imageUrl ?? "",
           city: meta.city ?? "",
           country: meta.country ?? "",
-          sport: meta.sport ?? "",
+          sports: playerSports,
           level: meta.level ?? "",
           league: meta.league ?? "",
           bio: meta.bio ?? "",
@@ -95,7 +96,7 @@ export default async function ConnectPage() {
                     {/* Avatar / photo header */}
                     <div className="relative h-36 overflow-hidden">
                       {p.photo ? (
-                        <Image src={p.photo} alt={p.name} fill className="object-cover object-top"
+                        <Image src={p.photo} alt={p.name} fill className="object-contain"
                           sizes="(max-width: 768px) 100vw, 25vw" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"
@@ -103,10 +104,12 @@ export default async function ConnectPage() {
                           <span className="text-5xl font-extrabold text-white/90 select-none">{initials}</span>
                         </div>
                       )}
-                      {p.sport && (
-                        <div className="absolute top-2.5 right-2.5 bg-white/95 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm"
-                          style={{ color: "#0F3154" }}>
-                          {p.sport}
+                      {p.sports.length > 0 && (
+                        <div className="absolute top-2.5 right-2.5 flex flex-wrap gap-1 justify-end">
+                          {p.sports.slice(0, 2).map((s) => (
+                            <span key={s} className="bg-white/95 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm"
+                              style={{ color: "#0F3154" }}>{s}</span>
+                          ))}
                         </div>
                       )}
                     </div>
