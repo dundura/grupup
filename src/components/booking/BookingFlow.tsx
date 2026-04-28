@@ -51,13 +51,13 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
   });
   const [confirmed, setConfirmed] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
-  const maxSessions = session.recurring ? (session.recurringWeeks ?? 8) : 1;
+  const maxSessions = session.recurringWeeks ?? (session.recurring ? 8 : 1);
 
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
   const typeName = session.sessionType.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const step1Valid = form.firstName.trim() && form.email.trim() && form.phone.trim();
-  const step2Valid = form.athleteName.trim();
+  const step1Valid = form.firstName.trim() && form.email.trim() && form.phone.trim() && form.athleteName.trim();
+  const step2Valid = true;
 
   async function handleCheckout() {
     setSubmitting(true);
@@ -181,6 +181,10 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <label className="text-sm font-medium mb-1.5 block">Phone <span style={{ color: "#DC373E" }}>*</span></label>
                     <Input type="tel" value={form.phone} onChange={(e) => setF("phone", e.target.value)} placeholder="(123) 456-7890" />
                   </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Athlete Name <span style={{ color: "#DC373E" }}>*</span></label>
+                    <Input value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)} placeholder="Who is this session for?" />
+                  </div>
                 </div>
 
                 <button
@@ -232,13 +236,6 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <span>${session.pricePerPlayer}.00</span>
                   </div>
                   <p className="text-xs text-muted-foreground">No service fees during beta 🎉</p>
-                </div>
-
-                {/* Athlete name */}
-                <div className="mb-5">
-                  <label className="text-sm font-medium mb-1.5 block">Athlete Name</label>
-                  <Input value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)}
-                    placeholder="Who is this session for?" />
                 </div>
 
                 <div className="flex gap-3">

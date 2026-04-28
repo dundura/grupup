@@ -38,8 +38,27 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
     spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "",
-    sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "",
+    sessionPhoto: "", videoUrl: "", firstClassFree: false,
+    recurring: false, recurringWeeks: "",
+    isPlan: false, planWeeks: "4",
+    planSessions: [] as { date: string; time: string }[],
   });
+
+  function buildPlanSessions(count: number, startTime?: string): { date: string; time: string }[] {
+    const base = new Date();
+    return Array.from({ length: count }, (_, i) => {
+      const d = new Date(base);
+      d.setDate(d.getDate() + i * 7);
+      return { date: d.toISOString().split("T")[0], time: startTime ?? "" };
+    });
+  }
+
+  function planDiscount(sessions: number): number {
+    if (sessions >= 8) return 20;
+    if (sessions >= 6) return 15;
+    if (sessions >= 4) return 10;
+    return 5;
+  }
 
   useEffect(() => {
     fetch(`/api/trainer/sessions/${id}`)
@@ -67,6 +86,9 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           firstClassFree: (s as any).firstClassFree ?? false,
           recurring: (s as any).recurring ?? false,
           recurringWeeks: (s as any).recurringWeeks != null ? String((s as any).recurringWeeks) : "",
+          isPlan: false,
+          planWeeks: "4",
+          planSessions: [],
         });
         setLoading(false);
       })
@@ -141,20 +163,56 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Schedule & Location</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Day of week</label>
-                <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option value="">Select day</option>
-                  {days.map((d) => <option key={d}>{d}</option>)}
-                </select>
+
+            {form.isPlan ? (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">Set the date and time for each session — any schedule works (3 days in a row, weekends only, etc.)</p>
+                <div className="flex items-end gap-3 rounded-xl border border-dashed p-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Set time for all sessions</label>
+                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                  </div>
+                  <button type="button"
+                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors hover:bg-[#0F3154] hover:text-white"
+                    style={{ borderColor: "#0F3154", color: "#0F3154" }}
+                    onClick={() => setForm((f) => ({ ...f, planSessions: f.planSessions.map((s) => ({ ...s, time: f.time })) }))}>
+                    Apply to all
+                  </button>
+                </div>
+                {Array.from({ length: parseInt(form.planWeeks) || 4 }, (_, i) => {
+                  const s = form.planSessions[i] ?? { date: "", time: form.time };
+                  return (
+                    <div key={i} className="grid grid-cols-2 gap-3 items-center">
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Session {i + 1}</label>
+                        <Input type="date" value={s.date}
+                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], date: e.target.value }; return { ...f, planSessions: sessions }; })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Time</label>
+                        <Input type="time" value={s.time}
+                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], time: e.target.value }; return { ...f, planSessions: sessions }; })} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Start time</label>
-                <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Day of week</label>
+                  <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">Select day</option>
+                    {days.map((d) => <option key={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Start time</label>
+                  <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                </div>
               </div>
-            </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">City</label>
@@ -235,37 +293,74 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
               </label>
             </div>
 
-            {/* Recurring toggle */}
-            <div className="border-t pt-3">
-              <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !(f as any).recurring, recurringWeeks: "" }))}
-                className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
-                style={(form as any).recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
-                <div className="text-left">
-                  <p className="font-semibold text-sm">Recurring session</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {(form as any).recurring && form.dayOfWeek
-                      ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
-                      : "Runs every week on the selected day"}
-                  </p>
+            {/* Recurring + Package toggles */}
+            <div className="border-t pt-3 space-y-3">
+              {!form.isPlan && (
+                <div>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !(f as any).recurring, recurringWeeks: "" }))}
+                    className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                    style={(form as any).recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                    <div className="text-left">
+                      <p className="font-semibold text-sm">Recurring session</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {(form as any).recurring && form.dayOfWeek
+                          ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}`
+                          : "Runs every week on the selected day"}
+                      </p>
+                    </div>
+                    <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                      <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).recurring ? "translate-x-4" : "translate-x-0"}`} />
+                    </div>
+                  </button>
+                  {(form as any).recurring && (
+                    <div className="mt-2 px-1">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">How many sessions?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {[2, 3, 4, 5, 6, 7, 8].map((w) => (
+                          <button key={w} type="button"
+                            onClick={() => setForm((f) => ({ ...f, recurringWeeks: (f as any).recurringWeeks === String(w) ? "" : String(w) }))}
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
+                            style={(form as any).recurringWeeks === String(w)
+                              ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
+                              : { borderColor: "#e2e8f0", color: "#475569" }}>
+                            {w}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).recurring ? "translate-x-4" : "translate-x-0"}`} />
+              )}
+
+              <button type="button"
+                onClick={() => setForm((f) => ({ ...f, isPlan: !f.isPlan, recurring: false, recurringWeeks: "", planSessions: !f.isPlan ? buildPlanSessions(parseInt(f.planWeeks) || 4, f.time) : f.planSessions }))}
+                className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
+                style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Package</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Set custom dates &amp; times for each session · player pays upfront · discount applied automatically</p>
+                </div>
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
                 </div>
               </button>
-              {(form as any).recurring && (
-                <div className="mt-2 px-1">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">How many sessions?</p>
-                  <div className="flex flex-wrap gap-2">
-                    {[2, 3, 4, 5, 6, 7, 8].map((w) => (
-                      <button key={w} type="button"
-                        onClick={() => setForm((f) => ({ ...f, recurringWeeks: (f as any).recurringWeeks === String(w) ? "" : String(w) }))}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
-                        style={(form as any).recurringWeeks === String(w)
-                          ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
-                          : { borderColor: "#e2e8f0", color: "#475569" }}>
-                        {w}
-                      </button>
-                    ))}
+
+              {form.isPlan && (
+                <div className="space-y-2 pt-1">
+                  <label className="text-sm font-medium block">Number of sessions in package</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[2, 3, 4, 5, 6, 7, 8].map((w) => {
+                      const disc = planDiscount(w);
+                      return (
+                        <button key={w} type="button"
+                          onClick={() => setForm((f) => ({ ...f, planWeeks: String(w), planSessions: buildPlanSessions(w, f.time) }))}
+                          className="flex flex-col items-center py-2.5 px-1 rounded-xl border-2 transition-all"
+                          style={form.planWeeks === String(w) ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
+                          <span className="font-bold text-sm">{w}</span>
+                          <span className="text-xs font-semibold" style={{ color: "#DC373E" }}>{disc}% off</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
