@@ -84,14 +84,10 @@ export default function ForTrainersPage() {
                   Run group sessions to build your client base — then convert them to privates. We handle the bookings, payments, and marketing.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/sign-up"
+                  <Link href="#apply"
                     className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base"
                     style={{ backgroundColor: "#DC373E" }}>
                     Apply Now
-                  </Link>
-                  <Link href="/trainer/new-session"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors">
-                    Create a Session →
                   </Link>
                 </div>
               </div>
@@ -219,17 +215,22 @@ export default function ForTrainersPage() {
         </div>
       </section>
 
-      <section id="apply" className="py-10 md:py-14 text-center">
-        <div className="container">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Apply today</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Applications reviewed within 3 business days. Start earning in 1-2 weeks.
-          </p>
-          <Link href="/sign-up"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-base"
-            style={{ backgroundColor: "#DC373E" }}>
-            Create Your Account
-          </Link>
+      <section id="apply" className="bg-[#f4f6f9] px-4 sm:px-6 lg:px-8 py-10">
+        <div className="relative rounded-[20px] max-w-7xl mx-auto text-center overflow-hidden" style={{ backgroundColor: "#0F3154" }}>
+          <div className="absolute inset-0 opacity-5"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+          <div className="relative px-6 py-16 md:py-20">
+            <p className="text-[#DC373E] font-semibold text-sm uppercase tracking-wider mb-4">Free to join · No listing fees</p>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-5 leading-tight">Apply today.</h2>
+            <p className="text-white/70 text-xl mb-10 max-w-xl mx-auto">
+              Applications reviewed within 3 business days. Start earning in 1–2 weeks.
+            </p>
+            <Link href="/sign-up"
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl text-white font-bold text-lg"
+              style={{ backgroundColor: "#DC373E" }}>
+              Create Your Account
+            </Link>
+          </div>
         </div>
       </section>
     </div>
