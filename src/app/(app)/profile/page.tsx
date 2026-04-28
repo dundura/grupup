@@ -209,6 +209,14 @@ export default function ProfilePage() {
 
       <div className="space-y-6">
 
+        {/* Players section — parents only, shown first */}
+        {role === "parent" && (
+          <PlayerProfilesList
+            initialProfiles={(form as any).childProfiles ?? []}
+            onChange={(profiles) => setForm((f) => ({ ...f, childProfiles: profiles }))}
+          />
+        )}
+
         {/* Photo upload */}
         <div className={`bg-card border rounded-2xl p-6 ${!hasUploadedPhoto ? "border-red-300 bg-red-50/30" : ""}`}>
           <div className="flex items-center justify-between mb-4">
@@ -573,14 +581,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-          {/* Players section — parents only (managing multiple kids) */}
-        {role === "parent" && (
-          <PlayerProfilesList
-            initialProfiles={(form as any).childProfiles ?? []}
-            onChange={(profiles) => setForm((f) => ({ ...f, childProfiles: profiles }))}
-          />
-        )}
-
+  
         {/* Visibility toggle — players/parents only */}
         {role !== "trainer" && (
           <div className="bg-card border rounded-2xl p-5">
