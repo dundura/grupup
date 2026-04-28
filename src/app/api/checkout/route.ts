@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { trainerSessions } from "@/db/schema";
+import { trainerSessions, trainers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 function getStripe() {
@@ -18,10 +18,7 @@ export async function POST(req: NextRequest) {
     const { sessionId, athleteName, contactName, firstName, lastName, email, notes, sessionCount = 1 } = body;
     const userId = existingUserId ?? `guest-${Date.now()}`;
 
-    const [session] = await db
-      .select()
-      .from(trainerSessions)
-      .where(eq(trainerSessions.id, parseInt(sessionId)));
+    const [session] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, parseInt(sessionId)));
 
     if (!session || !session.isActive) {
       return NextResponse.json({ error: "Session not found or no longer available" }, { status: 404 });
@@ -30,10 +27,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This session is full" }, { status: 400 });
     }
 
+    // Look up trainer's Stripe Connect account
+    const [trainer] = await db.select({ stripeAccountId: trainers.stripeAccountId })
+      .from(trainers).where(eq(trainers.clerkId, session.trainerClerkId));
+
     const origin = req.headers.get("origin") ?? "https://www.grupup.app";
     const stripe = getStripe();
 
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const totalAmount = session.pricePerPlayer * sessionCount;
+    const platformFee = Math.round(totalAmount * 0.15 * 100); // 15% in cents
+
+    const checkoutParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: email || undefined,
@@ -66,14 +70,23 @@ export async function POST(req: NextRequest) {
       },
       success_url: `${origin}/sessions/${session.id}/book/success?checkout_session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/sessions/${session.id}/book`,
-    });
+    };
 
+    // Auto-transfer 85% to trainer if they have Connect set up
+    if (trainer?.stripeAccountId) {
+      checkoutParams.payment_intent_data = {
+        application_fee_amount: platformFee,
+        transfer_data: { destination: trainer.stripeAccountId },
+      };
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("[POST /api/checkout]", err);
     const msg = err instanceof Error ? err.message : "";
     if (msg.includes("STRIPE_SECRET_KEY")) {
-      return NextResponse.json({ error: "Payments not configured yet. Please contact info@anytime-soccer.com." }, { status: 503 });
+      return NextResponse.json({ error: "Payments not configured yet." }, { status: 503 });
     }
     return NextResponse.json({ error: "Failed to create checkout. Please try again." }, { status: 500 });
   }

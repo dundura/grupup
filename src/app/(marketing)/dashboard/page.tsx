@@ -35,6 +35,8 @@ export default function DashboardPage() {
   const [trainerBookings, setTrainerBookings] = useState<any[]>([]);
   const [archiving, setArchiving] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
+  const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
+  const [connectingStripe, setConnectingStripe] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -49,17 +51,27 @@ export default function DashboardPage() {
         fetch("/api/trainer/profile").then((r) => r.json()),
         fetch("/api/trainer/sessions").then((r) => r.json()),
         fetch("/api/trainer/bookings").then((r) => r.json()),
-      ]).then(([profile, sess, bkgs]) => {
+        fetch("/api/trainer/stripe/status").then((r) => r.json()),
+      ]).then(([profile, sess, bkgs, stripeStatus]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
         setIsArchived(profile?.isArchived ?? false);
+        setStripeConnected(stripeStatus?.connected ?? false);
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [isLoaded, role]);
+
+  async function handleConnectStripe() {
+    setConnectingStripe(true);
+    const res = await fetch("/api/trainer/stripe/connect", { method: "POST" });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else setConnectingStripe(false);
+  }
 
   async function handleArchive(archive: boolean) {
     setArchiving(true);
@@ -441,6 +453,42 @@ export default function DashboardPage() {
                 </Link>
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Stripe Payouts — trainers only */}
+        {role === "trainer" && stripeConnected !== null && (
+          <div className="bg-white rounded-2xl border p-6">
+            <h2 className="text-base font-bold mb-1">Payouts</h2>
+            <p className="text-xs text-muted-foreground mb-5">Connect Stripe to receive automatic payouts after each session.</p>
+
+            {stripeConnected ? (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
+                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm text-green-800">Stripe connected</p>
+                  <p className="text-xs text-green-700 mt-0.5">You'll receive 85% of every booking automatically within 2–7 business days.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-[#f0f4f9] border">
+                  <DollarSign className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
+                  <div>
+                    <p className="font-semibold text-sm">Get paid automatically</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Connect your bank account once — 85% of every booking transfers to you directly after the session.</p>
+                  </div>
+                </div>
+                <button onClick={handleConnectStripe} disabled={connectingStripe}
+                  className="w-full py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-60 transition-opacity"
+                  style={{ backgroundColor: "#0F3154" }}>
+                  {connectingStripe ? "Redirecting to Stripe…" : "Connect Stripe Payouts"}
+                </button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Powered by Stripe · Takes ~2 minutes · Your bank info is never stored by GrupUp
+                </p>
+              </div>
+            )}
           </div>
         )}
 
