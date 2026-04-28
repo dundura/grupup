@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useAuth } from "@clerk/nextjs";
+import { Plus, Trash2, GripVertical } from "lucide-react";
+
+type Question = { id: string; type: "text" | "choice"; label: string; required: boolean; options: string[] };
+type Questionnaire = { title: string; questions: Question[] } | null;
+
+function newQuestion(): Question {
+  return { id: Math.random().toString(36).slice(2), type: "text", label: "", required: false, options: [""] };
+}
 
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
@@ -34,6 +42,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [priceLocked] = useState(false);
+  const [questionnaire, setQuestionnaire] = useState<Questionnaire>(null);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
@@ -90,6 +99,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           planWeeks: "4",
           planSessions: [],
         });
+        setQuestionnaire((s as any).questionnaire ?? null);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load session"); setLoading(false); });
@@ -127,7 +137,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       const res = await fetch(`/api/trainer/sessions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, questionnaire }),
       });
       if (res.ok) { router.push(`/sessions/${id}`); }
       else { const d = await res.json(); setError(d.error ?? "Something went wrong"); }
@@ -429,6 +439,125 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Session Video <span className="font-normal normal-case text-xs">(optional)</span></label>
             <p className="text-xs text-muted-foreground">Paste a YouTube or Vimeo link to show a preview video on your session page.</p>
             <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
+          </div>
+
+          {/* Questionnaire builder */}
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Player Questionnaire</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Players complete this after booking — visible on their dashboard</p>
+              </div>
+              <button type="button"
+                onClick={() => setQuestionnaire(questionnaire ? null : { title: "Before Your First Session", questions: [newQuestion()] })}
+                className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${questionnaire ? "bg-[#0F3154]" : "bg-gray-200"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${questionnaire ? "translate-x-4" : "translate-x-0"}`} />
+              </button>
+            </div>
+
+            {questionnaire && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Questionnaire title</label>
+                  <Input value={questionnaire.title}
+                    onChange={(e) => setQuestionnaire({ ...questionnaire, title: e.target.value })}
+                    placeholder="e.g. Before Your First Session" />
+                </div>
+
+                <div className="space-y-3">
+                  {questionnaire.questions.map((q, qi) => (
+                    <div key={q.id} className="border rounded-xl p-4 space-y-3">
+                      <div className="flex items-start gap-2">
+                        <GripVertical className="h-4 w-4 text-muted-foreground mt-2 shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <Input value={q.label}
+                            onChange={(e) => setQuestionnaire((prev) => {
+                              if (!prev) return prev;
+                              const qs = [...prev.questions];
+                              qs[qi] = { ...qs[qi], label: e.target.value };
+                              return { ...prev, questions: qs };
+                            })}
+                            placeholder="Question text…" />
+                          <div className="flex gap-3 flex-wrap items-center">
+                            <div className="flex gap-1">
+                              {(["text", "choice"] as const).map((t) => (
+                                <button key={t} type="button"
+                                  onClick={() => setQuestionnaire((prev) => {
+                                    if (!prev) return prev;
+                                    const qs = [...prev.questions];
+                                    qs[qi] = { ...qs[qi], type: t, options: t === "choice" ? (qs[qi].options.length ? qs[qi].options : [""]) : [] };
+                                    return { ...prev, questions: qs };
+                                  })}
+                                  className="px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors capitalize"
+                                  style={q.type === t ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                                  {t === "text" ? "Text answer" : "Multiple choice"}
+                                </button>
+                              ))}
+                            </div>
+                            <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                              <input type="checkbox" checked={q.required}
+                                onChange={(e) => setQuestionnaire((prev) => {
+                                  if (!prev) return prev;
+                                  const qs = [...prev.questions];
+                                  qs[qi] = { ...qs[qi], required: e.target.checked };
+                                  return { ...prev, questions: qs };
+                                })}
+                                className="accent-[#0F3154]" />
+                              Required
+                            </label>
+                          </div>
+                          {q.type === "choice" && (
+                            <div className="space-y-1.5 pl-1">
+                              {q.options.map((opt, oi) => (
+                                <div key={oi} className="flex gap-2 items-center">
+                                  <Input value={opt} placeholder={`Option ${oi + 1}`} className="text-sm"
+                                    onChange={(e) => setQuestionnaire((prev) => {
+                                      if (!prev) return prev;
+                                      const qs = [...prev.questions];
+                                      const opts = [...qs[qi].options];
+                                      opts[oi] = e.target.value;
+                                      qs[qi] = { ...qs[qi], options: opts };
+                                      return { ...prev, questions: qs };
+                                    })} />
+                                  <button type="button" onClick={() => setQuestionnaire((prev) => {
+                                    if (!prev) return prev;
+                                    const qs = [...prev.questions];
+                                    qs[qi] = { ...qs[qi], options: qs[qi].options.filter((_, i) => i !== oi) };
+                                    return { ...prev, questions: qs };
+                                  })} className="text-muted-foreground hover:text-red-500 transition-colors shrink-0">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                              <button type="button" onClick={() => setQuestionnaire((prev) => {
+                                if (!prev) return prev;
+                                const qs = [...prev.questions];
+                                qs[qi] = { ...qs[qi], options: [...qs[qi].options, ""] };
+                                return { ...prev, questions: qs };
+                              })} className="text-xs text-[#0F3154] font-semibold hover:underline flex items-center gap-1 mt-1">
+                                <Plus className="h-3 w-3" /> Add option
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <button type="button" onClick={() => setQuestionnaire((prev) => {
+                          if (!prev) return prev;
+                          return { ...prev, questions: prev.questions.filter((_, i) => i !== qi) };
+                        })} className="text-muted-foreground hover:text-red-500 transition-colors shrink-0 mt-1">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button type="button"
+                  onClick={() => setQuestionnaire((prev) => prev ? { ...prev, questions: [...prev.questions, newQuestion()] } : prev)}
+                  className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border-2 border-dashed transition-colors hover:border-[#0F3154] hover:text-[#0F3154] text-muted-foreground w-full justify-center">
+                  <Plus className="h-4 w-4" /> Add question
+                </button>
+              </div>
+            )}
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}

@@ -7,6 +7,7 @@ import { playerFollows } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
 import ConnectFilters from "./ConnectFilters";
+import { MultipleSports } from "./MultipleSports";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -214,9 +215,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
                           </span>
                         )}
                         {p.sports.length > 1 ? (
-                          <span title={p.sports.join(", ")}>
-                            Multiple ▾
-                          </span>
+                          <MultipleSports sports={p.sports} />
                         ) : p.sports.length === 1 ? (
                           <span>{p.sports[0]}</span>
                         ) : null}

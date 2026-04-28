@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
-  CalendarDays, Clock, Trash2, DollarSign, Eye,
+  CalendarDays, Clock, Trash2, DollarSign, Eye, ClipboardList, X,
 } from "lucide-react";
 
 interface TrainerProfile {
@@ -41,6 +41,13 @@ export default function DashboardPage() {
   const [followRequests, setFollowRequests] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [followers, setFollowers] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
+  const [pendingQuestionnaires, setPendingQuestionnaires] = useState<Array<{
+    bookingId: number; sessionTitle: string;
+    questionnaire: { title: string; questions: Array<{ id: string; type: string; label: string; required: boolean; options?: string[] }> };
+  }>>([]);
+  const [activeQuestionnaire, setActiveQuestionnaire] = useState<typeof pendingQuestionnaires[0] | null>(null);
+  const [qResponses, setQResponses] = useState<Record<string, string>>({});
+  const [qSubmitting, setQSubmitting] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -67,12 +74,16 @@ export default function DashboardPage() {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
-      // Player: load follow requests
-      fetch("/api/player/follows").then((r) => r.json()).then((data) => {
-        if (data.pending) setFollowRequests(data.pending);
-        if (data.approved) setFollowers(data.approved);
-      }).catch(() => {});
-      setLoading(false);
+      // Player: load follow requests + pending questionnaires
+      Promise.all([
+        fetch("/api/player/follows").then((r) => r.json()).catch(() => ({})),
+        fetch("/api/player/questionnaires").then((r) => r.json()).catch(() => ({})),
+      ]).then(([followData, qData]) => {
+        if (followData.pending) setFollowRequests(followData.pending);
+        if (followData.approved) setFollowers(followData.approved);
+        if (qData.pending) setPendingQuestionnaires(qData.pending);
+        setLoading(false);
+      });
     }
   }, [isLoaded, role]);
 
@@ -92,6 +103,20 @@ export default function DashboardPage() {
       setFollowers((f) => f.filter((x) => x.followerClerkId !== followerClerkId));
     }
     setFollowLoading(null);
+  }
+
+  async function handleQSubmit() {
+    if (!activeQuestionnaire) return;
+    setQSubmitting(true);
+    await fetch(`/api/bookings/${activeQuestionnaire.bookingId}/questionnaire`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ responses: qResponses }),
+    });
+    setPendingQuestionnaires((q) => q.filter((x) => x.bookingId !== activeQuestionnaire.bookingId));
+    setActiveQuestionnaire(null);
+    setQResponses({});
+    setQSubmitting(false);
   }
 
   async function handleConnectStripe() {
@@ -181,6 +206,61 @@ export default function DashboardPage() {
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
                 style={{ backgroundColor: "#DC373E" }}>
                 {deleting ? "Deleting…" : "Yes, delete it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Questionnaire modal */}
+      {activeQuestionnaire && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white rounded-t-2xl">
+              <div>
+                <h2 className="font-bold text-base">{activeQuestionnaire.questionnaire.title}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{activeQuestionnaire.sessionTitle}</p>
+              </div>
+              <button onClick={() => { setActiveQuestionnaire(null); setQResponses({}); }}
+                className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-5">
+              {activeQuestionnaire.questionnaire.questions.map((q) => (
+                <div key={q.id}>
+                  <label className="text-sm font-semibold block mb-2">
+                    {q.label}
+                    {q.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  {q.type === "text" ? (
+                    <textarea
+                      value={qResponses[q.id] ?? ""}
+                      onChange={(e) => setQResponses((r) => ({ ...r, [q.id]: e.target.value }))}
+                      rows={3} placeholder="Your answer…"
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      {(q.options ?? []).filter(Boolean).map((opt) => (
+                        <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
+                          <input type="radio" name={q.id} value={opt}
+                            checked={qResponses[q.id] === opt}
+                            onChange={() => setQResponses((r) => ({ ...r, [q.id]: opt }))}
+                            className="accent-[#0F3154]" />
+                          <span className="text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="px-6 pb-5">
+              <button onClick={handleQSubmit} disabled={qSubmitting}
+                className="w-full py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-60 transition-opacity"
+                style={{ backgroundColor: "#DC373E" }}>
+                {qSubmitting ? "Submitting…" : "Submit questionnaire"}
               </button>
             </div>
           </div>
@@ -354,6 +434,32 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Player: Pending Questionnaires */}
+        {role !== "trainer" && pendingQuestionnaires.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <ClipboardList className="h-5 w-5" style={{ color: "#DC373E" }} />
+              <h2 className="text-base font-bold">Action Required</h2>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                {pendingQuestionnaires.length}
+              </span>
+            </div>
+            {pendingQuestionnaires.map((q) => (
+              <div key={q.bookingId} className="flex items-center justify-between gap-3 border rounded-xl px-4 py-3">
+                <div>
+                  <p className="font-semibold text-sm">{q.questionnaire.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{q.sessionTitle}</p>
+                </div>
+                <button onClick={() => { setActiveQuestionnaire(q); setQResponses({}); }}
+                  className="shrink-0 px-4 py-2 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  Complete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Player: Follow Requests & Followers */}
         {role !== "trainer" && (followRequests.length > 0 || followers.length > 0) && (
