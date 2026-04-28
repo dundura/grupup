@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MapPin, Users, Pencil } from "lucide-react";
 import { db } from "@/db";
 import { playerFollows } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
 import ConnectFilters from "./ConnectFilters";
 import { MultipleSports } from "./MultipleSports";
@@ -52,7 +52,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
     id: string; clerkId: string; name: string; photo: string; city: string; country: string;
     zipCode: string; sports: string[]; level: string; league: string; bio: string;
     team: string; birthYear: string; gender: string;
-    availableForFreePlay: boolean; openToTrain: boolean;
+    availableForFreePlay: boolean; openToTrain: boolean; followerCount: number;
   }[] = [];
 
   try {
@@ -95,6 +95,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
             gender: child.gender ?? "",
             availableForFreePlay: meta.availableForFreePlay ?? false,
             openToTrain: meta.openToTrain ?? false,
+            followerCount: 0,
           });
         }
       }
@@ -119,8 +120,20 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
           gender: meta.gender ?? "",
           availableForFreePlay: meta.availableForFreePlay ?? false,
           openToTrain: meta.openToTrain ?? false,
+          followerCount: 0,
         });
       }
+    }
+
+    // Fetch follower counts for all displayed players in one query
+    const clerkIds = [...new Set(approvedPlayers.map((p) => p.clerkId))];
+    if (clerkIds.length) {
+      const followerRows = await db.select({ targetClerkId: playerFollows.targetClerkId })
+        .from(playerFollows)
+        .where(and(inArray(playerFollows.targetClerkId, clerkIds), eq(playerFollows.status, "approved")));
+      const counts: Record<string, number> = {};
+      for (const r of followerRows) counts[r.targetClerkId] = (counts[r.targetClerkId] ?? 0) + 1;
+      for (const p of approvedPlayers) p.followerCount = counts[p.clerkId] ?? 0;
     }
   } catch (err) { console.error("[connect] failed to load players:", err); }
 
@@ -244,6 +257,13 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
 
                     {/* White bottom */}
                     <div className="bg-white rounded-b-2xl border border-t-0 border-gray-200 px-5 py-4">
+                      {p.followerCount > 0 && (
+                        <div className="flex items-center justify-center gap-1 mb-3">
+                          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-xs font-semibold" style={{ color: "#0F3154" }}>{p.followerCount}</span>
+                          <span className="text-xs text-muted-foreground">{p.followerCount === 1 ? "follower" : "followers"}</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-center gap-3 flex-wrap mb-4 text-xs">
                         {p.birthYear && (
                           <span className="flex items-center gap-1.5">
