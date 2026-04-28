@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { trainerSessions } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { trainerSessions, bookings } from "@/db/schema";
+import { eq, and, count } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +24,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
     const body = await req.json();
+    const newSpotsTotal = parseInt(body.spotsTotal) || 6;
+
+    // Count actual paid bookings to derive correct spotsLeft
+    const [{ value: bookedCount }] = await db
+      .select({ value: count() })
+      .from(bookings)
+      .where(and(eq(bookings.sessionId, id), eq(bookings.status, "paid")));
+    const newSpotsLeft = Math.max(0, newSpotsTotal - (bookedCount ?? 0));
+
     await db.update(trainerSessions).set({
       title: body.title,
       sport: body.sport,
@@ -35,7 +44,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       time: body.time ?? "",
       duration: parseInt(body.duration) || 60,
       pricePerPlayer: parseInt(body.pricePerPlayer) || 30,
-      spotsTotal: parseInt(body.spotsTotal) || 6,
+      spotsTotal: newSpotsTotal,
+      spotsLeft: newSpotsLeft,
       skillLevel: body.skillLevel ?? "",
       ageRange: body.ageRange ?? "",
       sessionPhoto: body.sessionPhoto ?? null,
