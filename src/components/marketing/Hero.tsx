@@ -140,44 +140,39 @@ export function Hero() {
             <div className="hidden lg:flex flex-col gap-3">
 
               <div className="flex flex-col gap-2" style={{ height: "380px" }}>
-                {/* Basketball with floating pills */}
-                <div className="relative" style={{ height: "185px" }}>
+                {/* Basketball */}
+                <div className="relative rounded-2xl overflow-hidden" style={{ height: "185px" }}>
+                  <img
+                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
+                    alt="Basketball players"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
+                </div>
+
+                {/* Football — pill on bottom right */}
+                <div className="relative flex-1">
                   <div className="relative rounded-2xl overflow-hidden h-full">
                     <img
-                      src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
-                      alt="Basketball players"
+                      src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377633398-c04se8.png"
+                      alt="Football players"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Basketball</p>
+                    <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Football</p>
                   </div>
-                  <div className="absolute -top-2 -right-2 rounded-lg shadow-xl px-2 py-1.5 z-10"
+                  {/* Floating pill — bottom right, mostly off image */}
+                  <div className="absolute -bottom-2 -right-2 rounded-lg shadow-xl px-2 py-1.5 z-10"
                     style={{ backgroundColor: "#0F3154", animation: "heroFloat 5s ease-in-out infinite" }}>
                     <div className="flex items-center gap-1 mb-0.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
                       <p className="text-[9px] font-bold text-white/60 uppercase tracking-wide">Session booked</p>
                     </div>
                     <p className="text-[10px] font-semibold text-white">Tue 5:30 PM · 6 players</p>
-                    <p className="text-[9px] text-white/60 mt-0.5">Basketball · Cary, NC</p>
-                  </div>
-                  <div className="absolute -bottom-2 -left-2 bg-white rounded-lg shadow-xl px-2 py-1.5 z-10"
-                    style={{ animation: "heroFloat 5s ease-in-out 2s infinite" }}>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Why group?</p>
-                    <p className="text-[10px] font-semibold text-gray-800">60% less than private</p>
+                    <p className="text-[9px] text-white/60 mt-0.5">Football · Cary, NC</p>
                   </div>
                 </div>
-
-                {/* Football */}
-                <div className="relative rounded-2xl overflow-hidden flex-1">
-                  <img
-                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377633398-c04se8.png"
-                    alt="Football players"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-3 left-0 right-0 text-center text-white font-bold text-sm drop-shadow">Football</p>
-                </div>
-              </div>
 
               {/* Highlights card */}
               <div className="bg-white rounded-2xl p-4 shadow-sm divide-y divide-gray-100">
