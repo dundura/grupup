@@ -17,7 +17,7 @@ const sports = [
 const highlights = [
   { icon: "🔴", title: "Save Money",  desc: "Up to 60% less than private training" },
   { icon: "📍", title: "Train Nearby", desc: "Convenient local group sessions" },
-  { icon: "🟡", title: "Have Fun",    desc: "Get fit together with friends" },
+  { icon: "🟡", title: "Have Fun",    desc: "Level up together with friends" },
 ];
 
 export function Hero() {
