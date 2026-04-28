@@ -235,7 +235,6 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <span>Total</span>
                     <span>${session.pricePerPlayer}.00</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">No service fees during beta 🎉</p>
                 </div>
 
                 <div className="flex gap-3">
