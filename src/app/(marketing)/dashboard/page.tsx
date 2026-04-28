@@ -30,6 +30,8 @@ export default function DashboardPage() {
   const [trainerProfile, setTrainerProfile]   = useState<TrainerProfile | null>(null);
   const [sessions, setSessions]               = useState<TrainerSession[]>([]);
   const [loading, setLoading]                 = useState(true);
+  const [deleteModal, setDeleteModal]         = useState<number | null>(null);
+  const [deleting, setDeleting]               = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -53,10 +55,13 @@ export default function DashboardPage() {
     }
   }, [isLoaded, role]);
 
-  async function deleteSession(id: number) {
-    if (!confirm("Delete this session? Players who booked will be notified.")) return;
-    await fetch(`/api/trainer/sessions/${id}`, { method: "DELETE" });
-    setSessions((s) => s.filter((x) => x.id !== id));
+  async function confirmDelete() {
+    if (!deleteModal) return;
+    setDeleting(true);
+    await fetch(`/api/trainer/sessions/${deleteModal}`, { method: "DELETE" });
+    setSessions((s) => s.filter((x) => x.id !== deleteModal));
+    setDeleteModal(null);
+    setDeleting(false);
   }
 
   if (!isLoaded || loading) {
@@ -80,6 +85,37 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
+
+      {/* Delete confirmation modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="font-bold text-base">Delete this session?</p>
+                <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              ⚠️ Any players who have already booked will be notified and issued a full refund.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteModal(null)}
+                className="flex-1 py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">
+                Cancel
+              </button>
+              <button onClick={confirmDelete} disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ backgroundColor: "#DC373E" }}>
+                {deleting ? "Deleting…" : "Yes, delete it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pending approval banner */}
       {isPending && (
@@ -303,7 +339,7 @@ export default function DashboardPage() {
                         <Pencil className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => deleteSession(s.id)}
+                        onClick={() => setDeleteModal(s.id)}
                         className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors"
                         title="Delete session"
                       >
