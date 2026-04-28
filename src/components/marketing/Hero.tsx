@@ -115,7 +115,7 @@ export function Hero() {
               {/* Two stacked images */}
               <div className="grid grid-cols-1 gap-2" style={{ height: "320px" }}>
                 {/* Basketball — pills on outer wrapper (no overflow-hidden) */}
-                <div className="relative">
+                <div className="relative h-full">
                   <div className="relative rounded-2xl overflow-hidden h-full">
                     <img
                       src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
