@@ -36,6 +36,7 @@ export default function TrainerSetupPage() {
   const [form, setForm] = useState({
     photo: "",
     bio: meta.bio ?? "",
+    phone: "",
     country: meta.country ?? "",
     city: meta.city ?? "",
     zipCode: "",
@@ -60,6 +61,7 @@ export default function TrainerSetupPage() {
           setForm((f) => ({
             ...f,
             photo: existing.photo || user?.imageUrl || "",
+            phone: (existing as any).phone || "",
             bio: existing.bio || f.bio,
             country: existing.state ? f.country : (f.country || ""),
             city: existing.city || f.city,
@@ -122,11 +124,12 @@ export default function TrainerSetupPage() {
 
   const step1Missing = [
     !form.photo && "Profile photo",
+    !form.phone.trim() && "Phone number",
     !form.city.trim() && "City",
     !form.country && "Country",
     form.sports.length === 0 && "at least one sport",
   ].filter(Boolean) as string[];
-  const step1Valid = form.photo && form.city.trim() && form.country && form.sports.length > 0;
+  const step1Valid = form.photo && form.phone.trim() && form.city.trim() && form.country && form.sports.length > 0;
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
@@ -176,6 +179,20 @@ export default function TrainerSetupPage() {
                   onUploaded={(url) => setForm((f) => ({ ...f, photo: url }))}
                   label="Upload your coaching photo"
                 />
+              </div>
+
+              {/* Phone */}
+              <div className="bg-white rounded-2xl border p-6">
+                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">
+                  Phone Number <span style={{ color: "#DC373E" }}>*</span>
+                </label>
+                <Input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  placeholder="e.g. (919) 555-0123"
+                />
+                <p className="text-xs text-muted-foreground mt-2">Used for booking notifications only. Not shown publicly.</p>
               </div>
 
               {/* Bio */}

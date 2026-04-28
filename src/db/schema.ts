@@ -9,6 +9,7 @@ export const trainers = pgTable("trainers", {
   name: varchar("name", { length: 200 }).notNull(),
   photo: text("photo"),
   bio: text("bio"),
+  phone: varchar("phone", { length: 30 }),
   hourlyRate: integer("hourly_rate").default(85),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 100 }),
