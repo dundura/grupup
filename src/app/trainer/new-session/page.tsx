@@ -251,14 +251,6 @@ export default function NewSessionPage() {
                             {w}
                           </button>
                         ))}
-                        <button type="button"
-                          onClick={() => setForm((f) => ({ ...f, recurringWeeks: "" }))}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
-                          style={form.recurringWeeks === ""
-                            ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
-                            : { borderColor: "#e2e8f0", color: "#475569" }}>
-                          Ongoing
-                        </button>
                       </div>
                     </div>
                   )}
