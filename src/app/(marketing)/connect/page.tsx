@@ -27,7 +27,7 @@ export default async function ConnectPage() {
         };
         return {
           id: u.id,
-          name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.emailAddresses?.[0]?.emailAddress ?? "Player",
+          name: (`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim()) || (u.emailAddresses?.[0]?.emailAddress ?? "Player"),
           photo: meta.photo ?? u.imageUrl ?? "",
           city: meta.city ?? "",
           country: meta.country ?? "",

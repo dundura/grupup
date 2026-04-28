@@ -35,8 +35,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     redirect("/connect");
   }
 
-  const name = `${target.firstName ?? ""} ${target.lastName ?? ""}`.trim()
-    || target.emailAddresses?.[0]?.emailAddress ?? "Player";
+  const name = (`${target.firstName ?? ""} ${target.lastName ?? ""}`.trim())
+    || (target.emailAddresses?.[0]?.emailAddress ?? "Player");
   const photo = meta.photo ?? target.imageUrl ?? "";
 
   return (
