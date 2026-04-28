@@ -34,7 +34,7 @@ export function Hero() {
   }
 
   return (
-    <section className="bg-[#f4f6f9] px-3 sm:px-6 lg:px-8 pt-6 pb-0">
+    <section className="bg-[#f4f6f9] px-3 sm:px-6 lg:px-8 pt-6 pb-0 overflow-x-hidden">
       <div className="relative rounded-2xl max-w-7xl mx-auto overflow-hidden" style={{ backgroundColor: "#0d1f3c" }}>
 
         {/* Dot grid */}
@@ -64,35 +64,49 @@ export function Hero() {
                 </p>
               </div>
 
-              {/* Search bar — stacked on mobile, pill on desktop */}
-              <form onSubmit={handleSearch} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 sm:bg-white sm:rounded-full sm:shadow-md sm:pl-4 sm:pr-1.5 sm:py-1.5">
-                {/* Mobile: individual fields */}
-                <div className="flex gap-2 sm:contents">
-                  <div className="flex-1 flex items-center gap-2 bg-white rounded-full px-4 py-2.5 sm:bg-transparent sm:rounded-none sm:px-0 sm:py-0">
+              {/* Search bar */}
+              <form onSubmit={handleSearch} className="w-full">
+                {/* Mobile layout */}
+                <div className="flex flex-col gap-2 sm:hidden">
+                  <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2.5 w-full">
                     <Search className="h-4 w-4 text-gray-400 shrink-0" />
-                    <input
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Sport or keyword..."
-                      className="flex-1 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none bg-transparent min-w-0"
-                    />
+                    <select
+                      value={sport}
+                      onChange={(e) => setSport(e.target.value)}
+                      className="flex-1 text-sm font-medium text-gray-700 bg-transparent focus:outline-none cursor-pointer"
+                    >
+                      {sports.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
                   </div>
+                  <button type="submit"
+                    className="w-full py-3 rounded-full font-semibold text-sm text-white"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Find a Group Session
+                  </button>
+                </div>
+                {/* Desktop layout — pill */}
+                <div className="hidden sm:flex items-center gap-0 bg-white rounded-full shadow-md pl-4 pr-1.5 py-1.5">
+                  <Search className="h-4 w-4 text-gray-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search by sport..."
+                    className="flex-1 py-1.5 px-2 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none bg-transparent min-w-0"
+                  />
                   <select
                     value={sport}
                     onChange={(e) => setSport(e.target.value)}
-                    className="bg-white rounded-full px-3 py-2.5 text-sm font-medium text-gray-700 focus:outline-none cursor-pointer sm:bg-transparent sm:rounded-none sm:border-l sm:border-gray-200 sm:pl-3 sm:pr-2"
+                    className="text-sm font-medium text-gray-700 bg-transparent focus:outline-none cursor-pointer pr-2 border-l border-gray-200 pl-3"
                   >
                     {sports.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
+                  <button type="submit"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full font-semibold text-sm text-white whitespace-nowrap shrink-0"
+                    style={{ backgroundColor: "#DC373E" }}>
+                    Find a Group Session
+                  </button>
                 </div>
-                <button type="submit"
-                  className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full font-semibold text-sm text-white whitespace-nowrap"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  <Search className="h-4 w-4 sm:hidden" />
-                  <span className="hidden sm:inline">Find a Group Session</span>
-                  <span className="sm:hidden">Find Sessions</span>
-                </button>
               </form>
 
               {/* Soccer image */}
