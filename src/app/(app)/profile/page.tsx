@@ -17,7 +17,28 @@ import type { ChildProfile } from "@/components/profile/PlayerProfilesList";
 const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 const improvementAreaOptions = ["Ball Skills", "Finishing", "Defending", "1v1", "Passing", "Shooting", "Speed & Agility", "Dribbling", "Heading", "Goalkeeping", "Game Sense", "Set Pieces"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
-const leagues = ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational", "Other"];
+const leaguesBySport: Record<string, string[]> = {
+  Soccer:            ["ECNL", "MLS Next", "NPL (National Premier League)", "USYSA", "US Club Soccer", "Elite Academy", "High School Varsity", "College", "Recreational"],
+  Basketball:        ["AAU", "NBA Academy", "Nike EYBL", "High School Varsity", "College", "Recreational"],
+  Football:          ["Pop Warner", "USA Football", "High School Varsity", "College", "Recreational"],
+  Baseball:          ["Little League", "USSSA", "Perfect Game", "Travel Ball", "High School Varsity", "College", "Recreational"],
+  Tennis:            ["USTA", "High School Varsity", "College", "Recreational"],
+  Lacrosse:          ["US Lacrosse", "High School Varsity", "College", "Recreational"],
+  Volleyball:        ["USA Volleyball", "High School Varsity", "College", "Recreational"],
+  Swimming:          ["USA Swimming", "High School Varsity", "College", "Recreational"],
+  "Speed & Agility": ["High School Varsity", "College", "Club", "Recreational"],
+};
+const defaultLeagues = ["High School Varsity", "College", "Club", "Recreational"];
+
+function getLeagues(sports: string[]): string[] {
+  if (!sports.length) return defaultLeagues;
+  const set = new Set<string>();
+  for (const s of sports) {
+    for (const l of (leaguesBySport[s] ?? defaultLeagues)) set.add(l);
+  }
+  set.add("Other");
+  return Array.from(set);
+}
 const countries = [
   "United States", "Canada", "United Kingdom", "Australia", "Ireland",
   "Germany", "France", "Spain", "Brazil", "Mexico", "South Africa",
@@ -478,7 +499,7 @@ export default function ProfilePage() {
                 <select value={form.league} onChange={(e) => set("league", e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="">Select league</option>
-                  {leagues.map((l) => <option key={l}>{l}</option>)}
+                  {getLeagues(form.selectedPlayerSports).map((l) => <option key={l}>{l}</option>)}
                 </select>
                 {form.league === "Other" && (
                   <Input className="mt-2" value={form.leagueOther} onChange={(e) => set("leagueOther", e.target.value)}
