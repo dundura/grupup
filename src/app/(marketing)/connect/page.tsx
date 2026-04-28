@@ -135,10 +135,14 @@ export default async function ConnectPage() {
                           </span>
                         )}
                         {sportLabel && <span>{sportLabel}</span>}
-                        {p.gender && <span>{p.gender}</span>}
+                          {p.gender && <span>{p.gender}</span>}
                       </div>
-                      {p.bio && (
-                        <p className="text-white/60 text-xs mt-3 leading-relaxed line-clamp-2 px-2">{p.bio}</p>
+                      {p.level && (
+                        <div className="mt-3">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white">
+                            {p.level}
+                          </span>
+                        </div>
                       )}
                     </div>
 
