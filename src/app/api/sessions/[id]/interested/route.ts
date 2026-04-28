@@ -46,6 +46,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             sessionId: id,
             action: "interested",
             spotsLeft: session.spotsLeft,
+            dayOfWeek: session.dayOfWeek ?? undefined,
+            time: session.time ?? undefined,
+            city: session.city ?? undefined,
           });
         }
       } catch {}

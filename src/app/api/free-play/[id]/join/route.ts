@@ -15,14 +15,14 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
     const [event] = await db.select().from(freePlayEvents).where(eq(freePlayEvents.id, eventId));
     if (!event || !event.isActive) return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    if (event.playersConfirmed >= event.playersNeeded) return NextResponse.json({ error: "Event is full" }, { status: 400 });
+    if ((event.playersConfirmed ?? 0) >= (event.playersNeeded ?? 10)) return NextResponse.json({ error: "Event is full" }, { status: 400 });
 
     // Increment confirmed count
     await db.update(freePlayEvents)
       .set({ playersConfirmed: sql`${freePlayEvents.playersConfirmed} + 1` })
       .where(eq(freePlayEvents.id, eventId));
 
-    const spotsLeft = event.playersNeeded - event.playersConfirmed - 1;
+    const spotsLeft = (event.playersNeeded ?? 10) - (event.playersConfirmed ?? 0) - 1;
 
     // Notify the joining player's followers
     try {
@@ -49,7 +49,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       }
     } catch {}
 
-    return NextResponse.json({ ok: true, playersConfirmed: event.playersConfirmed + 1 });
+    return NextResponse.json({ ok: true, playersConfirmed: (event.playersConfirmed ?? 0) + 1 });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }

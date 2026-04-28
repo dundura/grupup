@@ -182,6 +182,9 @@ export async function POST(req: NextRequest) {
                 sessionId: String(session.id),
                 action: "booked",
                 spotsLeft: Math.max(0, session.spotsLeft - 1),
+                dayOfWeek: session.dayOfWeek ?? undefined,
+                time: session.time ?? undefined,
+                city: session.city ?? undefined,
               });
             }
           } catch {}

@@ -222,6 +222,9 @@ export async function sendFollowerSessionAlert({
   sessionId,
   action,
   spotsLeft,
+  dayOfWeek,
+  time,
+  city,
 }: {
   toEmail: string;
   playerName: string;
@@ -229,10 +232,15 @@ export async function sendFollowerSessionAlert({
   sessionId: string;
   action: "interested" | "booked";
   spotsLeft?: number;
+  dayOfWeek?: string;
+  time?: string;
+  city?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
   const verb = action === "booked" ? "just booked a spot in" : "is interested in joining";
   const spotsMsg = spotsLeft != null && spotsLeft > 0 ? `Only ${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left!` : "";
+  const when = [dayOfWeek ? `${dayOfWeek}s` : null, time].filter(Boolean).join(" at ");
+  const where = city ?? "";
   await getResend().emails.send({
     from: FROM,
     to: toEmail,
@@ -243,10 +251,15 @@ export async function sendFollowerSessionAlert({
         <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
           <h1 style="color: white; margin: 0; font-size: 20px;">${action === "booked" ? "🏃 Your connection just joined a session!" : "🔔 Your connection is interested in a session!"}</h1>
         </div>
-        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 8px;">
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 16px;">
           <strong>${playerName}</strong> ${verb} <strong>${sessionTitle}</strong>.
         </p>
-        ${spotsMsg ? `<p style="color: #DC373E; font-weight: 600; font-size: 14px; margin: 0 0 24px;">⚡ ${spotsMsg}</p>` : "<br/>"}
+        ${(when || where) ? `
+        <div style="background: #f8fafc; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;">
+          ${when ? `<p style="margin: 0 0 4px; font-size: 14px; color: #374151;">📅 <strong>${when}</strong></p>` : ""}
+          ${where ? `<p style="margin: 0; font-size: 14px; color: #374151;">📍 ${where}</p>` : ""}
+        </div>` : ""}
+        ${spotsMsg ? `<p style="color: #DC373E; font-weight: 600; font-size: 14px; margin: 0 0 20px;">⚡ ${spotsMsg}</p>` : ""}
         <a href="https://www.grupup.app/sessions/${sessionId}"
           style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
           View Session & Join Them
