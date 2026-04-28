@@ -143,7 +143,7 @@ export function Hero() {
                 </div>
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1599676551100-b5d55dd2fb39?w=800&q=80"
+                    src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377633398-c04se8.png"
                     alt="Football players"
                     className="w-full h-full object-cover"
                   />
