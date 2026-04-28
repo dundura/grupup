@@ -184,10 +184,10 @@ export default function AdminClient({
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-semibold">{u.name}</p>
-                              {tab === "trainers" && u.trainerId && !u.isApproved && (
+                              {tab === "trainers" && !u.isApproved && (
                                 <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Pending</span>
                               )}
-                              {tab === "trainers" && u.trainerId && u.isApproved && (
+                              {tab === "trainers" && u.isApproved && (
                                 <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Approved</span>
                               )}
                               {tab === "players" && !u.isApproved && (
