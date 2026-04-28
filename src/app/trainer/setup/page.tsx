@@ -30,6 +30,7 @@ export default function TrainerSetupPage() {
   const [saveError, setSaveError] = useState("");
   const [step, setStep] = useState(1);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [photoUploaded, setPhotoUploaded] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as { sports?: string[]; bio?: string; yearsExperience?: string; specialties?: string[]; certifications?: string[]; city?: string; country?: string };
 
@@ -58,9 +59,13 @@ export default function TrainerSetupPage() {
       .then((r) => r.json())
       .then((existing) => {
         if (existing) {
+          // Consider photo already uploaded if it's a real CloudFront upload (not a Clerk avatar)
+          if (existing.photo && existing.photo.includes("cloudfront.net")) {
+            setPhotoUploaded(true);
+          }
           setForm((f) => ({
             ...f,
-            photo: existing.photo || user?.imageUrl || "",
+            photo: existing.photo || "",
             phone: (existing as any).phone || "",
             bio: existing.bio || f.bio,
             country: existing.state ? f.country : (f.country || ""),
@@ -75,12 +80,12 @@ export default function TrainerSetupPage() {
             hourlyRate: existing.hourlyRate > 0 ? String(existing.hourlyRate) : f.hourlyRate,
           }));
         } else {
-          setForm((f) => ({ ...f, photo: user?.imageUrl ?? "" }));
+          setForm((f) => ({ ...f, photo: "" }));
         }
         setProfileLoaded(true);
       })
       .catch(() => {
-        setForm((f) => ({ ...f, photo: user?.imageUrl ?? "" }));
+        setForm((f) => ({ ...f, photo: "" }));
         setProfileLoaded(true);
       });
   }, [isLoaded, user?.imageUrl]);
@@ -123,13 +128,13 @@ export default function TrainerSetupPage() {
   }
 
   const step1Missing = [
-    !form.photo && "Profile photo",
+    !photoUploaded && "Profile photo (upload required)",
     !form.phone.trim() && "Phone number",
     !form.city.trim() && "City",
     !form.country && "Country",
     form.sports.length === 0 && "at least one sport",
   ].filter(Boolean) as string[];
-  const step1Valid = form.photo && form.phone.trim() && form.city.trim() && form.country && form.sports.length > 0;
+  const step1Valid = photoUploaded && form.phone.trim() && form.city.trim() && form.country && form.sports.length > 0;
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
@@ -176,9 +181,14 @@ export default function TrainerSetupPage() {
                 </label>
                 <ImageUpload
                   currentUrl={form.photo}
-                  onUploaded={(url) => setForm((f) => ({ ...f, photo: url }))}
+                  onUploaded={(url) => { setForm((f) => ({ ...f, photo: url })); setPhotoUploaded(true); }}
                   label="Upload your coaching photo"
                 />
+                {!photoUploaded && (
+                  <p className="text-xs text-red-600 mt-2 font-medium">
+                    A profile photo is required to create your coaching profile.
+                  </p>
+                )}
               </div>
 
               {/* Phone */}
