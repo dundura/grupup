@@ -68,6 +68,24 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   const isFollowing = viewerFollowRow.length > 0;
   const isBlocked = viewerBlockRow.length > 0;
 
+  // Fetch Clerk profiles for followers (up to 12 for sidebar)
+  const followerProfiles: { id: string; name: string; photo: string; slug: string }[] = [];
+  if (followerRows.length > 0) {
+    const followerClerkIds = followerRows.slice(0, 12).map((r) => r.followerClerkId);
+    for (const fid of followerClerkIds) {
+      try {
+        const fu = await client.users.getUser(fid);
+        const fmeta = fu.publicMetadata as { photo?: string; profileSlug?: string };
+        followerProfiles.push({
+          id: fid,
+          name: `${fu.firstName ?? ""} ${fu.lastName ?? ""}`.trim() || "Player",
+          photo: fmeta.photo ?? fu.imageUrl ?? "",
+          slug: fmeta.profileSlug ?? fid,
+        });
+      } catch {}
+    }
+  }
+
   // Upcoming booked sessions
   const playerBookings = await db.select().from(bookings)
     .where(and(eq(bookings.clerkUserId, targetUserId), eq(bookings.status, "paid")))
@@ -92,7 +110,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-5xl mx-auto px-4 py-10 lg:flex lg:gap-8 lg:items-start">
+      <div className="flex-1 min-w-0">
         <Link href="/connect" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ChevronLeft className="h-4 w-4" /> Back to Connect
         </Link>
@@ -329,6 +348,38 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+      </div>{/* end main column */}
+
+        {/* Followers sidebar */}
+        {followerProfiles.length > 0 && (
+          <div className="hidden lg:block w-64 shrink-0">
+            <div className="bg-white rounded-2xl border shadow-sm p-4 sticky top-6">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                Followers <span style={{ color: "#0F3154" }}>({followerCount})</span>
+              </h2>
+              <div className="space-y-3">
+                {followerProfiles.map((f) => (
+                  <Link key={f.id} href={`/connect/${f.slug}`}
+                    className="flex items-center gap-2.5 group">
+                    <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#f0f4f9]">
+                      {f.photo ? (
+                        <Image src={f.photo} alt={f.name} fill className="object-cover" sizes="36px" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "#0F3154" }}>
+                          {f.name[0]?.toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium group-hover:text-[#0F3154] transition-colors truncate">{f.name}</span>
+                  </Link>
+                ))}
+                {followerCount > 12 && (
+                  <p className="text-xs text-muted-foreground pt-1">+{followerCount - 12} more</p>
+                )}
+              </div>
             </div>
           </div>
         )}
