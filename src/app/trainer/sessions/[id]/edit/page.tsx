@@ -18,8 +18,8 @@ const sessionTypes = [
 ];
 
 function baseHourlyRate(spots: number): number {
-  if (spots <= 3) return 30;
-  if (spots <= 6) return 25;
+  if (spots <= 3) return 35;
+  if (spots <= 6) return 30;
   return 20;
 }
 function calcPrice(spots: number, durationMin: number): number {
@@ -36,7 +36,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRange: "", skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "",
+    spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "",
     sessionPhoto: "", videoUrl: "", firstClassFree: false,
   });
 

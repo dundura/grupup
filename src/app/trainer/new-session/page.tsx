@@ -12,15 +12,15 @@ const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
 
 const sessionTypes = [
-  { value: "semi-private", label: "Semi-Private", desc: "2–3 players · $30/player", spots: 3 },
-  { value: "small-group",  label: "Small Group",  desc: "4–6 players · $25/player", spots: 6 },
-  { value: "clinic",       label: "Clinic",        desc: "7+ players · $20/player", spots: 10 },
+  { value: "semi-private", label: "Semi-Private", desc: "2–3 players · $35/player", spots: 3 },
+  { value: "small-group",  label: "Small Group",  desc: "4–6 players · $30/player", spots: 6 },
+  { value: "clinic",       label: "Clinic",        desc: "7+ players · $22/player", spots: 10 },
 ];
 
 const defaultPrices: Record<string, number> = {
-  "semi-private": 30,
-  "small-group":  25,
-  "clinic":       20,
+  "semi-private": 35,
+  "small-group":  30,
+  "clinic":       22,
   "private":      85,
 };
 
@@ -33,7 +33,7 @@ export default function NewSessionPage() {
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevel: "",
-    spotsTotal: "6", pricePerPlayer: "25",
+    spotsTotal: "6", pricePerPlayer: "30",
     notes: "This session focuses on improving key skills in a small group environment. Players will get high-quality reps, real competition, and personalized feedback.",
     instructions: "Arrive 10 minutes before the session. Bring water and wear appropriate gear.",
     videoUrl: "",
@@ -56,9 +56,9 @@ export default function NewSessionPage() {
 
   function baseHourlyRate(spots: number): number {
     if (spots === 1) return 85;
-    if (spots <= 3) return 30;
-    if (spots <= 6) return 25;
-    return 20;
+    if (spots <= 3) return 35;
+    if (spots <= 6) return 30;
+    return 22;
   }
 
   function planDiscount(weeks: number): number {
@@ -130,7 +130,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "25", notes: "", instructions: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", videoUrl: "", recurring: false, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>

@@ -34,7 +34,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       dayOfWeek: body.dayOfWeek ?? "",
       time: body.time ?? "",
       duration: parseInt(body.duration) || 60,
-      pricePerPlayer: parseInt(body.pricePerPlayer) || 25,
+      pricePerPlayer: parseInt(body.pricePerPlayer) || 30,
       spotsTotal: parseInt(body.spotsTotal) || 6,
       skillLevel: body.skillLevel ?? "",
       ageRange: body.ageRange ?? "",
