@@ -3,7 +3,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { playerFollows } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { sendFollowRequest } from "@/lib/email";
+import { sendFollowRequest, sendFollowApproved } from "@/lib/email";
 
 // POST: follow (creates pending) / unfollow
 export async function POST(req: NextRequest) {
@@ -76,6 +76,29 @@ export async function PATCH(req: NextRequest) {
     await db.update(playerFollows)
       .set({ status: "approved" })
       .where(and(eq(playerFollows.followerClerkId, followerClerkId), eq(playerFollows.targetClerkId, userId)));
+
+    // Email the follower to let them know they were approved
+    try {
+      const client = await clerkClient();
+      const [approver, follower] = await Promise.all([
+        client.users.getUser(userId),
+        client.users.getUser(followerClerkId),
+      ]);
+      const approverName = `${approver.firstName ?? ""} ${approver.lastName ?? ""}`.trim() || "Someone";
+      const followerEmail = follower.emailAddresses?.[0]?.emailAddress ?? "";
+      const followerName = `${follower.firstName ?? ""} ${follower.lastName ?? ""}`.trim() || "there";
+      const approverMeta = approver.publicMetadata as { photo?: string; profileSlug?: string };
+      if (followerEmail) {
+        await sendFollowApproved({
+          toEmail: followerEmail,
+          toName: followerName,
+          approverName,
+          approverPhoto: approverMeta.photo ?? approver.imageUrl ?? "",
+          approverProfileId: approverMeta.profileSlug ?? userId,
+        });
+      }
+    } catch {}
+
     return NextResponse.json({ success: true });
   }
 

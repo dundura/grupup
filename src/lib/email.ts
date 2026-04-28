@@ -215,6 +215,58 @@ export async function sendFollowRequest({
   });
 }
 
+export async function sendFollowApproved({
+  toEmail,
+  toName,
+  approverName,
+  approverPhoto,
+  approverProfileId,
+}: {
+  toEmail: string;
+  toName: string;
+  approverName: string;
+  approverPhoto?: string;
+  approverProfileId?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const profileUrl = approverProfileId
+    ? `https://www.grupup.app/connect/${approverProfileId}`
+    : "https://www.grupup.app/connect";
+  await getResend().emails.send({
+    from: FROM,
+    to: toEmail,
+    bcc: ADMIN_BCC,
+    subject: `${approverName} approved your follow request on GrupUp`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">Follow request approved! 🎉</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">You're now connected on GrupUp</p>
+        </div>
+        <div style="text-align:center; margin-bottom: 24px;">
+          ${approverPhoto
+            ? `<img src="${approverPhoto}" alt="${approverName}" width="72" height="72" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #e5e7eb;margin-bottom:12px;" />`
+            : ""}
+          <p style="color: #374151; font-size: 15px; margin: 0;">
+            <strong>${approverName}</strong> approved your follow request.
+            You can now send them messages and stay up to date with their activity.
+          </p>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <a href="${profileUrl}"
+            style="flex:1;display:block;background:#0F3154;color:white;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+            View Their Profile
+          </a>
+          <a href="https://www.grupup.app/messages"
+            style="flex:1;display:block;background:white;color:#0F3154;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;border:2px solid #0F3154;">
+            Send a Message
+          </a>
+        </div>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdminNewPlayerNotification({
   playerName,
   playerEmail,
