@@ -4,12 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { trainers } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY not configured");
-  return new Stripe(key, { apiVersion: "2026-04-22.dahlia" });
-}
+import { getStripe, stripeOpts } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,7 +73,7 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create(checkoutParams);
+    const checkoutSession = await stripe.checkout.sessions.create(checkoutParams, stripeOpts());
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("[POST /api/checkout/private]", err);

@@ -139,7 +139,7 @@ export function Hero() {
             {/* ── Right column (desktop only) ── */}
             <div className="hidden lg:flex flex-col gap-3">
 
-              <div className="flex flex-col gap-2" style={{ height: "430px" }}>
+              <div className="flex flex-col gap-2" style={{ height: "400px", marginBottom: "4px" }}>
                 {/* Basketball */}
                 <div className="relative" style={{ height: "230px" }}>
                   <div className="relative rounded-2xl overflow-hidden h-full">
