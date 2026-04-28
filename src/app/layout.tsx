@@ -6,6 +6,8 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+const OG_IMAGE = "https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777375447323-924k8k.png";
+
 export const metadata: Metadata = {
   title: "Grupup - Group Sports Training Sessions",
   description:
@@ -15,6 +17,20 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
     apple: "/icons/icon-192.svg",
+  },
+  openGraph: {
+    title: "Grupup - Group Sports Training Sessions",
+    description: "Find and book group sports training sessions with elite coaches near you.",
+    url: "https://www.grupup.app",
+    siteName: "Grupup",
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Grupup" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Grupup - Group Sports Training Sessions",
+    description: "Find and book group sports training sessions with elite coaches near you.",
+    images: [OG_IMAGE],
   },
   appleWebApp: {
     capable: true,
