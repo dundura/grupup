@@ -76,7 +76,7 @@ export function PhotoCropModal({
         </div>
 
         {/* Crop area */}
-        <div className="relative w-full" style={{ height: 320, backgroundColor: "#111" }}>
+        <div className="relative w-full" style={{ height: 360, backgroundColor: "#111", overflow: "hidden" }}>
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -84,19 +84,24 @@ export function PhotoCropModal({
             aspect={1}
             cropShape="round"
             showGrid={false}
+            restrictPosition={false}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
+            style={{
+              containerStyle: { width: "100%", height: "100%" },
+              cropAreaStyle: { border: "2px solid white" },
+            }}
           />
         </div>
 
         {/* Zoom slider */}
-        <div className="px-5 py-4 flex items-center gap-3 border-b">
+        <div className="px-5 py-3 flex items-center gap-3 border-b">
           <ZoomOut className="h-4 w-4 text-muted-foreground shrink-0" />
           <input
             type="range"
             min={1}
-            max={3}
+            max={4}
             step={0.05}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
@@ -104,7 +109,7 @@ export function PhotoCropModal({
           />
           <ZoomIn className="h-4 w-4 text-muted-foreground shrink-0" />
         </div>
-        <p className="text-center text-xs text-muted-foreground pb-2">Drag to reposition · scroll to zoom</p>
+        <p className="text-center text-xs text-muted-foreground py-2">Drag in any direction · pinch or slide to zoom</p>
 
         {/* Actions */}
         <div className="flex gap-3 p-4">
