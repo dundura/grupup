@@ -51,8 +51,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ id: existing.id });
     }
 
-    // Create new
-    const id = `trainer-${userId.slice(-8)}`;
+    // Create new — use name-based slug
+    const nameSlug = (`${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "trainer")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const id = `${nameSlug}-${userId.slice(-4)}`;
     await db.insert(trainers).values({
       id,
       clerkId: userId,

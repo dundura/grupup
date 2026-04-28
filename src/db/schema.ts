@@ -145,6 +145,7 @@ export const trainerSessions = pgTable("trainer_sessions", {
   spotsLeft: integer("spots_left").notNull(),
   skillLevel: varchar("skill_level", { length: 50 }),
   ageRange: varchar("age_range", { length: 50 }),
+  recurring: boolean("recurring").default(false),
   sessionPhoto: text("session_photo"),
   notes: text("notes"),
   instructions: text("instructions"),

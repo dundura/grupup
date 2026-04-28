@@ -163,12 +163,20 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   )}
                 </div>
                 {/* Private booking — only visible if trainer has at least one group session */}
-                {hasGroupSession && (
-                  <a href={`mailto:info@anytime-soccer.com?subject=Private session inquiry — ${trainer.name}`}
-                    className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted mt-2"
-                    style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-                    Inquire about private sessions
-                  </a>
+                {hasGroupSession && (trainer.hourlyRate ?? 0) > 0 && (
+                  <div className="mt-3 pt-3 border-t space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">1-on-1 Private</span>
+                      <span className="font-extrabold text-lg" style={{ color: "#0F3154" }}>
+                        ${Math.round((trainer.hourlyRate ?? 85) / 0.85)}<span className="text-xs font-medium text-muted-foreground">/hr</span>
+                      </span>
+                    </div>
+                    <Link href={`/trainers/${trainer.id}/book-private`}
+                      className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                      style={{ backgroundColor: "#DC373E" }}>
+                      View & Book Private Session
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>
