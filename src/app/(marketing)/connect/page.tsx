@@ -1,7 +1,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, Pencil } from "lucide-react";
 import { db } from "@/db";
 import { playerFollows } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -19,8 +19,21 @@ function avatarColor(name: string) {
   return COLORS[Math.abs(hash) % COLORS.length];
 }
 
+const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
+
 export default async function ConnectPage() {
   const { userId: viewerUserId } = await auth();
+
+  // Check if viewer is admin
+  let isAdmin = false;
+  if (viewerUserId) {
+    try {
+      const client = await clerkClient();
+      const viewer = await client.users.getUser(viewerUserId);
+      const email = viewer.emailAddresses?.[0]?.emailAddress ?? "";
+      isAdmin = ADMIN_EMAILS.includes(email);
+    } catch {}
+  }
 
   // Viewer's current follows (to pre-populate follow button state)
   const viewerFollows = viewerUserId
@@ -123,6 +136,15 @@ export default async function ConnectPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Admin edit button */}
+                    {isAdmin && (
+                      <Link href={`/admin/edit/${p.clerkId}`}
+                        className="absolute top-2 right-2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow transition-colors"
+                        title="Edit profile">
+                        <Pencil className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                      </Link>
+                    )}
 
                     {/* Dark navy top */}
                     <div className="rounded-t-2xl pt-[80px] pb-5 px-5 text-center" style={{ backgroundColor: "#0F3154" }}>
