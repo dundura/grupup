@@ -124,11 +124,26 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           {/* Left column: title + description + booking */}
           <div className="space-y-5">
 
-            {session.recurring && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
-                🔁 {(session as any).recurringWeeks ? `${(session as any).recurringWeeks}-week series` : "Weekly recurring session"}
-              </span>
-            )}
+            {session.recurring && (() => {
+              const rawSD = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+              const today = new Date().toISOString().split("T")[0];
+              const next = rawSD.map((d: any) => typeof d === "string" ? d : d.date).find((d: string) => d >= today);
+              const nextLabel = next
+                ? new Date(next + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+                : null;
+              return (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
+                    🔁 {(session as any).recurringWeeks ? `${(session as any).recurringWeeks}-session series` : "Session Series"}
+                  </span>
+                  {nextLabel && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                      <CalendarDays className="h-3 w-3" /> Next: {nextLabel}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
             {/* About + Booking side by side */}
@@ -225,8 +240,19 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 <div className="p-4 pl-0 pt-0">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Date / Time</p>
                   <div className="space-y-1.5 text-sm">
+                    {(() => {
+                      const rawSD = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+                      const today = new Date().toISOString().split("T")[0];
+                      const next = rawSD.map((d: any) => typeof d === "string" ? d : d.date).find((d: string) => d >= today);
+                      if (!next) return null;
+                      return (
+                        <p className="text-base font-extrabold" style={{ color: "#0F3154" }}>
+                          {new Date(next + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                        </p>
+                      );
+                    })()}
                     {session.dayOfWeek && session.time ? (
-                      <p className="flex items-center gap-1.5 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
+                      <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs"><CalendarDays className="h-3.5 w-3.5 shrink-0" />{session.dayOfWeek}s at {session.time}</p>
                     ) : <p className="text-muted-foreground text-sm">—</p>}
                     {session.duration && (
                       session.duration > 60 ? (
