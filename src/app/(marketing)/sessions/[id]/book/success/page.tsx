@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react";
 import { db } from "@/db";
 import { bookings, trainerSessions, trainers } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getStripe, stripeOpts } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { sendBookingConfirmation, sendTrainerNewBooking } from "@/lib/email";
 import { clerkClient } from "@clerk/nextjs/server";
 
@@ -18,7 +18,9 @@ async function ensureBookingRecorded(checkoutSessionId: string) {
     if (existing) return;
 
     const stripe = getStripe();
-    const cs = await stripe.checkout.sessions.retrieve(checkoutSessionId, {}, stripeOpts());
+    // Retrieve without stripeOpts — always from platform account
+    const cs = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+    console.log("[success] cs.payment_status:", cs.payment_status, "metadata:", cs.metadata);
     if (cs.payment_status !== "paid") return;
 
     const { trainerSessionId, userId, userName, userEmail, athleteName, sessionCount, type, trainerId } = cs.metadata ?? {};
@@ -117,7 +119,8 @@ async function ensureBookingRecorded(checkoutSessionId: string) {
       });
     } catch {}
   } catch (err) {
-    console.error("[success-page] booking record failed:", err);
+    console.error("[success-page] FAILED:", String(err));
+    throw err; // surface in Vercel logs as a function error
   }
 }
 
