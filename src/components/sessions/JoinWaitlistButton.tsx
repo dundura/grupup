@@ -5,14 +5,14 @@ import { useUser } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 
 export default function JoinWaitlistButton({
-  sessionId, sessionTitle, waitlistCount,
-}: { sessionId: number; sessionTitle: string; waitlistCount: number }) {
+  sessionId, sessionTitle, waitlistCount, initialJoined = false,
+}: { sessionId: number; sessionTitle: string; waitlistCount: number; initialJoined?: boolean }) {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "");
   const [email, setEmail] = useState(user?.emailAddresses?.[0]?.emailAddress ?? "");
   const [sending, setSending] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(initialJoined);
   const [leaving, setLeaving] = useState(false);
   const [left, setLeft] = useState(false);
 

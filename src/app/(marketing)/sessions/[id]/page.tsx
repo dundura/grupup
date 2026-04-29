@@ -101,7 +101,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
     // Waitlist count + entries
     try {
-      const wRows = await db.select({ userName: sessionWaitlist.userName }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+      const wRows = await db.select({ userName: sessionWaitlist.userName, clerkUserId: sessionWaitlist.clerkUserId }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
       waitlistEntries = wRows;
       waitlistCount = wRows.length;
     } catch {}
@@ -298,7 +298,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
                   // Waitlist mode — no booking yet
                   if (waitlistOn) return (
-                    <JoinWaitlistButton sessionId={session.id} sessionTitle={session.title} waitlistCount={waitlistCount} />
+                    <JoinWaitlistButton sessionId={session.id} sessionTitle={session.title} waitlistCount={waitlistCount} initialJoined={currentUserId ? waitlistEntries.some((w) => (w as any).clerkUserId === currentUserId) : false} />
                   );
 
                   if (isFull) return (
