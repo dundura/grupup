@@ -49,6 +49,8 @@ export default function DashboardPage() {
     athleteName: string; amountPaid: number; sessionCount: number;
     bookingType: string; createdAt: string;
   }>>([]);
+  const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
+  const [lateContactModal, setLateContactModal] = useState<{ title: string; amount: number } | null>(null);
   const [pendingQuestionnaires, setPendingQuestionnaires] = useState<Array<{
     bookingId: number; sessionTitle: string;
     questionnaire: { title: string; questions: Array<{ id: string; type: string; label: string; required: boolean; options?: string[] }> };
@@ -149,6 +151,29 @@ export default function DashboardPage() {
     setQSubmitting(false);
   }
 
+  async function handleCancelBooking(bookingId: number, createdAt: string, title: string, amount: number) {
+    const bookedAt = new Date(createdAt).getTime();
+    const withinWindow = Date.now() - bookedAt < 24 * 60 * 60 * 1000;
+    if (!withinWindow) {
+      setLateContactModal({ title, amount });
+      return;
+    }
+    if (!confirm("Cancel this booking? You'll receive a full refund within 5–10 business days.")) return;
+    setCancellingBooking(bookingId);
+    try {
+      const res = await fetch(`/api/player/bookings/${bookingId}/cancel`, { method: "POST" });
+      const d = await res.json();
+      if (d.ok) {
+        setPlayerBookings((prev) => prev.filter((b) => b.id !== bookingId));
+        alert("Booking cancelled. Refund is on its way.");
+      } else {
+        alert(d.error ?? "Cancellation failed. Please contact support.");
+      }
+    } finally {
+      setCancellingBooking(null);
+    }
+  }
+
   async function handleConnectStripe() {
     setConnectingStripe(true);
     setStripeError("");
@@ -238,6 +263,33 @@ export default function DashboardPage() {
                 {deleting ? "Deleting…" : "Yes, delete it"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Late cancellation contact modal */}
+      {lateContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base">Request Cancellation</h3>
+              <button onClick={() => setLateContactModal(null)}><X className="h-5 w-5 text-muted-foreground" /></button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              The 24-hour free cancellation window has passed for <strong>{lateContactModal.title}</strong>.
+              Email us and we'll review your request.
+            </p>
+            <a
+              href={`mailto:bookings@soccer-near-me.com?subject=Cancellation Request — ${encodeURIComponent(lateContactModal.title)}&body=Hi, I'd like to request a cancellation for my booking of ${encodeURIComponent(lateContactModal.title)} ($${lateContactModal.amount}). Please let me know if a refund is possible.`}
+              className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+              style={{ backgroundColor: "#0F3154" }}
+              onClick={() => setLateContactModal(null)}>
+              Email Support
+            </a>
+            <button onClick={() => setLateContactModal(null)}
+              className="w-full py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">
+              Never mind
+            </button>
           </div>
         </div>
       )}
@@ -865,6 +917,12 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </p>
+                        <button
+                          onClick={() => handleCancelBooking(b.id, b.createdAt, b.sessionTitle, b.amountPaid)}
+                          disabled={cancellingBooking === b.id}
+                          className="mt-1.5 text-xs text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50">
+                          {cancellingBooking === b.id ? "Cancelling…" : "Cancel"}
+                        </button>
                       </div>
                     </div>
                   </div>
