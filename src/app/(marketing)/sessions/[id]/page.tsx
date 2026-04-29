@@ -241,8 +241,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 ) : (
                   <p className="text-muted-foreground text-sm italic">No description added yet.</p>
                 )}
-                {session.dayOfWeek && (
-                  <div className="mt-3 pt-3 border-t flex items-start gap-2 text-xs text-[#0F3154]">
+                {session.dayOfWeek && !((session as any).sessionDates?.length) && (
+                  <div className="mt-3 flex items-start gap-2 text-xs text-[#0F3154] bg-[#e8f0f9] rounded-xl px-3 py-2.5">
                     <CalendarDays className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                     <p>This session runs every <strong>{session.dayOfWeek}</strong>{session.time ? ` at ${session.time}` : ""}. After booking, your trainer will contact you to confirm which days you'd like to attend.</p>
                   </div>
