@@ -68,8 +68,8 @@ export function SessionCard({ session }: SessionCardProps) {
     >
       {/* Cover photo — session-specific or trainer profile photo */}
       {(session.coverPhoto || session.trainer.photo) && (
-        <div className="relative w-full aspect-[4/3] overflow-hidden">
-          <Image src={session.coverPhoto || session.trainer.photo} alt={session.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
+        <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
+          <Image src={session.coverPhoto || session.trainer.photo} alt={session.title} fill className="object-contain group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
           {session.recurring && (
             <span className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full text-white shadow" style={{ backgroundColor: "#0F3154" }}>
               🔁 {session.recurringWeeks ? `${session.recurringWeeks}-week series` : "Weekly"}
