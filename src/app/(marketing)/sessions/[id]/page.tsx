@@ -227,6 +227,34 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
+            {/* Session dates */}
+            {(() => {
+              const dates: string[] = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+              const today = new Date().toISOString().split("T")[0];
+              const upcoming = dates.filter((d) => d >= today);
+              const past = dates.filter((d) => d < today);
+              if (!dates.length) return null;
+              return (
+                <div className="bg-white rounded-2xl border shadow-sm p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                    Session Dates
+                    <span className="ml-2 font-normal normal-case text-muted-foreground">({upcoming.length} upcoming)</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {dates.map((d) => {
+                      const isPast = d < today;
+                      return (
+                        <span key={d}
+                          className={`text-sm font-medium px-3 py-1.5 rounded-lg border ${isPast ? "text-muted-foreground bg-muted/50 line-through" : "text-[#0F3154] bg-blue-50 border-blue-100"}`}>
+                          {new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Special Instructions */}
             <div className="bg-white rounded-2xl border shadow-sm p-6">
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Special Instructions</p>

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { trainerSessions } from "@/db/schema";
+import { trainerSessions, trainerFollows } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { sendTrainerNewSession } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -59,8 +60,41 @@ export async function POST(req: NextRequest) {
       firstClassFree: body.firstClassFree ?? false,
       recurring: body.recurring ?? false,
       recurringWeeks: body.recurringWeeks ? parseInt(body.recurringWeeks) : null,
+      discountPct: body.discountPct ? parseInt(body.discountPct) : 0,
+      discountLabel: body.discountLabel ?? "",
+      startDate: body.startDate ?? null,
+      sessionDates: Array.isArray(body.recurringDates) && body.recurringDates.length > 0
+        ? body.recurringDates
+        : [],
       isActive: true,
     }).returning();
+
+    // Notify trainer's followers about the new session
+    try {
+      const followerRows = await db.select({ followerClerkId: trainerFollows.followerClerkId })
+        .from(trainerFollows)
+        .where(eq(trainerFollows.trainerClerkId, userId));
+      if (followerRows.length > 0) {
+        const trainerName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Your trainer";
+        for (const { followerClerkId } of followerRows) {
+          try {
+            const fu = await client.users.getUser(followerClerkId);
+            const email = fu.emailAddresses?.[0]?.emailAddress ?? "";
+            if (email) {
+              await sendTrainerNewSession({
+                toEmail: email,
+                trainerName,
+                sessionTitle: body.title,
+                sessionId: String(session.id),
+                city: body.city,
+                dayOfWeek: body.dayOfWeek,
+                time: body.time,
+              });
+            }
+          } catch {}
+        }
+      }
+    } catch {}
 
     return NextResponse.json(session, { status: 201 });
   } catch (err) {

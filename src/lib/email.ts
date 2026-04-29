@@ -446,6 +446,49 @@ export async function sendPlayerApproved({
   });
 }
 
+export async function sendTrainerNewSession({
+  toEmail,
+  trainerName,
+  sessionTitle,
+  sessionId,
+  city,
+  dayOfWeek,
+  time,
+}: {
+  toEmail: string;
+  trainerName: string;
+  sessionTitle: string;
+  sessionId: string;
+  city?: string;
+  dayOfWeek?: string;
+  time?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: toEmail,
+    bcc: ADMIN_BCC,
+    subject: `${trainerName} posted a new session: ${sessionTitle}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">New session from ${trainerName}</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">A trainer you follow just posted a new group session</p>
+        </div>
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;">
+          <p style="margin: 0 0 8px; font-weight: 700; font-size: 16px; color: #0F3154;">${sessionTitle}</p>
+          ${dayOfWeek && time ? `<p style="margin: 4px 0; font-size: 14px; color: #374151;">📅 ${dayOfWeek}s at ${time}</p>` : ""}
+          ${city ? `<p style="margin: 4px 0; font-size: 14px; color: #374151;">📍 ${city}</p>` : ""}
+        </div>
+        <a href="https://www.grupup.app/sessions/${sessionId}"
+          style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+          View &amp; Book Session
+        </a>
+      </div>
+    `,
+  });
+}
+
 export async function sendTrainerNewBooking({
   trainerEmail,
   trainerName,

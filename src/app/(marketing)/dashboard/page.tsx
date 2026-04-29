@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
-  CalendarDays, Clock, Trash2, DollarSign, Eye, ClipboardList, X, Ban,
+  CalendarDays, Clock, Trash2, DollarSign, Eye, ClipboardList, X, Ban, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 interface TrainerProfile {
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const [deleteModal, setDeleteModal]         = useState<number | null>(null);
   const [deleting, setDeleting]               = useState(false);
   const [trainerBookings, setTrainerBookings] = useState<any[]>([]);
+  const [expandedSession, setExpandedSession] = useState<number | null>(null);
   const [archiving, setArchiving] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null);
@@ -362,6 +363,12 @@ export default function DashboardPage() {
                 style={{ color: "#0F3154", borderColor: "#0F3154" }}>
                 <Plus className="h-3.5 w-3.5" /> Add Profile
               </Link>
+              {role === "trainer" && (
+                <Link href="/trainer/manage"
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
+                  <ClipboardList className="h-3.5 w-3.5" /> Manage
+                </Link>
+              )}
               <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit
@@ -626,6 +633,50 @@ export default function DashboardPage() {
                           <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{s.skillLevel}</span>
                         )}
                       </div>
+                      {/* Registrations roster toggle */}
+                      {(() => {
+                        const roster = trainerBookings.filter((b) => b.sessionId === String(s.id));
+                        if (roster.length === 0) return (
+                          <p className="text-xs text-muted-foreground mt-1.5">No registrations yet</p>
+                        );
+                        const isOpen = expandedSession === s.id;
+                        return (
+                          <div className="mt-1.5">
+                            <button type="button"
+                              onClick={() => setExpandedSession(isOpen ? null : s.id)}
+                              className="flex items-center gap-1 text-xs font-semibold text-[#0F3154] hover:underline">
+                              {roster.length} registered
+                              {isOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </button>
+                            {isOpen && (
+                              <div className="mt-2 border rounded-lg overflow-hidden">
+                                <table className="w-full text-xs">
+                                  <thead className="bg-muted/50">
+                                    <tr>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Player</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Athlete</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Booked</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {roster.map((b: any) => (
+                                      <tr key={b.id} className="border-t">
+                                        <td className="px-3 py-2 font-medium">{b.userName || "—"}</td>
+                                        <td className="px-3 py-2 text-muted-foreground">
+                                          {b.athleteName && b.athleteName !== b.userName ? b.athleteName : "—"}
+                                        </td>
+                                        <td className="px-3 py-2 text-muted-foreground">
+                                          {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="flex flex-col gap-1.5 shrink-0">
                       <Link href={`/sessions/${s.id}`}

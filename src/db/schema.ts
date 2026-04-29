@@ -193,6 +193,8 @@ export const trainerSessions = pgTable("trainer_sessions", {
       id: string; type: "text" | "choice"; label: string; required: boolean; options?: string[];
     }>;
   } | null>().default(null),
+  startDate: varchar("start_date", { length: 20 }),
+  sessionDates: json("session_dates").$type<string[]>().default([]),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

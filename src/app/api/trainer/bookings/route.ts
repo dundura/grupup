@@ -46,6 +46,7 @@ export async function GET() {
       userName: b.userName ?? "",
       userEmail: b.userEmail ?? "",
       athleteName: b.athleteName ?? "",
+      sessionId: b.sessionId ?? null,
       sessionTitle: (b.sessionId ? sessionTitles[b.sessionId] : null) ?? (b.bookingType === "private" ? "Private Session" : "Unknown"),
       bookingType: b.bookingType ?? "group",
       sessionCount: b.sessionCount ?? 1,

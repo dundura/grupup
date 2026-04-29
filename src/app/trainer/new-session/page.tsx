@@ -42,9 +42,23 @@ export default function NewSessionPage() {
     firstClassFree: false,
     recurring: false,
     recurringWeeks: "",
+    startDate: "",
+    recurringDates: [] as string[],
+    discountPct: 0,
+    discountLabel: "",
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
   });
+
+  function generateRecurringDates(start: string, weeks: number): string[] {
+    if (!start || weeks <= 0) return [];
+    const base = new Date(start + "T12:00:00");
+    return Array.from({ length: weeks }, (_, i) => {
+      const d = new Date(base);
+      d.setDate(d.getDate() + i * 7);
+      return d.toISOString().split("T")[0];
+    });
+  }
 
   function buildPlanSessions(weeks: number, startDate?: string, startTime?: string): { date: string; time: string }[] {
     const base = startDate ? new Date(startDate) : new Date();
@@ -90,6 +104,14 @@ export default function NewSessionPage() {
         const duration = parseInt(val) || 60;
         next.pricePerPlayer = String(calcPrice(spots, duration));
       }
+      // Auto-generate recurring dates when start date or recurring weeks change
+      if ((key === "startDate" || key === "recurringWeeks") && f.recurring) {
+        const start = key === "startDate" ? val : f.startDate;
+        const weeks = parseInt(key === "recurringWeeks" ? val : f.recurringWeeks) || 4; // default 4
+        if (start) {
+          next.recurringDates = generateRecurringDates(start, weeks);
+        }
+      }
       return next;
     });
   }
@@ -134,7 +156,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", startDate: "", recurringDates: [], discountPct: 0, discountLabel: "", isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -206,6 +228,64 @@ export default function NewSessionPage() {
               );
             })()}
 
+            {/* Contact for more spots */}
+            <p className="text-xs text-muted-foreground text-center">
+              Need more than 20 spots?{" "}
+              <a href="mailto:neil@anytime-soccer.com" className="underline text-[#0F3154]">Contact us</a>
+            </p>
+
+            {/* Discount */}
+            <div className="pt-2 border-t space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Offer a discount</p>
+                  <p className="text-xs text-muted-foreground">Up to 50% off — great for filling spots fast</p>
+                </div>
+                <button type="button"
+                  onClick={() => setForm((f) => ({ ...f, discountPct: f.discountPct > 0 ? 0 : 10 }))}
+                  className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.discountPct > 0 ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.discountPct > 0 ? "translate-x-4" : "translate-x-0"}`} />
+                </button>
+              </div>
+              {form.discountPct > 0 && (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">Discount amount</span>
+                      <span className="text-lg font-extrabold" style={{ color: "#DC373E" }}>{form.discountPct}% off</span>
+                    </div>
+                    <input type="range" min={5} max={50} step={5} value={form.discountPct}
+                      onChange={(e) => setForm((f) => ({ ...f, discountPct: parseInt(e.target.value) }))}
+                      className="w-full accent-[#DC373E]" />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1"><span>5%</span><span>50%</span></div>
+                  </div>
+                  {(() => {
+                    const original = parseInt(form.pricePerPlayer) || 0;
+                    const discounted = Math.round(original * (1 - form.discountPct / 100));
+                    return (
+                      <div className="rounded-xl p-4 bg-red-50 border border-red-100 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Players pay</p>
+                          <p className="text-muted-foreground text-sm line-through">${original}/player</p>
+                          <p className="text-xl font-extrabold" style={{ color: "#DC373E" }}>${discounted}/player</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">You earn (85%)</p>
+                          <p className="text-xl font-bold" style={{ color: "#0F3154" }}>${Math.round(discounted * 0.85)}/player</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Promo label <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
+                    <Input value={form.discountLabel}
+                      onChange={(e) => setForm((f) => ({ ...f, discountLabel: e.target.value.slice(0, 40) }))}
+                      placeholder='e.g. "Early Bird", "Summer Special"' maxLength={40} />
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* First class free */}
             <label className="flex items-start gap-3 cursor-pointer pt-2 border-t">
               <input
@@ -224,13 +304,22 @@ export default function NewSessionPage() {
             <div className="border-t pt-4 space-y-3">
               {!form.isPlan && (
                 <div>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring, recurringWeeks: "" }))}
+                  <button type="button" onClick={() => setForm((f) => {
+                    const turningOn = !f.recurring;
+                    const defaultWeeks = "4";
+                    const newDates = turningOn && f.startDate
+                      ? generateRecurringDates(f.startDate, 4)
+                      : [];
+                    return { ...f, recurring: turningOn, recurringWeeks: turningOn ? defaultWeeks : "", recurringDates: newDates };
+                  })}
                     className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
                     style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
                     <div className="text-left">
                       <p className="font-semibold text-sm">Recurring session</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {form.recurring && form.dayOfWeek ? `Repeats every ${form.dayOfWeek} at ${form.time || "the same time"}` : "Runs every week on the selected day"}
+                        {form.recurring
+                          ? `${form.recurringWeeks || 4} sessions · players choose which ones to join`
+                          : "Players pick and book individual sessions"}
                       </p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
@@ -243,7 +332,14 @@ export default function NewSessionPage() {
                       <div className="flex flex-wrap gap-2">
                         {[2, 3, 4, 5, 6, 7, 8].map((w) => (
                           <button key={w} type="button"
-                            onClick={() => setForm((f) => ({ ...f, recurringWeeks: f.recurringWeeks === String(w) ? "" : String(w) }))}
+                            onClick={() => setForm((f) => {
+                              const isDeselecting = f.recurringWeeks === String(w);
+                              const newWeeks = isDeselecting ? "" : String(w);
+                              const newDates = !isDeselecting && f.startDate
+                                ? generateRecurringDates(f.startDate, w)
+                                : [];
+                              return { ...f, recurringWeeks: newWeeks, recurringDates: newDates };
+                            })}
                             className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
                             style={form.recurringWeeks === String(w)
                               ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
@@ -263,7 +359,7 @@ export default function NewSessionPage() {
                 style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
                 <div className="text-left">
                   <p className="font-semibold text-sm">Package</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Set custom dates &amp; times for each session · player pays upfront · discount applied automatically</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Player buys all sessions upfront at a discount — you set the dates</p>
                 </div>
                 <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
@@ -348,20 +444,63 @@ export default function NewSessionPage() {
                 })}
               </div>
             ) : (
-              /* Standard mode: day of week + time */
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Day of week</label>
-                  <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="">Select day</option>
-                    {days.map((d) => <option key={d}>{d}</option>)}
-                  </select>
+              /* Standard mode: day of week + time + start date */
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Day of week</label>
+                    <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select day</option>
+                      {days.map((d) => <option key={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Start time</label>
+                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Start time</label>
-                  <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                  <label className="text-sm font-medium mb-1.5 block">
+                    Start date <span className="font-normal text-xs text-muted-foreground">(optional)</span>
+                  </label>
+                  <Input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
                 </div>
+                {/* Editable recurring dates */}
+                {form.recurring && form.recurringDates.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Session dates</label>
+                      <button type="button"
+                        onClick={() => setForm((f) => ({ ...f, recurringDates: [...f.recurringDates, ""] }))}
+                        className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Edit to skip a week or adjust a date.</p>
+                    {form.recurringDates.map((d, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <Input type="date" value={d} className="flex-1"
+                          onChange={(e) => setForm((f) => {
+                            const dates = [...f.recurringDates];
+                            dates[i] = e.target.value;
+                            return { ...f, recurringDates: dates };
+                          })} />
+                        <button type="button"
+                          onClick={() => setForm((f) => {
+                            const remaining = f.recurringDates.filter((_, j) => j !== i);
+                            // Add a new date 7 days after the last one
+                            const last = remaining[remaining.length - 1];
+                            if (last) {
+                              const next = new Date(last + "T12:00:00");
+                              next.setDate(next.getDate() + 7);
+                              remaining.push(next.toISOString().split("T")[0]);
+                            }
+                            return { ...f, recurringDates: remaining };
+                          })}
+                          className="text-muted-foreground hover:text-red-500 text-lg leading-none px-1 shrink-0" title="Skip this date">×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
