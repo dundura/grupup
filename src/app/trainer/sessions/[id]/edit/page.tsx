@@ -102,7 +102,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           ageRanges: s.ageRange ? s.ageRange.split(",").map((x: string) => x.trim()).filter(Boolean) : [],
           skillLevels: s.skillLevel ? s.skillLevel.split(",").map((x: string) => x.trim()).filter(Boolean) : [],
           spotsTotal: String(s.spotsTotal ?? 6),
-          pricePerPlayer: String(s.pricePerPlayer ?? 25),
+          pricePerPlayer: String(calcPrice(s.spotsTotal ?? 6, s.duration ?? 60)),
           notes: s.notes ?? "",
           instructions: (s as any).instructions ?? "",
           sessionPhoto: (s as any).sessionPhoto ?? "",

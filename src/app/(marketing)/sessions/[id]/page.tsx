@@ -253,7 +253,22 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 {/* Cost */}
                 <div className="p-4 pr-0 pb-0">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Cost</p>
-                  <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span></p>
+                  {(session as any).discountPct > 0 ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground line-through">${session.pricePerPlayer}/player</p>
+                      <p className="text-2xl font-extrabold" style={{ color: "#DC373E" }}>
+                        ${Math.round(session.pricePerPlayer * (1 - (session as any).discountPct / 100))}
+                        <span className="text-sm font-medium text-muted-foreground ml-1">/ player</span>
+                      </p>
+                      {(session as any).discountLabel && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white mt-1 inline-block" style={{ backgroundColor: "#DC373E" }}>
+                          {(session as any).discountLabel}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-extrabold" style={{ color: "#0F3154" }}>${session.pricePerPlayer}<span className="text-sm font-medium text-muted-foreground ml-1">/ player</span></p>
+                  )}
                 </div>
               </div>
             </div>
