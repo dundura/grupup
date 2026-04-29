@@ -60,6 +60,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let followStatus: string | null = null;
   let currentUserId: string | null = null;
   let waitlistCount = 0;
+  let waitlistEntries: { userName: string | null }[] = [];
 
   try {
     const { userId } = await auth();
@@ -98,10 +99,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       } catch {}
     }
 
-    // Waitlist count
+    // Waitlist count + entries
     try {
-      const [wRow] = await db.select({ value: count() }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
-      waitlistCount = (wRow?.value as number) ?? 0;
+      const wRows = await db.select({ userName: sessionWaitlist.userName }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+      waitlistEntries = wRows;
+      waitlistCount = wRows.length;
     } catch {}
 
     // Get trainer email from Clerk
@@ -553,6 +555,31 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} />
                     <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Waitlist */}
+            {waitlistEntries.length > 0 && (
+              <div className="bg-white rounded-2xl border shadow-sm p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                  Waitlist ({waitlistEntries.length})
+                </p>
+                <div className="space-y-2">
+                  {waitlistEntries.map((w, i) => {
+                    const name = w.userName ?? "Player";
+                    const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                    const firstName = name.split(" ")[0];
+                    const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
+                    return (
+                      <div key={i} className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0 bg-amber-500">
+                          {initials}
+                        </div>
+                        <span className="text-sm font-medium">{firstName} {lastInitial}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
