@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 
@@ -9,10 +9,17 @@ export default function JoinWaitlistButton({
 }: { sessionId: number; sessionTitle: string; waitlistCount: number; initialJoined?: boolean }) {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "");
-  const [email, setEmail] = useState(user?.emailAddresses?.[0]?.emailAddress ?? "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(initialJoined);
+
+  useEffect(() => {
+    if (user) {
+      setName((prev) => prev || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim());
+      setEmail((prev) => prev || (user.emailAddresses?.[0]?.emailAddress ?? ""));
+    }
+  }, [user]);
   const [leaving, setLeaving] = useState(false);
   const [left, setLeft] = useState(false);
 
@@ -70,10 +77,27 @@ export default function JoinWaitlistButton({
         <p className="text-xs text-center text-muted-foreground">{waitlistCount} {waitlistCount === 1 ? "person has" : "people have"} expressed interest</p>
       )}
       {!open ? (
-        <button onClick={() => setOpen(true)}
-          className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white"
+        <button
+          onClick={async () => {
+            if (email.trim()) {
+              // Signed-in user: one-click submit
+              setSending(true);
+              try {
+                await fetch(`/api/sessions/${sessionId}/waitlist`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name, email, sessionTitle }),
+                });
+                setDone(true);
+              } finally { setSending(false); }
+            } else {
+              setOpen(true);
+            }
+          }}
+          disabled={sending}
+          className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white disabled:opacity-60"
           style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-          Express Interest
+          {sending ? "Sending…" : "Express Interest"}
         </button>
       ) : (
         <form onSubmit={handleJoin} className="space-y-2.5">
