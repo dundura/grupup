@@ -907,11 +907,21 @@ export default function DashboardPage() {
                       )}
                       {r.message && <p className="text-xs text-muted-foreground mt-1 italic">"{r.message}"</p>}
                     </div>
-                    <Link href={`/trainer/requests/${r.id}/accept`}
-                      className="shrink-0 px-4 py-2 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: "#DC373E" }}>
-                      Accept
-                    </Link>
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <Link href={`/trainer/requests/${r.id}/accept`}
+                        className="px-4 py-2 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity text-center"
+                        style={{ backgroundColor: "#DC373E" }}>
+                        Accept
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          await fetch(`/api/trainer/requests/${r.id}/dismiss`, { method: "POST" });
+                          setTrainingRequests((prev) => prev.filter((x) => x.id !== r.id));
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors text-center">
+                        Dismiss
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

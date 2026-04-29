@@ -165,14 +165,20 @@ export async function GET() {
     const all = await db.select().from(trainingRequests)
       .where(eq(trainingRequests.status, "open"));
 
-    // Filter by trainer's location
-    const nearby = trainer
-      ? all.filter((r) => {
-          const cityMatch = trainer.city && r.city && r.city.toLowerCase().includes(trainer.city.toLowerCase());
-          const zipMatch = trainer.zipCode && r.zipCode && r.zipCode === trainer.zipCode;
-          return cityMatch || zipMatch || (!r.city && !r.zipCode);
-        })
-      : all;
+    // Get requests this trainer has already responded to (dismissed or accepted)
+    const responded = await db.select({ requestId: trainingRequestResponses.requestId })
+      .from(trainingRequestResponses)
+      .where(eq(trainingRequestResponses.trainerClerkId, userId));
+    const respondedIds = new Set(responded.map((r) => r.requestId));
+
+    // Filter by trainer's location and exclude already-responded
+    const nearby = all.filter((r) => {
+      if (respondedIds.has(r.id)) return false;
+      if (!trainer) return true;
+      const cityMatch = trainer.city && r.city && r.city.toLowerCase().includes(trainer.city.toLowerCase());
+      const zipMatch = trainer.zipCode && r.zipCode && r.zipCode === trainer.zipCode;
+      return cityMatch || zipMatch || (!r.city && !r.zipCode);
+    });
 
     return NextResponse.json(nearby);
   } catch (err) {
