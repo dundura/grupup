@@ -17,6 +17,7 @@ interface Session {
   duration: number; pricePerPlayer: number; spotsTotal: number;
   spotsLeft: number; skillLevel: string; ageRange: string; notes: string;
   recurring: boolean; recurringWeeks: number | null;
+  discountPct?: number; discountLabel?: string;
 }
 interface Trainer {
   id: string; name: string; photo: string; bio: string; city: string;
@@ -56,6 +57,8 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
   const typeName = session.sessionType.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const discPct = session.discountPct ?? 0;
+  const displayPrice = discPct > 0 ? Math.round(session.pricePerPlayer * (1 - discPct / 100)) : session.pricePerPlayer;
   const step1Valid = form.firstName.trim() && form.email.trim() && form.phone.trim() && form.athleteName.trim();
   const step2Valid = true;
 
@@ -225,15 +228,24 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                 <div className="rounded-xl border p-4 mb-5 space-y-2 text-sm">
                   <div className="flex justify-between text-muted-foreground">
                     <span>{typeName} session</span>
-                    <span>${session.pricePerPlayer}.00</span>
+                    <span>
+                      {discPct > 0 && <span className="line-through mr-2 text-xs">${session.pricePerPlayer}</span>}
+                      <span className={discPct > 0 ? "font-semibold" : ""} style={discPct > 0 ? { color: "#DC373E" } : {}}>${displayPrice}</span>
+                    </span>
                   </div>
+                  {discPct > 0 && (
+                    <div className="flex justify-between" style={{ color: "#DC373E" }}>
+                      <span>{session.discountLabel || `${discPct}% discount`}</span>
+                      <span>−${session.pricePerPlayer - displayPrice}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-muted-foreground">
                     <span>Service fee</span>
                     <span>$0.00</span>
                   </div>
                   <div className="flex justify-between font-bold text-base border-t pt-2 mt-1">
                     <span>Total</span>
-                    <span>${session.pricePerPlayer}.00</span>
+                    <span style={discPct > 0 ? { color: "#DC373E" } : {}}>${displayPrice}</span>
                   </div>
                 </div>
 

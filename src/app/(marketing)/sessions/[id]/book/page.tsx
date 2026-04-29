@@ -36,6 +36,8 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         notes: session.notes ?? "",
         recurring: session.recurring ?? false,
         recurringWeeks: (session as any).recurringWeeks ?? null,
+        discountPct: (session as any).discountPct ?? 0,
+        discountLabel: (session as any).discountLabel ?? "",
       }}
       trainer={trainer ? {
         id: trainer.id,
