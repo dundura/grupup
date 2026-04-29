@@ -12,6 +12,7 @@ export default function ContactTrainerForm({
   defaultMessage = "",
   ctaLabel = "Questions? Contact Trainer",
   ctaStyle = "outline",
+  compact,
 }: {
   sessionId: number;
   sessionTitle: string;
