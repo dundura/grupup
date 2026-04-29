@@ -247,6 +247,11 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <span>Total</span>
                     <span style={discPct > 0 ? { color: "#DC373E" } : {}}>${displayPrice}</span>
                   </div>
+                  {discPct > 0 && (
+                    <p className="text-xs font-bold text-center px-3 py-2 rounded-lg" style={{ backgroundColor: "#fff0f0", color: "#DC373E" }}>
+                      🏷️ {discPct}% discount applied at checkout
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex gap-3">

@@ -57,6 +57,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let otherSessions: typeof trainerSessions.$inferSelect[] = [];
   let attendees: { userName: string | null }[] = [];
   let isFollowing = false;
+  let followStatus: string | null = null;
   let currentUserId: string | null = null;
   let waitlistCount = 0;
 
@@ -92,6 +93,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, session.trainerClerkId))
       );
       isFollowing = !!follow;
+      followStatus = follow?.status ?? null;
     }
 
     // Waitlist count
@@ -421,6 +423,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     <FollowButton
                       trainerClerkId={session.trainerClerkId}
                       initialIsFollowing={isFollowing}
+                      initialStatus={followStatus}
                       isSignedIn={!!currentUserId}
                     />
                   </div>

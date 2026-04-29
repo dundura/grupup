@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [stripeError, setStripeError] = useState("");
   const [followRequests, setFollowRequests] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
+  const [trainerFollowRequests, setTrainerFollowRequests] = useState<{ id: number; followerClerkId: string; name: string; photo: string }[]>([]);
   const [followers, setFollowers] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
   const [pendingQuestionnaires, setPendingQuestionnaires] = useState<Array<{
@@ -66,10 +67,12 @@ export default function DashboardPage() {
         fetch("/api/trainer/sessions").then((r) => r.json()),
         fetch("/api/trainer/bookings").then((r) => r.json()),
         fetch("/api/trainer/stripe/status").then((r) => r.json()),
-      ]).then(([profile, sess, bkgs, stripeStatus]) => {
+        fetch("/api/trainer/follow-requests").then((r) => r.json()),
+      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
+        setTrainerFollowRequests(Array.isArray(trainerReqs) ? trainerReqs : []);
         setIsArchived(profile?.isArchived ?? false);
         setStripeConnected(stripeStatus?.connected ?? false);
         setLoading(false);
@@ -701,6 +704,55 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Trainer: Follow Requests */}
+        {role === "trainer" && trainerFollowRequests.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6">
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2">
+              Follow Requests
+              <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{trainerFollowRequests.length}</span>
+            </h2>
+            <div className="space-y-3">
+              {trainerFollowRequests.map((req) => (
+                <div key={req.followerClerkId} className="flex items-center gap-3">
+                  {req.photo ? (
+                    <Image src={req.photo} alt={req.name} width={36} height={36} className="rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0 text-xs font-bold text-muted-foreground">
+                      {req.name[0] ?? "?"}
+                    </div>
+                  )}
+                  <p className="text-sm font-medium flex-1 min-w-0 truncate">{req.name}</p>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      disabled={followLoading === req.followerClerkId}
+                      onClick={async () => {
+                        setFollowLoading(req.followerClerkId);
+                        await fetch("/api/trainer/follow", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ followId: req.id, action: "approved" }) });
+                        setTrainerFollowRequests((r) => r.filter((x) => x.followerClerkId !== req.followerClerkId));
+                        setFollowLoading(null);
+                      }}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-colors"
+                      style={{ backgroundColor: "#0F3154" }}>
+                      Approve
+                    </button>
+                    <button
+                      disabled={followLoading === req.followerClerkId}
+                      onClick={async () => {
+                        setFollowLoading(req.followerClerkId);
+                        await fetch("/api/trainer/follow", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ followId: req.id, action: "denied" }) });
+                        setTrainerFollowRequests((r) => r.filter((x) => x.followerClerkId !== req.followerClerkId));
+                        setFollowLoading(null);
+                      }}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-50 hover:text-red-600 hover:border-red-200">
+                      Deny
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

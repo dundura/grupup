@@ -167,6 +167,7 @@ export const trainerFollows = pgTable("trainer_follows", {
   id: serial("id").primaryKey(),
   followerClerkId: varchar("follower_clerk_id", { length: 255 }).notNull(),
   trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("approved"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

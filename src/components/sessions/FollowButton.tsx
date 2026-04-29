@@ -2,26 +2,28 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck, Clock } from "lucide-react";
 
 export default function FollowButton({
   trainerClerkId,
   initialIsFollowing,
+  initialStatus,
   isSignedIn,
 }: {
   trainerClerkId: string;
   initialIsFollowing: boolean;
+  initialStatus?: string | null;
   isSignedIn: boolean;
 }) {
-  const [following, setFollowing] = useState(initialIsFollowing);
+  const [status, setStatus] = useState<string | null>(
+    initialIsFollowing ? (initialStatus ?? "approved") : null
+  );
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleClick() {
-    if (!isSignedIn) {
-      router.push("/sign-in");
-      return;
-    }
+    if (!isSignedIn) { router.push("/sign-in"); return; }
+    if (status === "pending") return; // locked while pending
     setLoading(true);
     try {
       const res = await fetch("/api/trainer/follow", {
@@ -31,26 +33,34 @@ export default function FollowButton({
       });
       if (res.ok) {
         const data = await res.json();
-        setFollowing(data.following);
+        setStatus(data.following ? data.status : null);
       }
     } finally {
       setLoading(false);
     }
   }
 
-  return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
+  if (status === "approved") return (
+    <button onClick={handleClick} disabled={loading}
       className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors"
-      style={
-        following
-          ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
-          : { color: "#0F3154", borderColor: "#0F3154" }
-      }>
-      {following
-        ? <><UserCheck className="h-3 w-3" /> Following</>
-        : <><UserPlus className="h-3 w-3" /> Follow</>}
+      style={{ backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }}>
+      <UserCheck className="h-3 w-3" /> Following
+    </button>
+  );
+
+  if (status === "pending") return (
+    <button disabled
+      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border cursor-not-allowed opacity-70"
+      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+      <Clock className="h-3 w-3" /> Requested
+    </button>
+  );
+
+  return (
+    <button onClick={handleClick} disabled={loading}
+      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors"
+      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+      <UserPlus className="h-3 w-3" /> Follow
     </button>
   );
 }
