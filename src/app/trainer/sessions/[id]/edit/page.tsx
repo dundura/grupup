@@ -30,8 +30,8 @@ function baseHourlyRate(spots: number): number {
   if (spots <= 6) return 30;
   return 22;
 }
-function calcPrice(spots: number, _durationMin: number): number {
-  return baseHourlyRate(spots);
+function calcPrice(spots: number, durationMin: number): number {
+  return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
 }
 
 export default function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -235,14 +235,15 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             </div>
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
+              const duration = parseInt(form.duration) || 60;
               const perSession = parseInt(form.pricePerPlayer) || 0;
-              const suggestedRate = baseHourlyRate(spots);
+              const hourlyRate = baseHourlyRate(spots);
               const trainerEarns = Math.round(perSession * 0.85);
               const totalIfFull = trainerEarns * spots;
               return (
                 <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Suggested: ${suggestedRate}/player for {spots > 6 ? "clinic" : spots > 3 ? "small group" : "semi-private"}</span>
+                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Players pay</span>

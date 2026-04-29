@@ -87,8 +87,8 @@ export default function NewSessionPage() {
     return 5;
   }
 
-  function calcPrice(spots: number, _durationMin: number): number {
-    return baseHourlyRate(spots);
+  function calcPrice(spots: number, durationMin: number): number {
+    return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
   }
 
   function set(key: string, val: string) {
