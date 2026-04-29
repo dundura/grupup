@@ -485,7 +485,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                       <button type="button"
                         onClick={() => {
                           if (form.recurringDates.length === 0) {
-                            setForm((f) => ({ ...f, recurringDates: addNextRecurringDate([], f.startDate ? f.startDate : f.time ? new Date().toISOString().split("T")[0] : new Date().toISOString().split("T")[0], f.time) } as any));
+                            setForm((f) => ({ ...f, recurringDates: generateRecurringDates(f.startDate || new Date().toISOString().split("T")[0], 4, f.time) } as any));
                           }
                         }}
                         className="p-3 rounded-xl border-2 text-left transition-all"

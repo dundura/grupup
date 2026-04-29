@@ -114,10 +114,23 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
     notFound();
   }
 
+  const ADMIN_EMAILS = ["nmciq2@gmail.com", "neil@anytime-soccer.com"];
+  let isAdminUser = false;
+  if (currentUserId) {
+    try {
+      const client = await clerkClient();
+      const me = await client.users.getUser(currentUserId);
+      const email = me.emailAddresses?.[0]?.emailAddress ?? "";
+      const meta = me.publicMetadata as { role?: string };
+      isAdminUser = ADMIN_EMAILS.includes(email) || meta.role === "admin";
+    } catch {}
+  }
+
+  const unlimited = session.spotsTotal === 0;
   const embedUrl = (session as any).videoUrl ? toEmbedUrl((session as any).videoUrl) : null;
-  const almostFull = session.spotsLeft <= 2 && session.spotsLeft > 0;
-  const isFull = session.spotsLeft === 0;
-  const fillPct = Math.round(((session.spotsTotal - session.spotsLeft) / session.spotsTotal) * 100);
+  const almostFull = !unlimited && session.spotsLeft <= 2 && session.spotsLeft > 0;
+  const isFull = !unlimited && session.spotsLeft === 0;
+  const fillPct = unlimited ? 0 : Math.round(((session.spotsTotal - session.spotsLeft) / session.spotsTotal) * 100);
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
@@ -402,39 +415,38 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
             </div>
-            </div>
 
-            {/* Session dates */}
-            {(() => {
-              const rawDates = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
-              const dates: { date: string; time?: string }[] = rawDates.map((d: any) =>
-                typeof d === "string" ? { date: d } : d
-              );
-              const today = new Date().toISOString().split("T")[0];
-              const upcoming = dates.filter((d) => d.date >= today);
-              if (!dates.length) return null;
-              return (
-                <div className="bg-white rounded-2xl border shadow-sm p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    Session Dates
-                    <span className="ml-2 font-normal normal-case text-muted-foreground">({upcoming.length} upcoming)</span>
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {dates.map((d) => {
-                      const isPast = d.date < today;
-                      const showTime = d.time && d.time !== session.time;
-                      return (
-                        <span key={d.date}
-                          className={`text-sm font-medium px-3 py-1.5 rounded-lg border ${isPast ? "text-muted-foreground bg-muted/50 line-through" : "text-[#0F3154] bg-blue-50 border-blue-100"}`}>
-                          {new Date(d.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                          {showTime && <span className="ml-1 text-xs opacity-75">@ {d.time}</span>}
-                        </span>
-                      );
-                    })}
+              {/* Session dates — spans full width, above Date/Time details */}
+              {(() => {
+                const rawDates = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+                const dates: { date: string; time?: string }[] = rawDates.map((d: any) =>
+                  typeof d === "string" ? { date: d } : d
+                );
+                const today = new Date().toISOString().split("T")[0];
+                const upcoming = dates.filter((d) => d.date >= today);
+                if (!dates.length) return null;
+                return (
+                  <div className="sm:col-span-2 bg-white rounded-2xl border shadow-sm p-5">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                      Session Dates
+                      <span className="ml-2 font-normal normal-case text-muted-foreground">({upcoming.length} upcoming)</span>
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {dates.map((d) => {
+                        const isPast = d.date < today;
+                        const showTime = d.time && d.time !== session.time;
+                        return (
+                          <span key={d.date}
+                            className={`text-sm font-medium px-3 py-1.5 rounded-lg border ${isPast ? "text-muted-foreground bg-muted/50 line-through" : "text-[#0F3154] bg-blue-50 border-blue-100"}`}>
+                            {new Date(d.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                            {showTime && <span className="ml-1 text-xs opacity-75">@ {d.time}</span>}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
             {/* Special Instructions */}
             <div className="bg-white rounded-2xl border shadow-sm p-6">
