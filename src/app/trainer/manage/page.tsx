@@ -47,6 +47,8 @@ export default function TrainerManagePage() {
   const [sentMsg, setSentMsg] = useState("");
   const [refunding, setRefunding] = useState<number | null>(null);
   const [refundModal, setRefundModal] = useState<{ id: number; name: string; amount: number } | null>(null);
+  const [notifyModal, setNotifyModal] = useState<{ sessionId: number; sessionTitle: string; count: number } | null>(null);
+  const [notifySent, setNotifySent] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -75,12 +77,11 @@ export default function TrainerManagePage() {
   }, [isLoaded, isSignedIn, router]);
 
   async function handleNotifyWaitlist(sessionId: number) {
-    if (!confirm("Email everyone on the waitlist that booking is now open?")) return;
     setNotifying(sessionId);
     try {
       const res = await fetch(`/api/trainer/sessions/${sessionId}/notify-waitlist`, { method: "POST" });
       const d = await res.json();
-      alert(`Sent to ${d.sent} ${d.sent === 1 ? "person" : "people"} on the waitlist.`);
+      setNotifySent(d.sent ?? 0);
     } finally {
       setNotifying(null);
     }
@@ -268,12 +269,11 @@ export default function TrainerManagePage() {
                           </p>
                           {waitlists[s.id].length > 0 && (
                           <button type="button"
-                            onClick={() => handleNotifyWaitlist(s.id)}
-                            disabled={notifying === s.id}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                            onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors"
                             style={{ backgroundColor: "#DC373E" }}>
                             <Mail className="h-3 w-3" />
-                            {notifying === s.id ? "Sending…" : "Notify — spots open!"}
+                            Notify — spots open!
                           </button>
                           )}
                         </div>
@@ -392,6 +392,51 @@ export default function TrainerManagePage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Notify RSVP list modal */}
+      {notifyModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: "#e8f0f9" }}>
+                <Mail className="h-7 w-7" style={{ color: "#0F3154" }} />
+              </div>
+              <h2 className="text-lg font-bold">Notify interested players</h2>
+              <p className="text-sm text-muted-foreground">
+                This will email <strong>{notifyModal.count} {notifyModal.count === 1 ? "person" : "people"}</strong> who expressed interest in <strong>{notifyModal.sessionTitle}</strong> that booking is now open.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setNotifyModal(null)}>Cancel</Button>
+              <Button className="flex-1" disabled={notifying === notifyModal.sessionId}
+                style={{ backgroundColor: "#DC373E" }}
+                onClick={async () => {
+                  const { sessionId } = notifyModal;
+                  setNotifyModal(null);
+                  await handleNotifyWaitlist(sessionId);
+                }}>
+                {notifying === notifyModal.sessionId ? "Sending…" : "Send emails"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notify sent confirmation */}
+      {notifySent !== null && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 text-center">
+            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto">
+              <span className="text-2xl">✅</span>
+            </div>
+            <h2 className="text-lg font-bold">Emails sent!</h2>
+            <p className="text-sm text-muted-foreground">
+              Notified <strong>{notifySent} {notifySent === 1 ? "person" : "people"}</strong> that booking is now open.
+            </p>
+            <Button className="w-full" style={{ backgroundColor: "#0F3154" }} onClick={() => setNotifySent(null)}>Done</Button>
           </div>
         </div>
       )}
