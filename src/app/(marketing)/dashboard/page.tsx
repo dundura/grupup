@@ -53,6 +53,11 @@ export default function DashboardPage() {
     athleteName: string; amountPaid: number; sessionCount: number;
     bookingType: string; status: string; createdAt: string;
   }>>([]);
+  const [playerRequests, setPlayerRequests] = useState<Array<{
+    id: number; sport?: string; level?: string; city?: string; budget?: string;
+    trainingType?: string; status: string; sendCount?: number; createdAt: string;
+  }>>([]);
+  const [reminding, setReminding] = useState<number | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
   const [cancelConfirmModal, setCancelConfirmModal] = useState<{ id: number; title: string; amount: number } | null>(null);
   const [lateContactModal, setLateContactModal] = useState<{ title: string; amount: number } | null>(null);
@@ -98,11 +103,13 @@ export default function DashboardPage() {
         fetch("/api/player/follows").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/questionnaires").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/bookings").then((r) => r.json()).catch(() => []),
-      ]).then(([followData, qData, bkgs]) => {
+        fetch("/api/player/requests").then((r) => r.json()).catch(() => []),
+      ]).then(([followData, qData, bkgs, reqs]) => {
         if (followData.pending) setFollowRequests(followData.pending);
         if (followData.approved) setFollowers(followData.approved);
         if (qData.pending) setPendingQuestionnaires(qData.pending);
         if (Array.isArray(bkgs)) setPlayerBookings(bkgs);
+        if (Array.isArray(reqs)) setPlayerRequests(reqs);
         setLoading(false);
       });
     }
@@ -1050,6 +1057,53 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Player: My Training Requests */}
+        {role !== "trainer" && playerRequests.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">My Training Requests</h2>
+              <Link href="/request" className="text-sm font-medium hover:underline" style={{ color: "#DC373E" }}>+ New request</Link>
+            </div>
+            <div className="space-y-3">
+              {playerRequests.map((r) => {
+                const canRemind = (r.sendCount ?? 1) < 2;
+                const statusColor = r.status === "open" ? "text-green-700 bg-green-50" : r.status === "accepted" ? "text-blue-700 bg-blue-50" : "text-gray-500 bg-gray-100";
+                return (
+                  <div key={r.id} className="border rounded-xl p-4 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {r.sport && <span className="font-semibold text-sm">{r.sport}</span>}
+                        {r.level && <span className="text-xs text-muted-foreground">{r.level}</span>}
+                        {r.city && <span className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{r.city}</span>}
+                        {r.budget && <span className="text-xs font-semibold text-green-700">{r.budget}/session</span>}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {" · "}<span className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${statusColor}`}>{r.status}</span>
+                      </p>
+                    </div>
+                    {r.status === "open" && (
+                      <button
+                        disabled={!canRemind || reminding === r.id}
+                        onClick={async () => {
+                          if (!canRemind) return;
+                          setReminding(r.id);
+                          const res = await fetch(`/api/training-requests/${r.id}/remind`, { method: "POST" });
+                          if (res.ok) setPlayerRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, sendCount: (x.sendCount ?? 1) + 1 } : x));
+                          setReminding(null);
+                        }}
+                        className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted"
+                        title={canRemind ? "Send a reminder to trainers" : "Reminder limit reached"}>
+                        {reminding === r.id ? "Sending…" : canRemind ? "Remind" : "Reminded"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
