@@ -1,8 +1,138 @@
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
+import { db } from "@/db";
+import { bookings, trainerSessions, trainers } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
+import { getStripe, stripeOpts } from "@/lib/stripe";
+import { sendBookingConfirmation, sendTrainerNewBooking } from "@/lib/email";
+import { clerkClient } from "@clerk/nextjs/server";
 
-export default async function BookingSuccessPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export const dynamic = "force-dynamic";
+
+async function ensureBookingRecorded(checkoutSessionId: string) {
+  try {
+    // Idempotency: don't double-record
+    const [existing] = await db.select({ id: bookings.id })
+      .from(bookings)
+      .where(eq(bookings.stripeSessionId, checkoutSessionId));
+    if (existing) return;
+
+    const stripe = getStripe();
+    const cs = await stripe.checkout.sessions.retrieve(checkoutSessionId, {}, stripeOpts());
+    if (cs.payment_status !== "paid") return;
+
+    const { trainerSessionId, userId, userName, userEmail, athleteName, sessionCount, type, trainerId } = cs.metadata ?? {};
+    const amount = (cs.amount_total ?? 0) / 100;
+
+    // Private booking path
+    if (type === "private" && trainerId) {
+      const [trainerRow] = await db.select().from(trainers).where(eq(trainers.id, trainerId));
+      await db.insert(bookings).values({
+        sessionId: null,
+        clerkUserId: userId ?? "",
+        userName: userName ?? "",
+        userEmail: userEmail ?? "",
+        athleteName: athleteName ?? "",
+        status: "paid",
+        stripeSessionId: cs.id,
+        amountPaid: amount,
+        bookingType: "private",
+        trainerClerkId: trainerRow?.clerkId ?? null,
+        sessionCount: parseInt(sessionCount ?? "1") || 1,
+        trainerPaid: false,
+      });
+      return;
+    }
+
+    const sessionIdInt = parseInt(trainerSessionId ?? "");
+    if (isNaN(sessionIdInt)) return;
+
+    const [sessionRow] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
+
+    await db.insert(bookings).values({
+      sessionId: trainerSessionId,
+      clerkUserId: userId ?? "",
+      userName: userName ?? "",
+      userEmail: userEmail ?? "",
+      athleteName: athleteName ?? "",
+      status: "paid",
+      stripeSessionId: cs.id,
+      amountPaid: amount,
+      bookingType: "group",
+      trainerClerkId: sessionRow?.trainerClerkId ?? null,
+      sessionCount: parseInt(sessionCount ?? "1") || 1,
+      trainerPaid: false,
+    });
+
+    // Decrement spots
+    await db.update(trainerSessions)
+      .set({ spotsLeft: sql`GREATEST(${trainerSessions.spotsLeft} - 1, 0)` })
+      .where(eq(trainerSessions.id, sessionIdInt));
+
+    const [trainerProfile] = await db.select().from(trainers).where(eq(trainers.clerkId, sessionRow?.trainerClerkId ?? ""));
+
+    // Email player
+    if (userEmail && sessionRow) {
+      try {
+        await sendBookingConfirmation({
+          toEmail: userEmail,
+          toName: userName ?? "there",
+          sessionTitle: sessionRow.title,
+          trainerName: trainerProfile?.name ?? "your trainer",
+          dayOfWeek: sessionRow.dayOfWeek ?? "",
+          time: sessionRow.time ?? "",
+          venue: sessionRow.venue ?? "",
+          city: sessionRow.city ?? "",
+          amount,
+        });
+      } catch {}
+    }
+
+    // Email trainer
+    if (trainerProfile?.clerkId) {
+      try {
+        const client = await clerkClient();
+        const trainerUser = await client.users.getUser(trainerProfile.clerkId);
+        const trainerEmail = trainerUser.emailAddresses?.[0]?.emailAddress ?? "";
+        if (trainerEmail) {
+          await sendTrainerNewBooking({
+            trainerEmail,
+            trainerName: trainerProfile.name,
+            playerName: userName ?? "Someone",
+            sessionTitle: sessionRow?.title ?? "your session",
+            amount,
+          });
+        }
+      } catch {}
+    }
+
+    // Email admin
+    try {
+      await sendTrainerNewBooking({
+        trainerEmail: "neil@anytime-soccer.com",
+        trainerName: "Admin",
+        playerName: `${userName ?? "Someone"} → ${sessionRow?.title ?? "session"} (${trainerProfile?.name ?? "unknown"})`,
+        sessionTitle: sessionRow?.title ?? "Group Session",
+        amount,
+      });
+    } catch {}
+  } catch (err) {
+    console.error("[success-page] booking record failed:", err);
+  }
+}
+
+export default async function BookingSuccessPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout_session_id?: string }>;
+}) {
+  const [, { checkout_session_id }] = await Promise.all([params, searchParams]);
+
+  if (checkout_session_id) {
+    await ensureBookingRecorded(checkout_session_id);
+  }
 
   return (
     <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center px-4">
@@ -11,9 +141,9 @@ export default async function BookingSuccessPage({ params }: { params: Promise<{
           style={{ backgroundColor: "#f0f9f4" }}>
           <CheckCircle className="h-9 w-9 text-green-600" />
         </div>
-        <h1 className="text-2xl font-bold mb-2">You're booked!</h1>
+        <h1 className="text-2xl font-bold mb-2">You&apos;re booked!</h1>
         <p className="text-muted-foreground mb-6">
-          Payment confirmed. A confirmation email is on its way. We'll see you at the session!
+          Payment confirmed. A confirmation email is on its way. We&apos;ll see you at the session!
         </p>
         <div className="space-y-3">
           <Link href="/dashboard"
