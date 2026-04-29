@@ -260,19 +260,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 </div>
               );
             })()}
-            {/* Manual price override */}
-            <div className="pt-2 border-t">
-              <label className="text-sm font-medium mb-1.5 block">
-                Set your price <span className="font-normal text-xs text-muted-foreground">(adjust from suggested)</span>
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                <Input type="number" min="1" value={form.pricePerPlayer}
-                  onChange={(e) => setForm((f) => ({ ...f, pricePerPlayer: e.target.value }))}
-                  className="pl-7" />
-              </div>
-            </div>
-
             {/* Discount */}
             <div className="pt-2 border-t space-y-3">
               <div className="flex items-center justify-between">
