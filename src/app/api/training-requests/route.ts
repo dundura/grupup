@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { trainers, trainingRequests } from "@/db/schema";
+import { trainers, trainingRequests, trainingRequestResponses } from "@/db/schema";
 import { eq, or, ilike } from "drizzle-orm";
 import { Resend } from "resend";
 
