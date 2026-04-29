@@ -3,14 +3,16 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   MapPin, CalendarDays, Users, ShieldCheck,
-  Star, ChevronLeft, Award, Minus, Plus,
+  Star, ChevronLeft, Award, Minus, Plus, Mail,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
-import { trainers, trainerSessions } from "@/db/schema";
+import { trainers, trainerSessions, trainerFollows } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 import { PackageBooking } from "@/components/trainers/PackageBooking";
 import MessageButton from "@/components/messaging/MessageButton";
+import FollowButton from "@/components/sessions/FollowButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
 
   let trainer;
   let sessions: typeof trainerSessions.$inferSelect[] = [];
+  let followStatus: string | null = null;
 
   try {
     const [row] = await db.select().from(trainers).where(eq(trainers.id, id));
@@ -30,6 +33,16 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
       .where(and(eq(trainerSessions.trainerClerkId, trainer.clerkId!), eq(trainerSessions.isActive, true)));
   } catch {
     notFound();
+  }
+
+  const { userId } = await auth();
+  if (userId && trainer.clerkId) {
+    try {
+      const [follow] = await db.select({ status: trainerFollows.status })
+        .from(trainerFollows)
+        .where(and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, trainer.clerkId)));
+      followStatus = follow?.status ?? null;
+    } catch {}
   }
 
   const sports       = (trainer.sports as string[] | null) ?? (trainer.sport ? [trainer.sport] : []);
@@ -118,6 +131,28 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
 
+            {/* No sessions — request CTA */}
+            {sessions.length === 0 && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6 text-center">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: "#f0f4f9" }}>
+                  <CalendarDays className="h-7 w-7" style={{ color: "#0F3154" }} />
+                </div>
+                <h3 className="font-bold text-base mb-1">No sessions available right now</h3>
+                <p className="text-sm text-muted-foreground mb-5">
+                  {trainer.name.split(" ")[0]} isn't running any group sessions at the moment. Send a request and we'll let them know you're interested.
+                </p>
+                <a
+                  href={`mailto:bookings@soccer-near-me.com?subject=Session Request — ${encodeURIComponent(trainer.name)}&body=Hi, I'd like to request a group session with ${encodeURIComponent(trainer.name)} in ${encodeURIComponent(location || trainer.city || "my area")}. Please let me know when sessions become available.`}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm w-full"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  <Mail className="h-4 w-4" />
+                  Request a Session
+                </a>
+                <p className="text-xs text-muted-foreground mt-3">We'll follow up within 24 hours.</p>
+              </div>
+            )}
+
             {/* Package booking — client component */}
             <PackageBooking
               trainerId={trainer.id}
@@ -174,7 +209,13 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   )}
                 </div>
                 {trainer.clerkId && (
-                  <div className="mt-2">
+                  <div className="mt-2 space-y-2">
+                    <FollowButton
+                      trainerClerkId={trainer.clerkId}
+                      initialIsFollowing={!!followStatus}
+                      initialStatus={followStatus}
+                      isSignedIn={!!userId}
+                    />
                     <MessageButton toClerkId={trainer.clerkId} toName={trainer.name} />
                   </div>
                 )}
