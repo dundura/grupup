@@ -340,6 +340,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 </div>
               </div>
             </div>
+            </div>
 
             {/* Session dates */}
             {(() => {
