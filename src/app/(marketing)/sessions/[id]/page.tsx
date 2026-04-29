@@ -179,6 +179,12 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 ) : (
                   <p className="text-muted-foreground text-sm italic">No description added yet.</p>
                 )}
+                {session.dayOfWeek && (
+                  <div className="mt-3 pt-3 border-t flex items-start gap-2 text-xs text-[#0F3154]">
+                    <CalendarDays className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <p>This session runs every <strong>{session.dayOfWeek}</strong>{session.time ? ` at ${session.time}` : ""}. After booking, your trainer will confirm the exact upcoming dates with you.</p>
+                  </div>
+                )}
               </div>
 
               {/* Booking */}
