@@ -229,7 +229,14 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       <p className="flex items-center gap-1.5 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
                     ) : <p className="text-muted-foreground text-sm">—</p>}
                     {session.duration && (
-                      <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs"><Clock className="h-3.5 w-3.5 shrink-0" />{session.duration} min</p>
+                      session.duration > 60 ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                          <Clock className="h-3 w-3 shrink-0" />
+                          {session.duration >= 60 ? `${Math.floor(session.duration / 60)} hr${session.duration % 60 > 0 ? ` ${session.duration % 60} min` : ""}` : `${session.duration} min`}
+                        </span>
+                      ) : (
+                        <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs"><Clock className="h-3.5 w-3.5 shrink-0" />{session.duration} min</p>
+                      )
                     )}
                   </div>
                 </div>
