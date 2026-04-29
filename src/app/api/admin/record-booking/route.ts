@@ -32,9 +32,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Payment not completed", status: cs.payment_status }, { status: 400 });
     }
 
+    const resend = searchParams.get("resend") === "1";
+
     // Idempotency check
     const [existing] = await db.select({ id: bookings.id }).from(bookings).where(eq(bookings.stripeSessionId, cs.id));
-    if (existing) return NextResponse.json({ ok: true, message: "Booking already recorded", bookingId: existing.id });
+    if (existing && !resend) return NextResponse.json({ ok: true, message: "Booking already recorded", bookingId: existing.id });
 
     const { trainerSessionId, userId, userName, userEmail, athleteName, sessionCount, type, trainerId } = cs.metadata ?? {};
     const amount = (cs.amount_total ?? 0) / 100;

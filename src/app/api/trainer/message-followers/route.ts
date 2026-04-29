@@ -5,7 +5,7 @@ import { trainerFollows } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <bookings@soccer-near-me.com>";
+const FROM = "GrupUp <neil@anytime-soccer.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
 
 export async function GET() {

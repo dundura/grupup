@@ -50,6 +50,7 @@ export default function DashboardPage() {
     bookingType: string; createdAt: string;
   }>>([]);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
+  const [cancelConfirmModal, setCancelConfirmModal] = useState<{ id: number; title: string; amount: number } | null>(null);
   const [lateContactModal, setLateContactModal] = useState<{ title: string; amount: number } | null>(null);
   const [pendingQuestionnaires, setPendingQuestionnaires] = useState<Array<{
     bookingId: number; sessionTitle: string;
@@ -151,21 +152,22 @@ export default function DashboardPage() {
     setQSubmitting(false);
   }
 
-  async function handleCancelBooking(bookingId: number, createdAt: string, title: string, amount: number) {
+  function handleCancelBooking(bookingId: number, createdAt: string, title: string, amount: number) {
     const bookedAt = new Date(createdAt).getTime();
     const withinWindow = Date.now() - bookedAt < 24 * 60 * 60 * 1000;
-    if (!withinWindow) {
-      setLateContactModal({ title, amount });
-      return;
-    }
-    if (!confirm("Cancel this booking? You'll receive a full refund within 5–10 business days.")) return;
-    setCancellingBooking(bookingId);
+    if (!withinWindow) { setLateContactModal({ title, amount }); return; }
+    setCancelConfirmModal({ id: bookingId, title, amount });
+  }
+
+  async function confirmCancel() {
+    if (!cancelConfirmModal) return;
+    setCancellingBooking(cancelConfirmModal.id);
+    setCancelConfirmModal(null);
     try {
-      const res = await fetch(`/api/player/bookings/${bookingId}/cancel`, { method: "POST" });
+      const res = await fetch(`/api/player/bookings/${cancelConfirmModal.id}/cancel`, { method: "POST" });
       const d = await res.json();
       if (d.ok) {
-        setPlayerBookings((prev) => prev.filter((b) => b.id !== bookingId));
-        alert("Booking cancelled. Refund is on its way.");
+        setPlayerBookings((prev) => prev.filter((b) => b.id !== cancelConfirmModal.id));
       } else {
         alert(d.error ?? "Cancellation failed. Please contact support.");
       }
@@ -267,6 +269,38 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Cancel confirmation modal */}
+      {cancelConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <X className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="font-bold text-base">Cancel this booking?</p>
+                <p className="text-sm text-muted-foreground">{cancelConfirmModal.title}</p>
+              </div>
+            </div>
+            <div className="rounded-xl bg-[#f0f9f4] border border-green-200 px-4 py-3">
+              <p className="text-sm text-green-800 font-medium">✓ Full refund of ${cancelConfirmModal.amount}</p>
+              <p className="text-xs text-green-700 mt-0.5">Returns to your original payment method in 5–10 business days.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setCancelConfirmModal(null)}
+                className="flex-1 py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">
+                Keep booking
+              </button>
+              <button onClick={confirmCancel}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ backgroundColor: "#DC373E" }}>
+                Yes, cancel it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Late cancellation contact modal */}
       {lateContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
@@ -280,7 +314,7 @@ export default function DashboardPage() {
               Email us and we'll review your request.
             </p>
             <a
-              href={`mailto:bookings@soccer-near-me.com?subject=Cancellation Request — ${encodeURIComponent(lateContactModal.title)}&body=Hi, I'd like to request a cancellation for my booking of ${encodeURIComponent(lateContactModal.title)} ($${lateContactModal.amount}). Please let me know if a refund is possible.`}
+              href={`mailto:neil@anytime-soccer.com?subject=Cancellation Request — ${encodeURIComponent(lateContactModal.title)}&body=Hi, I'd like to request a cancellation for my booking of ${encodeURIComponent(lateContactModal.title)} ($${lateContactModal.amount}). Please let me know if a refund is possible.`}
               className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
               style={{ backgroundColor: "#0F3154" }}
               onClick={() => setLateContactModal(null)}>

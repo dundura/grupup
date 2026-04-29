@@ -5,7 +5,7 @@ import { sessionWaitlist, trainerSessions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <bookings@soccer-near-me.com>";
+const FROM = "GrupUp <neil@anytime-soccer.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

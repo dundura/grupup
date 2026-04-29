@@ -5,7 +5,7 @@ import { trainerSessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <bookings@soccer-near-me.com>";
+const FROM = "GrupUp <neil@anytime-soccer.com>";
 const ADMIN_EMAIL = "neil@anytime-soccer.com";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
