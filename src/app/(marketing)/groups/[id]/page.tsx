@@ -13,6 +13,7 @@ import { auth } from "@clerk/nextjs/server";
 import { PackageBooking } from "@/components/trainers/PackageBooking";
 import MessageButton from "@/components/messaging/MessageButton";
 import FollowButton from "@/components/sessions/FollowButton";
+import RequestSessionModal from "@/components/trainers/RequestSessionModal";
 
 export const dynamic = "force-dynamic";
 
@@ -142,13 +143,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 <p className="text-sm text-muted-foreground mb-5">
                   {trainer.name.split(" ")[0]} isn't running any group sessions at the moment. Send a request and we'll let them know you're interested.
                 </p>
-                <a
-                  href={`mailto:bookings@soccer-near-me.com?bcc=neil@anytime-soccer.com&subject=Session Request — ${encodeURIComponent(trainer.name)}&body=Hi, I'd like to request a group session with ${encodeURIComponent(trainer.name)} in ${encodeURIComponent(location || trainer.city || "my area")}. Please let me know when sessions become available.`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm w-full"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  <Mail className="h-4 w-4" />
-                  Request a Session
-                </a>
+                <RequestSessionModal trainerId={trainer.id} trainerName={trainer.name} />
                 <p className="text-xs text-muted-foreground mt-3">We'll follow up within 24 hours.</p>
               </div>
             )}

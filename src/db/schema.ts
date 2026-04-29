@@ -171,6 +171,35 @@ export const trainerFollows = pgTable("trainer_follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const trainingRequests = pgTable("training_requests", {
+  id: serial("id").primaryKey(),
+  playerClerkId: varchar("player_clerk_id", { length: 255 }),
+  playerName: varchar("player_name", { length: 200 }).notNull(),
+  playerEmail: varchar("player_email", { length: 255 }).notNull(),
+  sport: varchar("sport", { length: 100 }),
+  level: varchar("level", { length: 50 }),
+  city: varchar("city", { length: 100 }),
+  zipCode: varchar("zip_code", { length: 20 }),
+  preferredDate: varchar("preferred_date", { length: 20 }),
+  preferredTime: varchar("preferred_time", { length: 20 }),
+  sessions: varchar("sessions", { length: 20 }),
+  budget: varchar("budget", { length: 50 }),
+  message: text("message"),
+  status: varchar("status", { length: 20 }).default("open"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const trainingRequestResponses = pgTable("training_request_responses", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull(),
+  trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
+  trainerName: varchar("trainer_name", { length: 200 }),
+  message: text("message"),
+  proposedRate: varchar("proposed_rate", { length: 50 }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const sessionReminders = pgTable("session_reminders", {
   id: serial("id").primaryKey(),
   bookingId: integer("booking_id").notNull(),
