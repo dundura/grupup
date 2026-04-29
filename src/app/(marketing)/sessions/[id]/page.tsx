@@ -137,21 +137,30 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           {/* Left column: title + description + booking */}
           <div className="space-y-5">
 
-            {session.recurring && (() => {
+            {(() => {
               const rawSD = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
               const today = new Date().toISOString().split("T")[0];
               const next = rawSD.map((d: any) => typeof d === "string" ? d : d.date).find((d: string) => d >= today);
               const nextLabel = next
                 ? new Date(next + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
                 : null;
+              const hasPills = session.recurring || session.dayOfWeek || nextLabel;
+              if (!hasPills) return null;
               return (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
-                    🔁 {(session as any).recurringWeeks ? `${(session as any).recurringWeeks}-session series` : "Session Series"}
-                  </span>
+                  {session.dayOfWeek && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>
+                      <CalendarDays className="h-3 w-3" /> {session.dayOfWeek}s{session.time ? ` at ${session.time}` : ""}
+                    </span>
+                  )}
+                  {session.recurring && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-[#e8f0f9] text-[#0F3154]">
+                      🔁 {(session as any).recurringWeeks ? `${(session as any).recurringWeeks}-session series` : "Recurring"}
+                    </span>
+                  )}
                   {nextLabel && (
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
-                      <CalendarDays className="h-3 w-3" /> Next: {nextLabel}
+                      📅 Next: {nextLabel}
                     </span>
                   )}
                 </div>
