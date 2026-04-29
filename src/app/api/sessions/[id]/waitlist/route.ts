@@ -38,10 +38,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       userEmail: email.toLowerCase().trim(),
     });
 
+    // Return success immediately — emails fire after
+    const sessionUrl = `https://grupup.app/sessions/${sessionId}`;
+
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const client = await clerkClient();
-      const sessionUrl = `https://grupup.app/sessions/${sessionId}`;
 
       // 1. Confirm to player
       try {
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       // 2. Notify trainer
       try {
+        const client = await clerkClient();
         const trainerClerk = await client.users.getUser(session.trainerClerkId);
         const trainerEmail = trainerClerk.emailAddresses?.[0]?.emailAddress;
         if (trainerEmail) {
@@ -90,6 +92,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       // 3. Notify trainer's followers
       try {
+        const client = await clerkClient();
         const follows = await db.select().from(trainerFollows)
           .where(eq(trainerFollows.trainerClerkId, session.trainerClerkId));
         for (const follow of follows) {

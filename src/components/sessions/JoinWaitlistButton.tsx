@@ -53,16 +53,13 @@ export default function JoinWaitlistButton({
 
   if (done) return (
     <div className="space-y-2">
-      <div className="text-center py-2">
-        <p className="text-sm font-semibold text-green-700">✓ You're on the waitlist!</p>
-        <p className="text-xs text-muted-foreground mt-1">We'll email you when booking opens.</p>
+      <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-50 border border-green-200">
+        <span className="text-sm font-semibold text-green-700">✓ You're on the waitlist</span>
       </div>
-      {email && (
-        <button onClick={handleLeave} disabled={leaving}
-          className="w-full text-xs text-muted-foreground hover:text-red-600 transition-colors py-1 underline">
-          {leaving ? "Removing…" : "Leave waitlist"}
-        </button>
-      )}
+      <button onClick={handleLeave} disabled={leaving}
+        className="w-full text-xs text-muted-foreground hover:text-red-600 transition-colors py-1 underline">
+        {leaving ? "Removing…" : "Leave waitlist"}
+      </button>
     </div>
   );
 
