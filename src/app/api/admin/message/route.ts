@@ -3,7 +3,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { Resend } from "resend";
 
 const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
-const FROM = "GrupUp <neil@anytime-soccer.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 
 export async function POST(req: NextRequest) {
   const { userId: adminId } = await auth();

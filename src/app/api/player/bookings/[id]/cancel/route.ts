@@ -8,7 +8,7 @@ import { trainers } from "@/db/schema";
 import { clerkClient } from "@clerk/nextjs/server";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <neil@anytime-soccer.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
 const HOURS_24 = 24 * 60 * 60 * 1000;
 

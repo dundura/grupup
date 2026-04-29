@@ -6,7 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { sendTrainerNewFollower } from "@/lib/email";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <neil@anytime-soccer.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
 
 // Follow / unfollow

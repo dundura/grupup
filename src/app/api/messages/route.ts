@@ -5,7 +5,7 @@ import { messages } from "@/db/schema";
 import { or, eq, and, desc } from "drizzle-orm";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <neil@anytime-soccer.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 
 export async function GET() {
   const { userId } = await auth();

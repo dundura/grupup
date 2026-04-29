@@ -4,7 +4,7 @@ import { bookings, trainerSessions, trainers, sessionReminders } from "@/db/sche
 import { eq, and } from "drizzle-orm";
 import { Resend } from "resend";
 
-const FROM = "GrupUp <neil@anytime-soccer.com>";
+const FROM = "GrupUp <bookings@soccer-near-me.com>";
 
 function parseTime(timeStr: string): { h: number; m: number } | null {
   if (!timeStr) return null;
