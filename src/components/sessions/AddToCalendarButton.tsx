@@ -37,6 +37,7 @@ export default function AddToCalendarButton({
   durationMin,
   location,
   description,
+  compact,
 }: {
   title: string;
   dayOfWeek: string;
