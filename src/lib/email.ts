@@ -134,9 +134,7 @@ export async function sendTrainerNewFollower({
 }) {
   if (!process.env.RESEND_API_KEY) return;
   const sports = (followerSports ?? []).join(" · ");
-  const profileUrl = followerProfileId
-    ? `https://www.grupup.app/connect/${followerProfileId}`
-    : "https://www.grupup.app/dashboard";
+  const profileUrl = "https://www.grupup.app/dashboard";
 
   await getResend().emails.send({
     from: FROM,
@@ -209,7 +207,7 @@ export async function sendFollowRequest({
 
   const location = [fromCity, fromCountry].filter(Boolean).join(", ");
   const sports = (fromSports ?? []).join(" · ");
-  const profileUrl = fromProfileId ? `https://www.grupup.app/connect/${fromProfileId}` : "https://www.grupup.app/dashboard";
+  const profileUrl = "https://www.grupup.app/dashboard";
 
   await getResend().emails.send({
     from: FROM,
@@ -364,9 +362,7 @@ export async function sendFollowApproved({
   approverProfileId?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
-  const profileUrl = approverProfileId
-    ? `https://www.grupup.app/connect/${approverProfileId}`
-    : "https://www.grupup.app/connect";
+  const profileUrl = "https://www.grupup.app/dashboard";
   await getResend().emails.send({
     from: FROM,
     to: toEmail,
