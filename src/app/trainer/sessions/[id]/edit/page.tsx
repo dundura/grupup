@@ -15,7 +15,7 @@ function newQuestion(): Question {
   return { id: Math.random().toString(36).slice(2), type: "text", label: "", required: false, options: [""] };
 }
 
-const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
+const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility", "Multi-sport"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
@@ -30,8 +30,8 @@ function baseHourlyRate(spots: number): number {
   if (spots <= 6) return 30;
   return 22;
 }
-function calcPrice(spots: number, durationMin: number): number {
-  return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
+function calcPrice(spots: number, _durationMin: number): number {
+  return baseHourlyRate(spots);
 }
 
 export default function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +41,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
   const [priceLocked] = useState(false);
   const [questionnaire, setQuestionnaire] = useState<Questionnaire>(null);
   const [form, setForm] = useState({
@@ -174,13 +175,26 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, questionnaire }),
       });
-      if (res.ok) { router.push(`/sessions/${id}`); }
+      if (res.ok) { setSaved(true); }
       else { const d = await res.json(); setError(d.error ?? "Something went wrong"); }
     } finally { setSaving(false); }
   }
 
   if (loading) return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-muted-foreground">Loading…</p></div>;
   if (error) return <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center"><p className="text-red-600">{error}</p></div>;
+
+  if (saved) return (
+    <div className="min-h-screen bg-[#f4f6f9] flex items-center justify-center px-4">
+      <div className="w-full max-w-md text-center bg-white rounded-2xl border shadow-sm p-10 space-y-6">
+        <div className="text-5xl">✅</div>
+        <h1 className="text-2xl font-bold">Session updated!</h1>
+        <div className="space-y-3">
+          <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push(`/sessions/${id}`)}>View listing</Button>
+          <Button variant="outline" className="w-full" onClick={() => setSaved(false)}>Keep editing</Button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
@@ -207,139 +221,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           </div>
 
           <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Schedule & Location</label>
-
-            {form.isPlan ? (
-              <div className="space-y-3">
-                <p className="text-xs text-muted-foreground">Set the date and time for each session — any schedule works (3 days in a row, weekends only, etc.)</p>
-                <div className="flex items-end gap-3 rounded-xl border border-dashed p-3">
-                  <div className="flex-1">
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Set time for all sessions</label>
-                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
-                  </div>
-                  <button type="button"
-                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors hover:bg-[#0F3154] hover:text-white"
-                    style={{ borderColor: "#0F3154", color: "#0F3154" }}
-                    onClick={() => setForm((f) => ({ ...f, planSessions: f.planSessions.map((s) => ({ ...s, time: f.time })) }))}>
-                    Apply to all
-                  </button>
-                </div>
-                {Array.from({ length: parseInt(form.planWeeks) || 4 }, (_, i) => {
-                  const s = form.planSessions[i] ?? { date: "", time: form.time };
-                  return (
-                    <div key={i} className="grid grid-cols-2 gap-3 items-center">
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Session {i + 1}</label>
-                        <Input type="date" value={s.date}
-                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], date: e.target.value }; return { ...f, planSessions: sessions }; })} />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Time</label>
-                        <Input type="time" value={s.time}
-                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], time: e.target.value }; return { ...f, planSessions: sessions }; })} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">Day of week</label>
-                    <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                      <option value="">Select day</option>
-                      {days.map((d) => <option key={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">Start time</label>
-                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">
-                    Start date{(form as any).recurring && <span style={{ color: "#DC373E" }}> *</span>}
-                    {!(form as any).recurring && <span className="font-normal text-xs text-muted-foreground ml-1">(optional)</span>}
-                  </label>
-                  <Input type="date" value={(form as any).startDate} onChange={(e) => set("startDate", e.target.value)} />
-                </div>
-                {(form as any).recurring && (form as any).recurringDates?.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium">Session dates</label>
-                      <button type="button"
-                        onClick={() => setForm((f) => {
-                          const dates = (f as any).recurringDates as { date: string; time: string }[];
-                          const last = dates[dates.length - 1];
-                          const next = last ? new Date(last.date + "T12:00:00") : new Date();
-                          next.setDate(next.getDate() + 7);
-                          return { ...f, recurringDates: [...dates, { date: next.toISOString().split("T")[0], time: last?.time || (f as any).time || "" }] } as any;
-                        })}
-                        className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Edit to skip a session or adjust a date.</p>
-                    {(form as any).recurringDates.map((d: { date: string; time: string }, i: number) => (
-                      <div key={i} className="flex gap-2 items-center">
-                        <Input type="date" value={d.date} className="flex-1"
-                          onChange={(e) => setForm((f) => {
-                            const dates = [...(f as any).recurringDates];
-                            dates[i] = { ...dates[i], date: e.target.value };
-                            return { ...f, recurringDates: dates } as any;
-                          })} />
-                        <Input type="time" value={d.time} className="w-28"
-                          onChange={(e) => setForm((f) => {
-                            const dates = [...(f as any).recurringDates];
-                            dates[i] = { ...dates[i], time: e.target.value };
-                            return { ...f, recurringDates: dates } as any;
-                          })} />
-                        <button type="button"
-                          onClick={() => setForm((f) => {
-                            const remaining = (f as any).recurringDates.filter((_: { date: string; time: string }, j: number) => j !== i);
-                            const last = remaining[remaining.length - 1];
-                            if (last) {
-                              const next = new Date(last.date + "T12:00:00");
-                              next.setDate(next.getDate() + 7);
-                              remaining.push({ date: next.toISOString().split("T")[0], time: last.time });
-                            }
-                            return { ...f, recurringDates: remaining } as any;
-                          })}
-                          className="text-muted-foreground hover:text-red-500 text-lg leading-none px-1 shrink-0" title="Skip this date">×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">City</label>
-                <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
-                <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Duration</label>
-              <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="60">1 hr</option>
-                <option value="90">1 hr 30 min</option>
-                <option value="120">2 hr</option>
-                <option value="150">2 hr 30 min</option>
-                <option value="180">3 hr</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
-              <Input value={form.venue} onChange={(e) => set("venue", e.target.value)} placeholder="e.g. WakeMed Soccer Park Field 3" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border p-6 space-y-4">
             <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Spots & Price</label>
             <div>
               <label className="text-sm font-medium mb-1.5 block">
@@ -354,15 +235,14 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             </div>
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
-              const duration = parseInt(form.duration) || 60;
               const perSession = parseInt(form.pricePerPlayer) || 0;
-              const hourlyRate = baseHourlyRate(spots);
+              const suggestedRate = baseHourlyRate(spots);
               const trainerEarns = Math.round(perSession * 0.85);
               const totalIfFull = trainerEarns * spots;
               return (
                 <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: "#f0f4f9" }}>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Base rate: ${hourlyRate}/player/hr × {duration} min</span>
+                    <span>Suggested: ${suggestedRate}/player for {spots > 6 ? "clinic" : spots > 3 ? "small group" : "semi-private"}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Players pay</span>
@@ -390,6 +270,58 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                   onChange={(e) => setForm((f) => ({ ...f, pricePerPlayer: e.target.value }))}
                   className="pl-7" />
               </div>
+            </div>
+
+            {/* Discount */}
+            <div className="pt-2 border-t space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Offer a discount</p>
+                  <p className="text-xs text-muted-foreground">Up to 50% off — great for filling spots fast</p>
+                </div>
+                <button type="button"
+                  onClick={() => setForm((f) => ({ ...f, discountPct: (f as any).discountPct > 0 ? 0 : 10 }))}
+                  className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).discountPct > 0 ? "bg-[#DC373E]" : "bg-gray-200"}`}>
+                  <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).discountPct > 0 ? "translate-x-4" : "translate-x-0"}`} />
+                </button>
+              </div>
+              {(form as any).discountPct > 0 && (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">Discount amount</span>
+                      <span className="text-lg font-extrabold" style={{ color: "#DC373E" }}>{(form as any).discountPct}% off</span>
+                    </div>
+                    <input type="range" min={5} max={50} step={5} value={(form as any).discountPct}
+                      onChange={(e) => setForm((f) => ({ ...f, discountPct: parseInt(e.target.value) }))}
+                      className="w-full accent-[#DC373E]" />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1"><span>5%</span><span>50%</span></div>
+                  </div>
+                  {(() => {
+                    const original = parseInt(form.pricePerPlayer) || 0;
+                    const discounted = Math.round(original * (1 - (form as any).discountPct / 100));
+                    return (
+                      <div className="rounded-xl p-4 bg-red-50 border border-red-100 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Players pay</p>
+                          <p className="text-muted-foreground text-sm line-through">${original}/player</p>
+                          <p className="text-xl font-extrabold" style={{ color: "#DC373E" }}>${discounted}/player</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">You earn (85%)</p>
+                          <p className="text-xl font-bold" style={{ color: "#0F3154" }}>${Math.round(discounted * 0.85)}/player</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Promo label <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
+                    <Input value={(form as any).discountLabel}
+                      onChange={(e) => setForm((f) => ({ ...f, discountLabel: e.target.value.slice(0, 40) }))}
+                      placeholder='e.g. "Early Bird", "Summer Special"' maxLength={40} />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* First class free */}
@@ -500,6 +432,140 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
+          {/* Schedule & Location — after Spots & Price */}
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
+            <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block">Schedule & Location</label>
+
+            {form.isPlan ? (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">Set the date and time for each session — any schedule works (3 days in a row, weekends only, etc.)</p>
+                <div className="flex items-end gap-3 rounded-xl border border-dashed p-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Set time for all sessions</label>
+                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                  </div>
+                  <button type="button"
+                    className="shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors hover:bg-[#0F3154] hover:text-white"
+                    style={{ borderColor: "#0F3154", color: "#0F3154" }}
+                    onClick={() => setForm((f) => ({ ...f, planSessions: f.planSessions.map((s) => ({ ...s, time: f.time })) }))}>
+                    Apply to all
+                  </button>
+                </div>
+                {Array.from({ length: parseInt(form.planWeeks) || 4 }, (_, i) => {
+                  const s = form.planSessions[i] ?? { date: "", time: form.time };
+                  return (
+                    <div key={i} className="grid grid-cols-2 gap-3 items-center">
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Session {i + 1}</label>
+                        <Input type="date" value={s.date}
+                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], date: e.target.value }; return { ...f, planSessions: sessions }; })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Time</label>
+                        <Input type="time" value={s.time}
+                          onChange={(e) => setForm((f) => { const sessions = [...f.planSessions]; sessions[i] = { ...sessions[i], time: e.target.value }; return { ...f, planSessions: sessions }; })} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Day of week</label>
+                    <select value={form.dayOfWeek} onChange={(e) => set("dayOfWeek", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option value="">Select day</option>
+                      {days.map((d) => <option key={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Start time</label>
+                    <Input type="time" value={form.time} onChange={(e) => set("time", e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    Start date{form.recurring && <span style={{ color: "#DC373E" }}> *</span>}
+                    {!form.recurring && <span className="font-normal text-xs text-muted-foreground ml-1">(optional)</span>}
+                  </label>
+                  <Input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
+                </div>
+                {form.recurring && form.recurringDates?.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Session dates</label>
+                      <button type="button"
+                        onClick={() => setForm((f) => {
+                          const dates = f.recurringDates;
+                          const last = dates[dates.length - 1];
+                          const next = last ? new Date(last.date + "T12:00:00") : new Date();
+                          next.setDate(next.getDate() + 7);
+                          return { ...f, recurringDates: [...dates, { date: next.toISOString().split("T")[0], time: last?.time || f.time || "" }] };
+                        })}
+                        className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Edit to skip a session or adjust a date.</p>
+                    {form.recurringDates.map((d, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <Input type="date" value={d.date} className="flex-1"
+                          onChange={(e) => setForm((f) => {
+                            const dates = [...f.recurringDates];
+                            dates[i] = { ...dates[i], date: e.target.value };
+                            return { ...f, recurringDates: dates };
+                          })} />
+                        <Input type="time" value={d.time} className="w-28"
+                          onChange={(e) => setForm((f) => {
+                            const dates = [...f.recurringDates];
+                            dates[i] = { ...dates[i], time: e.target.value };
+                            return { ...f, recurringDates: dates };
+                          })} />
+                        <button type="button"
+                          onClick={() => setForm((f) => {
+                            const remaining = f.recurringDates.filter((_, j) => j !== i);
+                            const last = remaining[remaining.length - 1];
+                            if (last) {
+                              const next = new Date(last.date + "T12:00:00");
+                              next.setDate(next.getDate() + 7);
+                              remaining.push({ date: next.toISOString().split("T")[0], time: last.time });
+                            }
+                            return { ...f, recurringDates: remaining };
+                          })}
+                          className="text-muted-foreground hover:text-red-500 text-lg leading-none px-1 shrink-0" title="Skip this date">×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">City</label>
+                <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Cary" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
+                <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Duration</label>
+              <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="60">1 hr</option>
+                <option value="90">1 hr 30 min</option>
+                <option value="120">2 hr</option>
+                <option value="150">2 hr 30 min</option>
+                <option value="180">3 hr</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
+              <Input value={form.venue} onChange={(e) => set("venue", e.target.value)} placeholder="e.g. WakeMed Soccer Park Field 3" />
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl border p-6 space-y-5">
             <div>
               <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Sport</label>
@@ -518,14 +584,22 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 Skill Level
                 <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="flex flex-wrap gap-2">
+                <button type="button"
+                  onClick={() => setForm((f) => ({
+                    ...f, skillLevels: f.skillLevels.length === levels.length ? [] : [...levels],
+                  }))}
+                  className="py-2 px-3 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.skillLevels.length === levels.length ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  All Levels
+                </button>
                 {levels.map((l) => (
                   <button key={l} type="button"
                     onClick={() => setForm((f) => ({
                       ...f,
                       skillLevels: f.skillLevels.includes(l) ? f.skillLevels.filter((x) => x !== l) : [...f.skillLevels, l],
                     }))}
-                    className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                    className="py-2 px-3 rounded-lg text-sm font-medium border transition-colors"
                     style={form.skillLevels.includes(l) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
                     {l}
                   </button>
@@ -538,6 +612,14 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
               </label>
               <div className="flex flex-wrap gap-2">
+                <button type="button"
+                  onClick={() => setForm((f) => ({
+                    ...f, ageRanges: f.ageRanges.length === ageRanges.length ? [] : [...ageRanges],
+                  }))}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.ageRanges.length === ageRanges.length ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  All Ages
+                </button>
                 {ageRanges.map((a) => (
                   <button key={a} type="button"
                     onClick={() => setForm((f) => ({
@@ -578,67 +660,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <Input value={(form as any).videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="text-sm" />
           </div>
 
-          {/* Discount */}
-          <div className="bg-white rounded-2xl border p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Discount</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Offer a limited-time discount — up to 50% off</p>
-              </div>
-              <button type="button"
-                onClick={() => setForm((f) => ({ ...f, discountPct: (f as any).discountPct > 0 ? 0 : 10 }))}
-                className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).discountPct > 0 ? "bg-[#DC373E]" : "bg-gray-200"}`}>
-                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${(form as any).discountPct > 0 ? "translate-x-4" : "translate-x-0"}`} />
-              </button>
-            </div>
-
-            {(form as any).discountPct > 0 && (
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Discount amount</label>
-                    <span className="text-xl font-extrabold" style={{ color: "#DC373E" }}>{(form as any).discountPct}% off</span>
-                  </div>
-                  <input type="range" min={5} max={50} step={5}
-                    value={(form as any).discountPct}
-                    onChange={(e) => setForm((f) => ({ ...f, discountPct: parseInt(e.target.value) }))}
-                    className="w-full accent-[#DC373E]" />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>5%</span><span>50%</span>
-                  </div>
-                </div>
-
-                {(() => {
-                  const original = parseInt((form as any).pricePerPlayer) || 0;
-                  const pct = (form as any).discountPct;
-                  const discounted = Math.round(original * (1 - pct / 100));
-                  return (
-                    <div className="rounded-xl p-4 bg-red-50 border border-red-100 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Players pay</p>
-                        <p className="text-muted-foreground text-sm line-through">${original}/player</p>
-                        <p className="text-xl font-extrabold" style={{ color: "#DC373E" }}>${discounted}/player</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">You earn (85%)</p>
-                        <p className="text-xl font-bold" style={{ color: "#0F3154" }}>${Math.round(discounted * 0.85)}/player</p>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Promo label <span className="text-muted-foreground font-normal text-xs">(optional)</span></label>
-                  <Input
-                    value={(form as any).discountLabel}
-                    onChange={(e) => setForm((f) => ({ ...f, discountLabel: e.target.value.slice(0, 40) }))}
-                    placeholder='e.g. "Early Bird", "Summer Special", "Limited Time"'
-                    maxLength={40}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Questionnaire builder */}
           <div className="bg-white rounded-2xl border p-6 space-y-4">

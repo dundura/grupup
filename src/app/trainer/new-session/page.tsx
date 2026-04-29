@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useAuth } from "@clerk/nextjs";
 
-const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
+const sports = ["Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility", "Multi-sport"];
 const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
@@ -87,8 +87,8 @@ export default function NewSessionPage() {
     return 5;
   }
 
-  function calcPrice(spots: number, durationMin: number): number {
-    return Math.max(5, Math.round(baseHourlyRate(spots) * durationMin / 60));
+  function calcPrice(spots: number, _durationMin: number): number {
+    return baseHourlyRate(spots);
   }
 
   function set(key: string, val: string) {
@@ -606,14 +606,22 @@ export default function NewSessionPage() {
                 Skill Level <span style={{ color: "#DC373E" }}>*</span>
                 <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="flex flex-wrap gap-2">
+                <button type="button"
+                  onClick={() => setForm((f) => ({
+                    ...f, skillLevels: f.skillLevels.length === levels.length ? [] : [...levels],
+                  }))}
+                  className="py-2 px-3 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.skillLevels.length === levels.length ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  All Levels
+                </button>
                 {levels.map((l) => (
                   <button key={l} type="button"
                     onClick={() => setForm((f) => ({
                       ...f,
                       skillLevels: f.skillLevels.includes(l) ? f.skillLevels.filter((x) => x !== l) : [...f.skillLevels, l],
                     }))}
-                    className="py-2 rounded-lg text-sm font-medium border transition-colors"
+                    className="py-2 px-3 rounded-lg text-sm font-medium border transition-colors"
                     style={form.skillLevels.includes(l) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
                     {l}
                   </button>
@@ -626,6 +634,14 @@ export default function NewSessionPage() {
                 <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
               </label>
               <div className="flex flex-wrap gap-2">
+                <button type="button"
+                  onClick={() => setForm((f) => ({
+                    ...f, ageRanges: f.ageRanges.length === ageRanges.length ? [] : [...ageRanges],
+                  }))}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                  style={form.ageRanges.length === ageRanges.length ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                  All Ages
+                </button>
                 {ageRanges.map((a) => (
                   <button key={a} type="button"
                     onClick={() => setForm((f) => ({
