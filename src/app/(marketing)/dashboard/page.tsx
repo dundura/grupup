@@ -696,11 +696,18 @@ export default function DashboardPage() {
                   <span className="ml-2 text-xs font-semibold text-muted-foreground">({sessions.length})</span>
                 )}
               </h2>
-              <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
-                <Link href="/trainer/new-session">
-                  <Plus className="h-4 w-4 mr-1" /> New session
+              <div className="flex items-center gap-3">
+                <Link href="/trainer/manage"
+                  className="flex items-center gap-1.5 text-sm font-medium hover:underline"
+                  style={{ color: "#0F3154" }}>
+                  <ClipboardList className="h-3.5 w-3.5" /> Manage
                 </Link>
-              </Button>
+                <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
+                  <Link href="/trainer/new-session">
+                    <Plus className="h-4 w-4 mr-1" /> New session
+                  </Link>
+                </Button>
+              </div>
             </div>
 
             {sessions.length === 0 ? (
