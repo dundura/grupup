@@ -474,10 +474,15 @@ export default function NewSessionPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium">Session dates</label>
                       <button type="button"
-                        onClick={() => setForm((f) => ({ ...f, recurringDates: [...f.recurringDates, ""] }))}
+                        onClick={() => setForm((f) => {
+                          const last = f.recurringDates[f.recurringDates.length - 1];
+                          const next = last ? new Date(last + "T12:00:00") : new Date();
+                          next.setDate(next.getDate() + 7);
+                          return { ...f, recurringDates: [...f.recurringDates, next.toISOString().split("T")[0]] };
+                        })}
                         className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
                     </div>
-                    <p className="text-xs text-muted-foreground">Edit to skip a week or adjust a date.</p>
+                    <p className="text-xs text-muted-foreground">Edit to skip a session or adjust a date.</p>
                     {form.recurringDates.map((d, i) => (
                       <div key={i} className="flex gap-2 items-center">
                         <Input type="date" value={d} className="flex-1"
