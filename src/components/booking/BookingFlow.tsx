@@ -8,7 +8,7 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import {
   Star, MapPin, ShieldCheck, ChevronDown, ChevronRight,
-  CheckCircle, CalendarDays, Clock, Users, Minus, Plus,
+  CheckCircle, CalendarDays, Clock, Users,
 } from "lucide-react";
 
 interface Session {
@@ -52,15 +52,13 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
     notes: "",
   });
   const [confirmed, setConfirmed] = useState(false);
-  const [sessionCount, setSessionCount] = useState(1);
-  const maxSessions = session.recurringWeeks ?? (session.recurring ? 8 : 1);
 
   // Date selection for session series
   const today = new Date().toISOString().split("T")[0];
   const upcomingDates = (session.sessionDates ?? []).filter((d) => d.date >= today);
   const hasDates = upcomingDates.length > 0 && session.recurring;
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
-  const effectiveCount = hasDates ? selectedDates.length : sessionCount;
+  const effectiveCount = hasDates ? selectedDates.length : 1;
 
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -360,33 +358,6 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
             {step === 4 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
                 <h2 className="text-lg font-bold mb-5">Checkout</h2>
-
-                {/* Session count picker — only for recurring sessions */}
-                {session.recurring && maxSessions > 1 && (
-                  <div className="rounded-xl border p-4 mb-5">
-                    <p className="text-sm font-semibold mb-3">How many sessions?</p>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => setSessionCount((c) => Math.max(1, c - 1))}
-                        disabled={sessionCount <= 1}
-                        className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30">
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="text-2xl font-bold w-8 text-center">{sessionCount}</span>
-                      <button
-                        type="button"
-                        onClick={() => setSessionCount((c) => Math.min(maxSessions, c + 1))}
-                        disabled={sessionCount >= maxSessions}
-                        className="h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors hover:border-[#0F3154] disabled:opacity-30">
-                        <Plus className="h-4 w-4" />
-                      </button>
-                      <span className="text-xs text-muted-foreground">
-                        {sessionCount === 1 ? "Single session" : `${sessionCount} sessions · up to ${maxSessions} available`}
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 {/* Order summary */}
                 <div className="rounded-xl border overflow-hidden mb-5">
