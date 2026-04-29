@@ -48,17 +48,18 @@ export default function JoinWaitlistButton({
   }
 
   if (left) return (
-    <p className="text-xs text-center text-muted-foreground">You've been removed from the waitlist.</p>
+    <p className="text-xs text-center text-muted-foreground">You've been removed from the RSVP list.</p>
   );
 
   if (done) return (
     <div className="space-y-2">
       <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-50 border border-green-200">
-        <span className="text-sm font-semibold text-green-700">✓ You're on the waitlist</span>
+        <span className="text-sm font-semibold text-green-700">✓ You've expressed interest!</span>
       </div>
+      <p className="text-xs text-center text-muted-foreground">We'll email you when booking opens.</p>
       <button onClick={handleLeave} disabled={leaving}
         className="w-full text-xs text-muted-foreground hover:text-red-600 transition-colors py-1 underline">
-        {leaving ? "Removing…" : "Leave waitlist"}
+        {leaving ? "Removing…" : "Remove my RSVP"}
       </button>
     </div>
   );
@@ -66,17 +67,17 @@ export default function JoinWaitlistButton({
   return (
     <div className="space-y-2">
       {waitlistCount > 0 && (
-        <p className="text-xs text-center text-muted-foreground">{waitlistCount} {waitlistCount === 1 ? "person" : "people"} waiting</p>
+        <p className="text-xs text-center text-muted-foreground">{waitlistCount} {waitlistCount === 1 ? "person has" : "people have"} expressed interest</p>
       )}
       {!open ? (
         <button onClick={() => setOpen(true)}
           className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white"
           style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-          Join Waitlist
+          Express Interest
         </button>
       ) : (
         <form onSubmit={handleJoin} className="space-y-2.5">
-          <p className="text-xs text-muted-foreground">No charge — we'll email you when spots open.</p>
+          <p className="text-xs text-muted-foreground">No charge — we'll email you when booking opens.</p>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required />
           <div className="flex gap-2">
@@ -85,7 +86,7 @@ export default function JoinWaitlistButton({
             <button type="submit" disabled={sending || !email.trim()}
               className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
               style={{ backgroundColor: "#0F3154" }}>
-              {sending ? "Joining…" : "Join"}
+              {sending ? "Sending…" : "RSVP"}
             </button>
           </div>
         </form>

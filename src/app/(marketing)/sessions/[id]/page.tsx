@@ -60,7 +60,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let followStatus: string | null = null;
   let currentUserId: string | null = null;
   let waitlistCount = 0;
-  let waitlistEntries: { userName: string | null }[] = [];
+  let waitlistEntries: { userName: string | null; clerkUserId: string | null }[] = [];
 
   try {
     const { userId } = await auth();
@@ -559,11 +559,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Waitlist */}
+            {/* RSVP list */}
             {waitlistEntries.length > 0 && (
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                  Waitlist ({waitlistEntries.length})
+                  Interested ({waitlistEntries.length})
                 </p>
                 <div className="space-y-2">
                   {waitlistEntries.map((w, i) => {

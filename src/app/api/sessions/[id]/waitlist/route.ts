@@ -29,7 +29,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Check not already on waitlist
     const [existing] = await db.select().from(sessionWaitlist)
       .where(and(eq(sessionWaitlist.sessionId, sessionId), eq(sessionWaitlist.userEmail, email.toLowerCase())));
-    if (existing) return NextResponse.json({ ok: true, alreadyJoined: true });
+    if (existing) {
+      // Still send confirmation so they know they're on it
+      if (process.env.RESEND_API_KEY) {
+        try {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          await resend.emails.send({
+            from: FROM,
+            to: email,
+            subject: `You're RSVPed: ${session.title}`,
+            html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+              <p style="color:#374151;font-size:15px;">Hi ${name || "there"}, just a reminder — you're already RSVPed for <strong>${session.title}</strong>. We'll email you when booking opens.</p>
+            </div>`,
+          });
+        } catch {}
+      }
+      return NextResponse.json({ ok: true, alreadyJoined: true });
+    }
 
     await db.insert(sessionWaitlist).values({
       sessionId,
@@ -49,16 +65,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         await resend.emails.send({
           from: FROM,
           to: email,
-          subject: `You're on the waitlist: ${session.title}`,
+          subject: `RSVP confirmed: ${session.title}`,
           html: `
             <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
               <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
-                <h1 style="color: white; margin: 0; font-size: 20px;">You're on the waitlist!</h1>
+                <h1 style="color: white; margin: 0; font-size: 20px;">You've expressed interest!</h1>
                 <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">${session.title}</p>
               </div>
               <p style="color: #374151; font-size: 15px;">Hi ${name || "there"},</p>
-              <p style="color: #374151; font-size: 15px;">You've been added to the waitlist for <strong>${session.title}</strong>. When the trainer opens booking, you'll get an email with a direct link to reserve your spot.</p>
-              <p style="color: #9ca3af; font-size: 13px; margin-top: 24px;">Want to leave the waitlist? Reply to this email.</p>
+              <p style="color: #374151; font-size: 15px;">You've RSVPed for <strong>${session.title}</strong>. When the trainer opens booking, you'll get an email with a direct link to reserve your spot.</p>
+              <p style="color: #9ca3af; font-size: 13px; margin-top: 24px;">Want to remove your RSVP? Reply to this email.</p>
             </div>
           `,
         });
@@ -74,14 +90,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             from: FROM,
             to: trainerEmail,
             bcc: ADMIN_BCC,
-            subject: `New waitlist signup: ${session.title}`,
+            subject: `New RSVP: ${session.title}`,
             html: `
               <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
                 <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
-                  <h1 style="color: white; margin: 0; font-size: 20px;">New waitlist signup</h1>
+                  <h1 style="color: white; margin: 0; font-size: 20px;">New RSVP</h1>
                   <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">${session.title}</p>
                 </div>
-                <p style="color: #374151; font-size: 15px;"><strong>${name || email}</strong> just joined the waitlist for <strong>${session.title}</strong>.</p>
+                <p style="color: #374151; font-size: 15px;"><strong>${name || email}</strong> just RSVPed for <strong>${session.title}</strong>.</p>
                 <p style="color: #374151; font-size: 15px;">When you're ready, open booking and they'll be notified automatically.</p>
                 <a href="${sessionUrl}" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#DC373E;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">View session</a>
               </div>
@@ -104,16 +120,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
               await resend.emails.send({
                 from: FROM,
                 to: followerEmail,
-                subject: `Someone joined the waitlist: ${session.title}`,
+                subject: `Someone RSVPed: ${session.title}`,
                 html: `
                   <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
                     <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
-                      <h1 style="color: white; margin: 0; font-size: 20px;">This session is filling up</h1>
+                      <h1 style="color: white; margin: 0; font-size: 20px;">Interest is growing</h1>
                       <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">${session.title}</p>
                     </div>
                     <p style="color: #374151; font-size: 15px;">Hi ${followerName},</p>
-                    <p style="color: #374151; font-size: 15px;">Someone just joined the waitlist for <strong>${session.title}</strong> — a session from a trainer you follow. Don't miss out.</p>
-                    <a href="${sessionUrl}" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#DC373E;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">Join the waitlist</a>
+                    <p style="color: #374151; font-size: 15px;">Someone just RSVPed for <strong>${session.title}</strong> — a session from a trainer you follow. Express your interest too.</p>
+                    <a href="${sessionUrl}" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#DC373E;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">Express Interest</a>
                   </div>
                 `,
               });
