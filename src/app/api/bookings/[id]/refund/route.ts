@@ -3,12 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { bookings, trainerSessions } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import Stripe from "stripe";
 import { Resend } from "resend";
-
-function getStripe() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
-}
+import { getStripe, stripeOpts } from "@/lib/stripe";
 
 const FROM = "GrupUp <bookings@soccer-near-me.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
@@ -30,10 +26,10 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
     // Get Stripe payment intent from checkout session
     const stripe = getStripe();
-    const cs = await stripe.checkout.sessions.retrieve(booking.stripeSessionId);
+    const cs = await stripe.checkout.sessions.retrieve(booking.stripeSessionId, {}, stripeOpts());
     if (!cs.payment_intent) return NextResponse.json({ error: "No payment intent found" }, { status: 400 });
 
-    await stripe.refunds.create({ payment_intent: cs.payment_intent as string });
+    await stripe.refunds.create({ payment_intent: cs.payment_intent as string }, stripeOpts());
 
     // Update booking status
     await db.update(bookings).set({ status: "refunded" }).where(eq(bookings.id, bookingId));

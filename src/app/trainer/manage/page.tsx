@@ -46,6 +46,7 @@ export default function TrainerManagePage() {
   const [sending, setSending] = useState(false);
   const [sentMsg, setSentMsg] = useState("");
   const [refunding, setRefunding] = useState<number | null>(null);
+  const [refundModal, setRefundModal] = useState<{ id: number; name: string; amount: number } | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -85,15 +86,15 @@ export default function TrainerManagePage() {
     }
   }
 
-  async function handleRefund(bookingId: number) {
-    if (!confirm("Refund this booking? This cannot be undone.")) return;
-    setRefunding(bookingId);
+  async function confirmRefund() {
+    if (!refundModal) return;
+    setRefunding(refundModal.id);
+    setRefundModal(null);
     try {
-      const res = await fetch(`/api/bookings/${bookingId}/refund`, { method: "POST" });
+      const res = await fetch(`/api/bookings/${refundModal.id}/refund`, { method: "POST" });
       const d = await res.json();
       if (d.ok) {
-        setBookings((prev) => prev.filter((b) => b.id !== bookingId));
-        alert("Refund issued. Player will receive an email confirmation.");
+        setBookings((prev) => prev.filter((b) => b.id !== refundModal.id));
       } else {
         alert(d.error ?? "Refund failed");
       }
@@ -101,6 +102,7 @@ export default function TrainerManagePage() {
       setRefunding(null);
     }
   }
+
 
   async function handleSend() {
     if (!message.trim() || !modal) return;
@@ -132,6 +134,38 @@ export default function TrainerManagePage() {
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
+
+      {/* Refund confirmation modal */}
+      {refundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <RotateCcw className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="font-bold text-base">Issue a refund?</p>
+                <p className="text-sm text-muted-foreground">{refundModal.name}</p>
+              </div>
+            </div>
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+              <p className="text-sm text-amber-800 font-medium">This cannot be undone</p>
+              <p className="text-xs text-amber-700 mt-0.5">${refundModal.amount} will be returned to the player's original payment method within 5–10 business days.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setRefundModal(null)}
+                className="flex-1 py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">
+                Cancel
+              </button>
+              <button onClick={confirmRefund}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ backgroundColor: "#DC373E" }}>
+                Yes, refund it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto space-y-6">
 
         <div className="flex items-center justify-between">
@@ -201,7 +235,7 @@ export default function TrainerManagePage() {
                                   </td>
                                   <td className="px-3 py-2 text-right">
                                     <button type="button"
-                                      onClick={() => handleRefund(b.id)}
+                                      onClick={() => setRefundModal({ id: b.id, name: b.userName || "this player", amount: b.amountPaid })}
                                       disabled={refunding === b.id}
                                       className="text-xs text-muted-foreground hover:text-red-600 transition-colors flex items-center gap-1"
                                       title="Refund this booking">
