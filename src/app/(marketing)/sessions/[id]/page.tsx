@@ -159,7 +159,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
                 {(() => {
-                  const sessionDates: string[] = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+                  const rawSD = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+                  const sessionDates: string[] = rawSD.map((d: any) => typeof d === "string" ? d : d.date);
                   const isPlan = (session as any).isPlan ?? false;
                   const allowLate = (session as any).allowLateBooking !== false;
                   const todayStr = new Date().toISOString().split("T")[0];
@@ -259,10 +260,12 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
             {/* Session dates */}
             {(() => {
-              const dates: string[] = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+              const rawDates = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+              const dates: { date: string; time?: string }[] = rawDates.map((d: any) =>
+                typeof d === "string" ? { date: d } : d
+              );
               const today = new Date().toISOString().split("T")[0];
-              const upcoming = dates.filter((d) => d >= today);
-              const past = dates.filter((d) => d < today);
+              const upcoming = dates.filter((d) => d.date >= today);
               if (!dates.length) return null;
               return (
                 <div className="bg-white rounded-2xl border shadow-sm p-5">
@@ -272,11 +275,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {dates.map((d) => {
-                      const isPast = d < today;
+                      const isPast = d.date < today;
+                      const showTime = d.time && d.time !== session.time;
                       return (
-                        <span key={d}
+                        <span key={d.date}
                           className={`text-sm font-medium px-3 py-1.5 rounded-lg border ${isPast ? "text-muted-foreground bg-muted/50 line-through" : "text-[#0F3154] bg-blue-50 border-blue-100"}`}>
-                          {new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                          {new Date(d.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                          {showTime && <span className="ml-1 text-xs opacity-75">@ {d.time}</span>}
                         </span>
                       );
                     })}

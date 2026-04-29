@@ -33,7 +33,7 @@ export default function NewSessionPage() {
   const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
   const [form, setForm] = useState({
     title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "",
-    dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevel: "",
+    dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevels: [] as string[],
     spotsTotal: "6", pricePerPlayer: "30",
     notes: "This session focuses on improving key skills in a small group environment. Players will get high-quality reps, real competition, and personalized feedback.",
     instructions: "Arrive 10 minutes before the session. Bring water and wear appropriate gear.",
@@ -43,7 +43,7 @@ export default function NewSessionPage() {
     recurring: false,
     recurringWeeks: "",
     startDate: "",
-    recurringDates: [] as string[],
+    recurringDates: [] as { date: string; time: string }[],
     discountPct: 0,
     discountLabel: "",
     allowLateBooking: true,
@@ -51,13 +51,13 @@ export default function NewSessionPage() {
     planSessions: [] as { date: string; time: string }[],
   });
 
-  function generateRecurringDates(start: string, weeks: number): string[] {
+  function generateRecurringDates(start: string, weeks: number, defaultTime = ""): { date: string; time: string }[] {
     if (!start || weeks <= 0) return [];
     const base = new Date(start + "T12:00:00");
     return Array.from({ length: weeks }, (_, i) => {
       const d = new Date(base);
       d.setDate(d.getDate() + i * 7);
-      return d.toISOString().split("T")[0];
+      return { date: d.toISOString().split("T")[0], time: defaultTime };
     });
   }
 
@@ -110,7 +110,7 @@ export default function NewSessionPage() {
         const start = key === "startDate" ? val : f.startDate;
         const weeks = parseInt(key === "recurringWeeks" ? val : f.recurringWeeks) || 4; // default 4
         if (start) {
-          next.recurringDates = generateRecurringDates(start, weeks);
+          next.recurringDates = generateRecurringDates(start, weeks, f.time);
         }
       }
       return next;
@@ -121,7 +121,7 @@ export default function NewSessionPage() {
     !form.title.trim()  && "Session title",
     !form.sport         && "Sport",
     !form.city.trim()   && "City",
-    !form.skillLevel    && "Skill level",
+    form.skillLevels.length === 0 && "Skill level",
     form.ageRanges.length === 0 && "Age range",
     !form.notes.trim()        && "About this session",
     !form.instructions.trim() && "Instructions",
@@ -158,7 +158,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", startDate: "", recurringDates: [], discountPct: 0, discountLabel: "", allowLateBooking: true, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevels: [], spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", startDate: "", recurringDates: [], discountPct: 0, discountLabel: "", allowLateBooking: true, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -229,6 +229,19 @@ export default function NewSessionPage() {
                 </div>
               );
             })()}
+
+            {/* Manual price override */}
+            <div className="pt-2 border-t">
+              <label className="text-sm font-medium mb-1.5 block">
+                Set your price <span className="font-normal text-xs text-muted-foreground">(adjust from suggested)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                <Input type="number" min="1" value={form.pricePerPlayer}
+                  onChange={(e) => setForm((f) => ({ ...f, pricePerPlayer: e.target.value }))}
+                  className="pl-7" />
+              </div>
+            </div>
 
             {/* Contact for more spots */}
             <p className="text-xs text-muted-foreground text-center">
@@ -310,7 +323,7 @@ export default function NewSessionPage() {
                     const turningOn = !f.recurring;
                     const defaultWeeks = "4";
                     const newDates = turningOn && f.startDate
-                      ? generateRecurringDates(f.startDate, 4)
+                      ? generateRecurringDates(f.startDate, 4, f.time)
                       : [];
                     return { ...f, recurring: turningOn, recurringWeeks: turningOn ? defaultWeeks : "", recurringDates: newDates };
                   })}
@@ -336,7 +349,7 @@ export default function NewSessionPage() {
                               const isDeselecting = f.recurringWeeks === String(w);
                               const newWeeks = isDeselecting ? "" : String(w);
                               const newDates = !isDeselecting && f.startDate
-                                ? generateRecurringDates(f.startDate, w)
+                                ? generateRecurringDates(f.startDate, w, f.time)
                                 : [];
                               return { ...f, recurringWeeks: newWeeks, recurringDates: newDates };
                             })}
@@ -485,30 +498,35 @@ export default function NewSessionPage() {
                       <button type="button"
                         onClick={() => setForm((f) => {
                           const last = f.recurringDates[f.recurringDates.length - 1];
-                          const next = last ? new Date(last + "T12:00:00") : new Date();
+                          const next = last ? new Date(last.date + "T12:00:00") : new Date();
                           next.setDate(next.getDate() + 7);
-                          return { ...f, recurringDates: [...f.recurringDates, next.toISOString().split("T")[0]] };
+                          return { ...f, recurringDates: [...f.recurringDates, { date: next.toISOString().split("T")[0], time: last?.time || f.time || "" }] };
                         })}
                         className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
                     </div>
                     <p className="text-xs text-muted-foreground">Edit to skip a session or adjust a date.</p>
                     {form.recurringDates.map((d, i) => (
                       <div key={i} className="flex gap-2 items-center">
-                        <Input type="date" value={d} className="flex-1"
+                        <Input type="date" value={d.date} className="flex-1"
                           onChange={(e) => setForm((f) => {
                             const dates = [...f.recurringDates];
-                            dates[i] = e.target.value;
+                            dates[i] = { ...dates[i], date: e.target.value };
+                            return { ...f, recurringDates: dates };
+                          })} />
+                        <Input type="time" value={d.time} className="w-28"
+                          onChange={(e) => setForm((f) => {
+                            const dates = [...f.recurringDates];
+                            dates[i] = { ...dates[i], time: e.target.value };
                             return { ...f, recurringDates: dates };
                           })} />
                         <button type="button"
                           onClick={() => setForm((f) => {
                             const remaining = f.recurringDates.filter((_, j) => j !== i);
-                            // Add a new date 7 days after the last one
                             const last = remaining[remaining.length - 1];
                             if (last) {
-                              const next = new Date(last + "T12:00:00");
+                              const next = new Date(last.date + "T12:00:00");
                               next.setDate(next.getDate() + 7);
-                              remaining.push(next.toISOString().split("T")[0]);
+                              remaining.push({ date: next.toISOString().split("T")[0], time: last.time });
                             }
                             return { ...f, recurringDates: remaining };
                           })}
@@ -584,12 +602,19 @@ export default function NewSessionPage() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Skill Level <span style={{ color: "#DC373E" }}>*</span></label>
+              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 block">
+                Skill Level <span style={{ color: "#DC373E" }}>*</span>
+                <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">(select all that apply)</span>
+              </label>
               <div className="grid grid-cols-4 gap-2">
                 {levels.map((l) => (
-                  <button key={l} type="button" onClick={() => set("skillLevel", l)}
+                  <button key={l} type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      skillLevels: f.skillLevels.includes(l) ? f.skillLevels.filter((x) => x !== l) : [...f.skillLevels, l],
+                    }))}
                     className="py-2 rounded-lg text-sm font-medium border transition-colors"
-                    style={form.skillLevel === l ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                    style={form.skillLevels.includes(l) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
                     {l}
                   </button>
                 ))}
