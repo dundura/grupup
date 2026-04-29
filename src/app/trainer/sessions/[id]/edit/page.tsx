@@ -249,7 +249,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">
-                    Start date <span className="font-normal text-xs text-muted-foreground">(optional)</span>
+                    Start date{(form as any).recurring && <span style={{ color: "#DC373E" }}> *</span>}
+                    {!(form as any).recurring && <span className="font-normal text-xs text-muted-foreground ml-1">(optional)</span>}
                   </label>
                   <Input type="date" value={(form as any).startDate} onChange={(e) => set("startDate", e.target.value)} />
                 </div>

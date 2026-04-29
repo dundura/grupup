@@ -126,6 +126,7 @@ export default function NewSessionPage() {
     !form.instructions.trim() && "Instructions",
     !form.isPlan && !form.dayOfWeek && "Day of week",
     !form.isPlan && !form.time      && "Start time",
+    form.recurring && !form.startDate && "Start date",
   ].filter(Boolean) as string[];
 
   const isValid = missing.length === 0;
@@ -462,7 +463,8 @@ export default function NewSessionPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">
-                    Start date <span className="font-normal text-xs text-muted-foreground">(optional)</span>
+                    Start date{form.recurring && <span style={{ color: "#DC373E" }}> *</span>}
+                    {!form.recurring && <span className="font-normal text-xs text-muted-foreground ml-1">(optional)</span>}
                   </label>
                   <Input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
                 </div>
