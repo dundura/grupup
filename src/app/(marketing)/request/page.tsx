@@ -17,6 +17,8 @@ export default function RequestTrainingPage() {
   const [form, setForm] = useState({
     name: user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "",
     email: user?.emailAddresses?.[0]?.emailAddress ?? "",
+    trainingType: "individual",
+    groupSize: "",
     sport: "",
     level: "",
     city: "",
@@ -121,6 +123,32 @@ export default function RequestTrainingPage() {
           {/* Training Details */}
           <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
             <h2 className="font-bold text-base">Training Details</h2>
+
+            {/* Training type toggle */}
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground mb-2 block">Training Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                {["individual", "group"].map((type) => (
+                  <button key={type} type="button"
+                    onClick={() => setF("trainingType", type)}
+                    className={`py-2.5 rounded-xl border-2 text-sm font-semibold transition-colors ${form.trainingType === type ? "text-white border-transparent" : "border-gray-200 text-muted-foreground"}`}
+                    style={form.trainingType === type ? { backgroundColor: "#0F3154" } : undefined}>
+                    {type === "individual" ? "Individual / Private" : "Group Training"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {form.trainingType === "group" && (
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Expected Group Size</label>
+                <select value={form.groupSize} onChange={(e) => setF("groupSize", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="">How many players?</option>
+                  {["2–4", "5–8", "9–12", "13–20", "20+"].map((n) => <option key={n} value={n}>{n} players</option>)}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div>

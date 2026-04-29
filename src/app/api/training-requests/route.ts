@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
     const body = await req.json();
-    const { name, email, sport, level, city, zipCode, preferredDate, preferredTime, sessions, budget, message } = body;
+    const { name, email, sport, level, city, zipCode, preferredDate, preferredTime, sessions, budget, message, trainingType, groupSize } = body;
 
     if (!name?.trim() || !email?.trim()) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       playerClerkId: userId ?? null,
       playerName: name,
       playerEmail: email,
+      trainingType: trainingType || "individual",
+      groupSize: groupSize || null,
       sport: sport || null,
       level: level || null,
       city: city || null,

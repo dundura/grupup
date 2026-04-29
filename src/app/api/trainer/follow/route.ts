@@ -9,6 +9,15 @@ import { Resend } from "resend";
 const FROM = "GrupUp <bookings@soccer-near-me.com>";
 const ADMIN_BCC = "neil@anytime-soccer.com";
 
+// Get current user's followed trainers
+export async function GET() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json([]);
+  const rows = await db.select({ trainerClerkId: trainerFollows.trainerClerkId, status: trainerFollows.status })
+    .from(trainerFollows).where(eq(trainerFollows.followerClerkId, userId));
+  return NextResponse.json(rows);
+}
+
 // Follow / unfollow
 export async function POST(req: NextRequest) {
   const { userId } = await auth();

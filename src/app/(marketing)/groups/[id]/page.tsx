@@ -92,6 +92,33 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
+            {/* Mobile-only trainer card */}
+            <div className="lg:hidden bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="relative h-56 w-full">
+                {trainer.photo ? (
+                  <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="100vw" unoptimized />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white" style={{ backgroundColor: "#0F3154" }}>
+                    {trainer.name?.[0] ?? "T"}
+                  </div>
+                )}
+              </div>
+              <div className="p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-bold">{trainer.name}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`h-3 w-3 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                    ))}
+                    <span className="text-xs text-muted-foreground ml-1">{trainer.rating?.toFixed(1)} · {trainer.reviewCount} reviews</span>
+                  </div>
+                </div>
+                {trainer.clerkId && (
+                  <FollowButton trainerClerkId={trainer.clerkId} initialIsFollowing={!!followStatus} initialStatus={followStatus} isSignedIn={!!userId} />
+                )}
+              </div>
+            </div>
+
             {/* 4-column overview */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {location && (
@@ -171,8 +198,8 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
           {/* ── RIGHT COLUMN (sidebar) ── */}
           <div className="space-y-5 lg:sticky lg:top-24">
 
-            {/* Trainer card */}
-            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            {/* Trainer card — desktop only */}
+            <div className="hidden lg:block bg-white rounded-2xl border shadow-sm overflow-hidden">
               <div className="relative h-64 w-full">
                 {trainer.photo ? (
                   <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="320px" unoptimized />

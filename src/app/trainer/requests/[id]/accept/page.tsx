@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 
 interface TrainingRequest {
   id: number; playerName: string; playerEmail: string;
+  trainingType?: string; groupSize?: string;
   sport?: string; level?: string; preferredDate?: string;
   preferredTime?: string; sessions?: string; budget?: string;
   message?: string; status: string; createdAt: string;
@@ -38,8 +39,13 @@ export default function AcceptRequestPage() {
         body: JSON.stringify({ proposedRate, message }),
       });
       const d = await res.json();
-      if (d.ok) setDone(true);
-      else alert(d.error ?? "Something went wrong");
+      if (d.ok && d.redirect) {
+        window.location.href = d.redirect;
+      } else if (d.ok) {
+        setDone(true);
+      } else {
+        alert(d.error ?? "Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -74,6 +80,8 @@ export default function AcceptRequestPage() {
           <h2 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Request Details</h2>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /><span className="font-semibold">{request.playerName}</span><span className="text-muted-foreground">{request.playerEmail}</span></div>
+            {request.trainingType && <p><span className="text-muted-foreground">Type:</span> <strong className="capitalize">{request.trainingType === "group" ? `Group Training` : "Individual / Private"}</strong></p>}
+            {request.groupSize && <p><span className="text-muted-foreground">Group size:</span> {request.groupSize} players</p>}
             {request.sport && <p><span className="text-muted-foreground">Sport:</span> {request.sport}</p>}
             {request.level && <p><span className="text-muted-foreground">Level:</span> {request.level}</p>}
             {(request.preferredDate || request.preferredTime) && (
@@ -100,13 +108,21 @@ export default function AcceptRequestPage() {
           </div>
 
           <div className="rounded-xl bg-[#f0f4f9] px-4 py-3 text-sm text-[#0F3154]">
-            Accepting will send <strong>{request.playerName}</strong> a payment link. Once they pay, the booking is confirmed and you'll be notified.
+            {request.trainingType === "group"
+              ? <>Accepting will redirect you to create a group session. Once it's live, <strong>{request.playerName}</strong> will be notified to book.</>
+              : <>Accepting will send <strong>{request.playerName}</strong> a payment link. Once they pay, the booking is confirmed.</>
+            }
           </div>
 
           <button onClick={handleAccept} disabled={submitting || !proposedRate.trim()}
             className="w-full py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-50 transition-opacity"
             style={{ backgroundColor: "#DC373E" }}>
-            {submitting ? "Sending payment link…" : "Accept & Send Payment Link"}
+            {submitting
+              ? "Processing…"
+              : request.trainingType === "group"
+                ? "Accept & Create Group Session"
+                : "Accept & Send Payment Link"
+            }
           </button>
         </div>
       </div>

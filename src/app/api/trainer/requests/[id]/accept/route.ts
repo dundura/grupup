@@ -24,6 +24,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const [trainer] = await db.select().from(trainers).where(eq(trainers.clerkId, userId));
     if (!trainer) return NextResponse.json({ error: "Trainer not found" }, { status: 404 });
 
+    const isGroup = (request as any).trainingType === "group";
+
     // Record response
     await db.insert(trainingRequestResponses).values({
       requestId,
@@ -34,7 +36,45 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       status: "pending",
     });
 
-    // Create Stripe checkout at the agreed rate
+    // For group requests, return a redirect to new-session pre-filled
+    if (isGroup) {
+      const params = new URLSearchParams({
+        fromRequest: String(requestId),
+        sport: (request as any).sport ?? "",
+        city: (request as any).city ?? "",
+        level: (request as any).level ?? "",
+        budget: proposedRate || (request as any).budget || "",
+      });
+      const newSessionUrl = `https://www.grupup.app/trainer/new-session?${params}`;
+
+      // Email player
+      if (request.playerEmail && process.env.RESEND_API_KEY) {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "GrupUp <bookings@soccer-near-me.com>",
+          to: request.playerEmail,
+          bcc: "neil@anytime-soccer.com",
+          subject: `${trainer.name} accepted your group training request!`,
+          html: `
+            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+              <div style="background:#0F3154;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+                <h1 style="color:white;margin:0;font-size:20px;">${trainer.name} accepted your request! 🎉</h1>
+                <p style="color:rgba(255,255,255,0.7);margin:6px 0 0;font-size:14px;">Your group training session is being created</p>
+              </div>
+              <p style="color:#374151;font-size:15px;">Hi ${request.playerName},</p>
+              <p style="color:#374151;font-size:15px;"><strong>${trainer.name}</strong> is setting up your group session${proposedRate ? ` at <strong>${proposedRate}/player</strong>` : ""}. You'll receive a booking link once it's live.</p>
+              ${message ? `<div style="background:#f8fafc;border-radius:10px;padding:14px;margin:16px 0;"><p style="margin:0;font-size:14px;color:#374151;">${message}</p></div>` : ""}
+              <a href="https://www.grupup.app/groups" style="display:block;background:#DC373E;color:white;text-align:center;padding:14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;margin-top:20px;">Browse Sessions</a>
+            </div>
+          `,
+        });
+      }
+
+      return NextResponse.json({ ok: true, redirect: newSessionUrl, type: "group" });
+    }
+
+    // Create Stripe checkout at the agreed rate (individual)
     const rateStr = proposedRate || request.budget || "";
     const priceNum = parseFloat(rateStr.replace(/[^0-9.]/g, "")) || 0;
     const origin = "https://www.grupup.app";

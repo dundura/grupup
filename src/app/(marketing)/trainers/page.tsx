@@ -5,19 +5,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, Star, MapPin, Users, Calendar, ChevronDown, X, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@clerk/nextjs";
+import FollowButton from "@/components/sessions/FollowButton";
 
 interface TrainerRow {
   id: string; name: string; photo: string; bio: string;
   city: string; state: string; zipCode: string; rating: number; reviewCount: number;
   yearsExperience: number; specialties: string[]; certifications: string[];
   skillLevels: string[]; sports: string[]; sport: string;
-  hourlyRate: number; hasActiveSessions: boolean;
+  hourlyRate: number; hasActiveSessions: boolean; clerkId: string;
 }
 
 const SPORTS = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
 
 export default function TrainersPage() {
+  const { isSignedIn } = useAuth();
   const [allTrainers, setAllTrainers] = useState<TrainerRow[]>([]);
+  const [follows, setFollows] = useState<Record<string, string>>({}); // clerkId → status
   const [loading, setLoading]         = useState(true);
   const [locationInput, setLocation]  = useState("");
   const [sportFilter, setSportFilter] = useState("All Sports");
@@ -32,6 +36,18 @@ export default function TrainersPage() {
       .then((data) => { setAllTrainers(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => { setAllTrainers([]); setLoading(false); });
   }, []);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch("/api/trainer/follow")
+      .then((r) => r.json())
+      .then((rows: { trainerClerkId: string; status: string }[]) => {
+        if (!Array.isArray(rows)) return;
+        const map: Record<string, string> = {};
+        for (const r of rows) map[r.trainerClerkId] = r.status;
+        setFollows(map);
+      }).catch(() => {});
+  }, [isSignedIn]);
 
   const filtered = useMemo(() => {
     let list = allTrainers.filter((t) => {
@@ -172,7 +188,11 @@ export default function TrainersPage() {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filtered.map((t) => <TrainerCard key={t.id} trainer={t} />)}
+            {filtered.map((t) => (
+              <TrainerCard key={t.id} trainer={t}
+                followStatus={t.clerkId ? (follows[t.clerkId] ?? null) : null}
+                isSignedIn={!!isSignedIn} />
+            ))}
           </div>
         )}
       </div>
@@ -203,7 +223,7 @@ function tierStyle(exp: number) {
   return           { bg: "#EFF6FF", color: "#1D4ED8" };
 }
 
-function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
+function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: TrainerRow; followStatus: string | null; isSignedIn: boolean }) {
   const sports      = t.sports?.length ? t.sports : t.sport ? [t.sport] : [];
   const specialties = (t.specialties ?? []).slice(0, 3);
   const bioText     = t.bio?.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() ?? "";
@@ -302,21 +322,31 @@ function TrainerCard({ trainer: t }: { trainer: TrainerRow }) {
         )}
 
         {/* Price + CTA */}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
-          {(t as any).lowestSessionPrice ? (
-            <div>
-              <span className="text-xs text-muted-foreground">Sessions from</span>
+        <div className="mt-auto pt-3 border-t border-gray-100 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            {(t as any).lowestSessionPrice ? (
               <div>
-                <span className="text-xl font-extrabold" style={{ color: "#0F3154" }}>${(t as any).lowestSessionPrice}</span>
-                <span className="text-xs text-muted-foreground ml-1">/ player</span>
+                <span className="text-xs text-muted-foreground">Sessions from</span>
+                <div>
+                  <span className="text-xl font-extrabold" style={{ color: "#0F3154" }}>${(t as any).lowestSessionPrice}</span>
+                  <span className="text-xs text-muted-foreground ml-1">/ player</span>
+                </div>
               </div>
-            </div>
-          ) : <div />}
-          <Link href={`/groups/${t.id}`}
-            className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 shrink-0"
-            style={{ backgroundColor: "#DC373E" }}>
-            Book Now
-          </Link>
+            ) : <div />}
+            <Link href={`/groups/${t.id}`}
+              className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 shrink-0"
+              style={{ backgroundColor: "#DC373E" }}>
+              View Profile
+            </Link>
+          </div>
+          {t.clerkId && (
+            <FollowButton
+              trainerClerkId={t.clerkId}
+              initialIsFollowing={!!followStatus}
+              initialStatus={followStatus}
+              isSignedIn={isSignedIn}
+            />
+          )}
         </div>
       </div>
     </div>

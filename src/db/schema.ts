@@ -182,6 +182,8 @@ export const trainingRequests = pgTable("training_requests", {
   zipCode: varchar("zip_code", { length: 20 }),
   preferredDate: varchar("preferred_date", { length: 20 }),
   preferredTime: varchar("preferred_time", { length: 20 }),
+  trainingType: varchar("training_type", { length: 20 }).default("individual"),
+  groupSize: varchar("group_size", { length: 20 }),
   sessions: varchar("sessions", { length: 20 }),
   budget: varchar("budget", { length: 50 }),
   message: text("message"),
