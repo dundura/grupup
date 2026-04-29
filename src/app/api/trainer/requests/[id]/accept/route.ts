@@ -26,6 +26,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const isGroup = (request as any).trainingType === "group";
 
+    // Mark request as accepted so it leaves the inbox
+    await db.update(trainingRequests).set({ status: "accepted" }).where(eq(trainingRequests.id, requestId));
+
     // Record response
     await db.insert(trainingRequestResponses).values({
       requestId,
