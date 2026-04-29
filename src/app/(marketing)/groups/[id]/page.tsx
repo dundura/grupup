@@ -80,7 +80,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 </p>
               )}
               {trainer.rating != null && (
-                <div className="flex items-center gap-2 mt-2">
+                <div className="hidden lg:flex items-center gap-2 mt-2">
                   <div className="flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} className={`h-4 w-4 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
