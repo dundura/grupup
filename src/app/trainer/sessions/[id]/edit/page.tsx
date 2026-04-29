@@ -54,6 +54,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     discountPct: 0, discountLabel: "",
     startDate: "",
     recurringDates: [] as string[],
+    allowLateBooking: true,
   });
 
   function generateRecurringDates(start: string, weeks: number): string[] {
@@ -114,7 +115,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           discountPct: (s as any).discountPct ?? 0,
           discountLabel: (s as any).discountLabel ?? "",
           startDate: (s as any).startDate ?? "",
-          recurringDates: Array.isArray((s as any).sessionDates) ? (s as any).sessionDates : [],
+          recurringDates: Array.isArray((s as any).sessionDates) && !(s as any).isPlan ? (s as any).sessionDates : [],
+          allowLateBooking: (s as any).allowLateBooking !== false ? true : false,
         });
         setQuestionnaire((s as any).questionnaire ?? null);
         setLoading(false);
@@ -455,6 +457,16 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                       );
                     })}
                   </div>
+                  {/* Allow late booking toggle */}
+                  <label className="flex items-start gap-3 cursor-pointer pt-2 border-t">
+                    <input type="checkbox" checked={form.allowLateBooking}
+                      onChange={(e) => setForm((f) => ({ ...f, allowLateBooking: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 accent-[#DC373E]" />
+                    <div>
+                      <p className="font-semibold text-sm">Allow late joins (pro-rated)</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Players who join after sessions have started pay only for remaining sessions.</p>
+                    </div>
+                  </label>
                 </div>
               )}
             </div>

@@ -195,6 +195,8 @@ export const trainerSessions = pgTable("trainer_sessions", {
   } | null>().default(null),
   startDate: varchar("start_date", { length: 20 }),
   sessionDates: json("session_dates").$type<string[]>().default([]),
+  isPlan: boolean("is_plan").default(false),
+  allowLateBooking: boolean("allow_late_booking").default(true),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -59,9 +59,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       discountPct: body.discountPct ? parseInt(body.discountPct) : 0,
       discountLabel: body.discountLabel ?? "",
       startDate: body.startDate ?? null,
-      sessionDates: Array.isArray(body.recurringDates) && body.recurringDates.length > 0
-        ? body.recurringDates
-        : [],
+      isPlan: body.isPlan ?? false,
+      allowLateBooking: body.allowLateBooking !== false,
+      sessionDates: body.isPlan && Array.isArray(body.planSessions) && body.planSessions.length > 0
+        ? body.planSessions.map((s: { date: string }) => s.date).filter(Boolean)
+        : Array.isArray(body.recurringDates) && body.recurringDates.length > 0
+          ? body.recurringDates
+          : [],
     }).where(and(eq(trainerSessions.id, parseInt(id)), eq(trainerSessions.trainerClerkId, userId)));
     return NextResponse.json({ ok: true });
   } catch (err) {

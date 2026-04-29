@@ -14,6 +14,7 @@ import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 import CopyLinkButton from "@/components/sessions/CopyLinkButton";
 import FollowButton from "@/components/sessions/FollowButton";
 import AddToCalendarButton from "@/components/sessions/AddToCalendarButton";
+import LateBookingRequest from "@/components/sessions/LateBookingRequest";
 import { auth } from "@clerk/nextjs/server";
 import { trainerFollows } from "@/db/schema";
 
@@ -157,16 +158,45 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
                   </div>
                 </div>
-                {isFull ? (
-                  <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
-                    style={{ backgroundColor: "#DC373E" }}>Session Full</div>
-                ) : (
-                  <Link href={`/sessions/${session.id}/book`}
-                    className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
-                    style={{ backgroundColor: "#DC373E" }}>
-                    Reserve My Spot
-                  </Link>
-                )}
+                {(() => {
+                  const sessionDates: string[] = Array.isArray((session as any).sessionDates) ? (session as any).sessionDates : [];
+                  const isPlan = (session as any).isPlan ?? false;
+                  const allowLate = (session as any).allowLateBooking !== false;
+                  const todayStr = new Date().toISOString().split("T")[0];
+                  const remaining = isPlan && sessionDates.length > 0 ? sessionDates.filter((d) => d >= todayStr).length : null;
+                  const total = sessionDates.length;
+                  const hasStarted = remaining !== null && remaining < total;
+
+                  // Pro-rated price display
+                  const planDisc = (n: number) => n >= 8 ? 20 : n >= 6 ? 15 : n >= 4 ? 10 : 5;
+                  const proratedPrice = isPlan && remaining !== null
+                    ? Math.round(session.pricePerPlayer * (1 - planDisc(total) / 100)) * remaining
+                    : null;
+
+                  if (isFull) return (
+                    <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
+                      style={{ backgroundColor: "#DC373E" }}>Session Full</div>
+                  );
+
+                  if (hasStarted && !allowLate) return (
+                    <LateBookingRequest sessionId={session.id} sessionTitle={session.title} />
+                  );
+
+                  return (
+                    <>
+                      {proratedPrice !== null && hasStarted && (
+                        <p className="text-xs text-center text-muted-foreground">
+                          {remaining} of {total} sessions remaining · <span className="font-semibold text-[#0F3154]">${proratedPrice} pro-rated</span>
+                        </p>
+                      )}
+                      <Link href={`/sessions/${session.id}/book`}
+                        className="flex items-center justify-center w-full py-3 rounded-xl text-white font-semibold text-sm"
+                        style={{ backgroundColor: "#DC373E" }}>
+                        Reserve My Spot
+                      </Link>
+                    </>
+                  );
+                })()}
                 <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
                   <Shield className="h-3 w-3" /> Secure · Cancel 24h before
                 </p>

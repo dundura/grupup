@@ -46,6 +46,7 @@ export default function NewSessionPage() {
     recurringDates: [] as string[],
     discountPct: 0,
     discountLabel: "",
+    allowLateBooking: true,
     isPlan: false, planWeeks: "4",
     planSessions: [] as { date: string; time: string }[],
   });
@@ -157,7 +158,7 @@ export default function NewSessionPage() {
           <p className="text-muted-foreground mb-8">Players will start finding your session on the browse page.</p>
           <div className="space-y-3">
             <Button className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => router.push("/dashboard")}>View my dashboard</Button>
-            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", startDate: "", recurringDates: [], discountPct: 0, discountLabel: "", isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
+            <Button variant="outline" className="w-full" onClick={() => { setDone(false); setForm({ title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "", dayOfWeek: "", time: "", duration: "60", ageRanges: [], skillLevel: "", spotsTotal: "6", pricePerPlayer: "30", notes: "", instructions: "", sessionPhoto: "", videoUrl: "", firstClassFree: false, recurring: false, recurringWeeks: "", startDate: "", recurringDates: [], discountPct: 0, discountLabel: "", allowLateBooking: true, isPlan: false, planWeeks: "4", planSessions: [] }); }}>Create another</Button>
           </div>
         </div>
       </div>
@@ -382,6 +383,16 @@ export default function NewSessionPage() {
                       );
                     })}
                   </div>
+                  {/* Allow late booking toggle */}
+                  <label className="flex items-start gap-3 cursor-pointer pt-2 border-t">
+                    <input type="checkbox" checked={form.allowLateBooking}
+                      onChange={(e) => setForm((f) => ({ ...f, allowLateBooking: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 accent-[#DC373E]" />
+                    <div>
+                      <p className="font-semibold text-sm">Allow late joins (pro-rated)</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Players who join after sessions have started pay only for remaining sessions.</p>
+                    </div>
+                  </label>
                 </div>
               )}
             </div>
