@@ -233,6 +233,17 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 <span>2</span><span>20</span>
               </div>
             </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Duration</label>
+              <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="60">1 hr</option>
+                <option value="90">1 hr 30 min</option>
+                <option value="120">2 hr</option>
+                <option value="150">2 hr 30 min</option>
+                <option value="180">3 hr</option>
+              </select>
+            </div>
             {(() => {
               const spots = parseInt(form.spotsTotal) || 1;
               const duration = parseInt(form.duration) || 60;
@@ -536,17 +547,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
                 <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Duration</label>
-              <select value={form.duration} onChange={(e) => set("duration", e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="60">1 hr</option>
-                <option value="90">1 hr 30 min</option>
-                <option value="120">2 hr</option>
-                <option value="150">2 hr 30 min</option>
-                <option value="180">3 hr</option>
-              </select>
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Venue / field name</label>
