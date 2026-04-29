@@ -171,9 +171,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             {/* Trainer card — mobile/tablet only */}
             {trainer && (
               <div className="lg:hidden bg-white rounded-2xl border shadow-sm overflow-hidden">
-                <div className="relative h-52 w-full">
+                <div className="relative h-52 w-full bg-gray-100">
                   {trainer.photo ? (
-                    <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="600px" unoptimized />
+                    <Image src={trainer.photo} alt={trainer.name} fill className="object-contain" sizes="600px" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white"
                       style={{ backgroundColor: "#0F3154" }}>
@@ -485,9 +485,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             {/* Trainer card — desktop only */}
             {trainer && (
               <div className="hidden lg:block bg-white rounded-2xl border shadow-sm overflow-hidden">
-                <div className="relative h-52 w-full">
+                <div className="relative h-52 w-full bg-gray-100">
                   {trainer.photo ? (
-                    <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="320px" unoptimized />
+                    <Image src={trainer.photo} alt={trainer.name} fill className="object-contain" sizes="320px" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white"
                       style={{ backgroundColor: "#0F3154" }}>
