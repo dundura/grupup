@@ -60,14 +60,14 @@ export default function TrainerManagePage() {
       setSessions(sessArr);
       setBookings(Array.isArray(bkgs) ? bkgs : []);
       setFollowers(Array.isArray(fols) ? fols : []);
-      // Load waitlists for sessions that have waitlist enabled
+      // Load waitlists for all sessions
       const wlMap: Record<number, WaitlistEntry[]> = {};
       await Promise.all(sessArr.map(async (s) => {
         try {
           const r = await fetch(`/api/sessions/${s.id}/waitlist`);
           const data = await r.json();
-          if (Array.isArray(data) && data.length > 0) wlMap[s.id] = data;
-        } catch {}
+          wlMap[s.id] = Array.isArray(data) ? data : [];
+        } catch { wlMap[s.id] = []; }
       }));
       setWaitlists(wlMap);
       setLoading(false);
@@ -260,10 +260,13 @@ export default function TrainerManagePage() {
                     )}
 
                     {/* Waitlist */}
-                    {waitlists[s.id]?.length > 0 && (
+                    {s.waitlistEnabled && waitlists[s.id] !== undefined && (
                       <div className="mt-3 pt-3 border-t space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-muted-foreground">{waitlists[s.id].length} on waitlist</p>
+                          <p className="text-xs font-semibold text-muted-foreground">
+                            Waitlist — {waitlists[s.id].length === 0 ? "no signups yet" : `${waitlists[s.id].length} waiting`}
+                          </p>
+                          {waitlists[s.id].length > 0 && (
                           <button type="button"
                             onClick={() => handleNotifyWaitlist(s.id)}
                             disabled={notifying === s.id}
@@ -272,7 +275,9 @@ export default function TrainerManagePage() {
                             <Mail className="h-3 w-3" />
                             {notifying === s.id ? "Sending…" : "Notify — spots open!"}
                           </button>
+                          )}
                         </div>
+                        {waitlists[s.id].length > 0 && (
                         <div className="border rounded-lg overflow-hidden">
                           <table className="w-full text-xs">
                             <thead className="bg-muted/50">
@@ -295,6 +300,7 @@ export default function TrainerManagePage() {
                             </tbody>
                           </table>
                         </div>
+                        )}
                       </div>
                     )}
                   </div>
