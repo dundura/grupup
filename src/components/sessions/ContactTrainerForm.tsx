@@ -19,6 +19,7 @@ export default function ContactTrainerForm({
   defaultMessage?: string;
   ctaLabel?: string;
   ctaStyle?: "outline" | "highlight";
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -60,6 +61,15 @@ export default function ContactTrainerForm({
       </div>
     );
   }
+
+  if (compact && !open) return (
+    <button onClick={() => setOpen(true)} title="Contact Trainer"
+      className="flex flex-col items-center justify-center gap-1 w-full py-2 rounded-xl border transition-colors hover:bg-muted"
+      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+      <MessageSquare className="h-4 w-4" />
+      <span className="text-[10px] font-semibold leading-none">Contact</span>
+    </button>
+  );
 
   return (
     <div>

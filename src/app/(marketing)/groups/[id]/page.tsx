@@ -104,14 +104,14 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
               <div className="p-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-bold">{trainer.name}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-3 w-3 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
-                    ))}
-                    <span className="text-xs text-muted-foreground ml-1">{trainer.rating?.toFixed(1)} · {trainer.reviewCount} reviews</span>
-                  </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`h-3 w-3 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                  ))}
+                  <span className="text-xs text-muted-foreground">{trainer.rating?.toFixed(1)} · {trainer.reviewCount} reviews</span>
+                  {(trainer.yearsExperience ?? 0) > 0 && (
+                    <span className="text-xs text-muted-foreground">· {trainer.yearsExperience} yrs exp</span>
+                  )}
                 </div>
                 {trainer.clerkId && (
                   <FollowButton trainerClerkId={trainer.clerkId} initialIsFollowing={!!followStatus} initialStatus={followStatus} isSignedIn={!!userId} />

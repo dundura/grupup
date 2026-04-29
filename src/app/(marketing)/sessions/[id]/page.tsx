@@ -168,8 +168,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             })()}
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
-            {/* About + Booking side by side */}
-            <div className="grid sm:grid-cols-[1fr_220px] gap-4 items-start">
+            {/* About + Booking + Details grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_220px] gap-4 items-start">
 
               {/* About */}
               <div className="bg-white rounded-2xl border shadow-sm p-5">
@@ -187,8 +187,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
 
-              {/* Booking */}
-              <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
+              {/* Booking — last on mobile, col 2 on desktop */}
+              <div className="order-last sm:order-none sm:row-start-1 sm:col-start-2 bg-white rounded-2xl border shadow-sm p-5 space-y-3">
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className={almostFull ? "font-bold" : "text-muted-foreground"} style={almostFull ? { color: "#DC373E" } : {}}>
@@ -280,10 +280,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
 
-            </div>
-
-            {/* Details 2x2 grid */}
-            <div className="bg-white rounded-2xl border shadow-sm p-5">
+              {/* Details 2x2 — spans full width below both columns on desktop */}
+              <div className="sm:col-span-2 bg-white rounded-2xl border shadow-sm p-5">
               <div className="grid grid-cols-2 gap-0 divide-x divide-y divide-gray-100">
                 {/* Date/Time */}
                 <div className="p-4 pl-0 pt-0">
@@ -456,25 +454,29 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                   <div className="text-xs text-muted-foreground space-y-1">
                     {(trainer.yearsExperience ?? 0) > 0 && <p>· {trainer.yearsExperience} yrs exp</p>}
                   </div>
-                  <ContactTrainerForm
-                    sessionId={session.id}
-                    sessionTitle={session.title}
-                    trainerName={trainer.name ?? "Trainer"}
-                  />
-                  <Link href={`/groups/${trainer.id}`}
-                    className="block text-center text-sm font-semibold py-2.5 rounded-lg border mt-2 hover:bg-muted transition-colors"
-                    style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                    View trainer profile
-                  </Link>
-                  <AddToCalendarButton
-                    title={session.title}
-                    dayOfWeek={session.dayOfWeek ?? ""}
-                    time={session.time ?? ""}
-                    durationMin={session.duration ?? 60}
-                    location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""}
-                    description={session.notes ?? undefined}
-                  />
-                  <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
+                  {/* Mobile: icon row */}
+                  <div className="grid grid-cols-4 gap-2 sm:hidden">
+                    <ContactTrainerForm sessionId={session.id} sessionTitle={session.title} trainerName={trainer.name ?? "Trainer"} compact />
+                    <Link href={`/groups/${trainer.id}`} title="View trainer profile"
+                      className="flex flex-col items-center justify-center gap-1 w-full py-2 rounded-xl border hover:bg-muted transition-colors"
+                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                      <Users className="h-4 w-4" />
+                      <span className="text-[10px] font-semibold leading-none">Profile</span>
+                    </Link>
+                    <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} compact />
+                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} compact />
+                  </div>
+                  {/* Desktop: stacked buttons */}
+                  <div className="hidden sm:block space-y-2">
+                    <ContactTrainerForm sessionId={session.id} sessionTitle={session.title} trainerName={trainer.name ?? "Trainer"} />
+                    <Link href={`/groups/${trainer.id}`}
+                      className="block text-center text-sm font-semibold py-2.5 rounded-lg border hover:bg-muted transition-colors"
+                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                      View trainer profile
+                    </Link>
+                    <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} />
+                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
+                  </div>
                 </div>
               </div>
             )}

@@ -44,6 +44,7 @@ export default function AddToCalendarButton({
   durationMin: number;
   location: string;
   description?: string;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -105,11 +106,16 @@ export default function AddToCalendarButton({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted"
+        className={compact
+          ? "flex flex-col items-center justify-center gap-1 w-full py-2 rounded-xl border transition-colors hover:bg-muted"
+          : "flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold border transition-colors hover:bg-muted"
+        }
         style={{ color: "#0F3154", borderColor: "#0F3154" }}>
         <CalendarDays className="h-4 w-4" />
-        Add to Calendar
-        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+        {compact
+          ? <span className="text-[10px] font-semibold leading-none">Calendar</span>
+          : <><span>Add to Calendar</span><ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} /></>
+        }
       </button>
 
       {open && (

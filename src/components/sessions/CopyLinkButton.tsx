@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link2, Check } from "lucide-react";
 
-export default function CopyLinkButton({ url }: { url: string }) {
+export default function CopyLinkButton({ url, compact }: { url: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -11,6 +11,15 @@ export default function CopyLinkButton({ url }: { url: string }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
+
+  if (compact) return (
+    <button onClick={handleCopy} title="Invite Friends"
+      className="flex flex-col items-center justify-center gap-1 w-full py-2 rounded-xl border transition-colors hover:bg-muted"
+      style={{ color: copied ? "#16a34a" : "#0F3154", borderColor: "#0F3154" }}>
+      {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+      <span className="text-[10px] font-semibold leading-none">{copied ? "Copied!" : "Invite"}</span>
+    </button>
+  );
 
   return (
     <button
