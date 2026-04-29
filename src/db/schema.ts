@@ -171,6 +171,13 @@ export const trainerFollows = pgTable("trainer_follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const sessionReminders = pgTable("session_reminders", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").notNull(),
+  sessionDate: varchar("session_date", { length: 20 }).notNull(), // "2026-04-29" or "recurring-Sat"
+  sentAt: timestamp("sent_at").defaultNow(),
+});
+
 export const trainerSessions = pgTable("trainer_sessions", {
   id: serial("id").primaryKey(),
   trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
