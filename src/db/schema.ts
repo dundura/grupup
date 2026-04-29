@@ -154,6 +154,15 @@ export const playerFollows = pgTable("player_follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const sessionWaitlist = pgTable("session_waitlist", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull(),
+  clerkUserId: varchar("clerk_user_id", { length: 255 }),
+  userName: varchar("user_name", { length: 200 }),
+  userEmail: varchar("user_email", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const trainerFollows = pgTable("trainer_follows", {
   id: serial("id").primaryKey(),
   followerClerkId: varchar("follower_clerk_id", { length: 255 }).notNull(),
@@ -197,6 +206,7 @@ export const trainerSessions = pgTable("trainer_sessions", {
   sessionDates: json("session_dates").$type<Array<{ date: string; time: string }>>().default([]),
   isPlan: boolean("is_plan").default(false),
   allowLateBooking: boolean("allow_late_booking").default(true),
+  waitlistEnabled: boolean("waitlist_enabled").default(false),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

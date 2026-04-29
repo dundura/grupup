@@ -56,6 +56,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     startDate: "",
     recurringDates: [] as { date: string; time: string }[],
     allowLateBooking: true,
+    waitlistEnabled: false,
   });
 
   function generateRecurringDates(start: string, weeks: number, defaultTime = ""): { date: string; time: string }[] {
@@ -117,6 +118,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           discountLabel: (s as any).discountLabel ?? "",
           startDate: (s as any).startDate ?? "",
           allowLateBooking: (s as any).allowLateBooking !== false ? true : false,
+          waitlistEnabled: (s as any).waitlistEnabled ?? false,
           recurringDates: (() => {
             const stored = Array.isArray((s as any).sessionDates) && !(s as any).isPlan ? (s as any).sessionDates : [];
             if (stored.length > 0) {
@@ -335,6 +337,17 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 </div>
               </label>
             </div>
+
+            {/* Waitlist */}
+            <label className="flex items-start gap-3 cursor-pointer pt-2 border-t">
+              <input type="checkbox" checked={form.waitlistEnabled}
+                onChange={(e) => setForm((f) => ({ ...f, waitlistEnabled: e.target.checked }))}
+                className="mt-0.5 h-4 w-4 accent-[#0F3154]" />
+              <div>
+                <p className="font-semibold text-sm">Enable waitlist</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Players sign up with no charge. Once you have enough interest, open it for booking — they'll get an email to pay.</p>
+              </div>
+            </label>
 
             {/* Recurring + Package toggles */}
             <div className="border-t pt-3 space-y-3">

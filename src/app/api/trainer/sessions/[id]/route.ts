@@ -61,6 +61,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       startDate: body.startDate ?? null,
       isPlan: body.isPlan ?? false,
       allowLateBooking: body.allowLateBooking !== false,
+      waitlistEnabled: body.waitlistEnabled ?? false,
       sessionDates: body.isPlan && Array.isArray(body.planSessions) && body.planSessions.length > 0
         ? body.planSessions.map((s: { date: string }) => s.date).filter(Boolean)
         : Array.isArray(body.recurringDates) && body.recurringDates.length > 0

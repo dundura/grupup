@@ -7,14 +7,15 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
-import { trainerSessions, trainers, bookings } from "@/db/schema";
-import { eq, and, ne } from "drizzle-orm";
+import { trainerSessions, trainers, bookings, sessionWaitlist } from "@/db/schema";
+import { eq, and, ne, count } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
 import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 import CopyLinkButton from "@/components/sessions/CopyLinkButton";
 import FollowButton from "@/components/sessions/FollowButton";
 import AddToCalendarButton from "@/components/sessions/AddToCalendarButton";
 import LateBookingRequest from "@/components/sessions/LateBookingRequest";
+import JoinWaitlistButton from "@/components/sessions/JoinWaitlistButton";
 import { auth } from "@clerk/nextjs/server";
 import { trainerFollows } from "@/db/schema";
 
@@ -56,6 +57,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let attendees: { userName: string | null }[] = [];
   let isFollowing = false;
   let currentUserId: string | null = null;
+  let waitlistCount = 0;
 
   try {
     const { userId } = await auth();
@@ -90,6 +92,10 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       );
       isFollowing = !!follow;
     }
+
+    // Waitlist count
+    const [{ value: wCount }] = await db.select({ value: count() }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+    waitlistCount = wCount ?? 0;
 
     // Get trainer email from Clerk
     try {
@@ -189,6 +195,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     ? Math.round(session.pricePerPlayer * (1 - planDisc(total) / 100)) * remaining
                     : null;
 
+                  const waitlistOn = (session as any).waitlistEnabled ?? false;
+
+                  // Waitlist mode — no booking yet
+                  if (waitlistOn) return (
+                    <JoinWaitlistButton sessionId={session.id} sessionTitle={session.title} waitlistCount={waitlistCount} />
+                  );
+
                   if (isFull) return (
                     <div className="w-full py-3 rounded-xl text-center text-sm font-semibold text-white opacity-60 cursor-not-allowed"
                       style={{ backgroundColor: "#DC373E" }}>Session Full</div>
@@ -198,8 +211,22 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     <LateBookingRequest sessionId={session.id} sessionTitle={session.title} />
                   );
 
+                  // Show discount preview before checkout
+                  const discPct = (session as any).discountPct ?? 0;
+                  const discLabel = (session as any).discountLabel ?? "";
+                  const displayPrice = discPct > 0
+                    ? Math.round(session.pricePerPlayer * (1 - discPct / 100))
+                    : session.pricePerPlayer;
+
                   return (
                     <>
+                      {discPct > 0 && (
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground line-through">${session.pricePerPlayer}/player</p>
+                          <p className="text-lg font-extrabold" style={{ color: "#DC373E" }}>${displayPrice}/player</p>
+                          {discLabel && <p className="text-xs font-semibold" style={{ color: "#DC373E" }}>{discLabel}</p>}
+                        </div>
+                      )}
                       {proratedPrice !== null && hasStarted && (
                         <p className="text-xs text-center text-muted-foreground">
                           {remaining} of {total} sessions remaining · <span className="font-semibold text-[#0F3154]">${proratedPrice} pro-rated</span>
@@ -244,14 +271,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       <p className="flex items-center gap-1.5 font-medium"><CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />{session.dayOfWeek}s at {session.time}</p>
                     ) : <p className="text-muted-foreground text-sm">—</p>}
                     {session.duration && (
-                      session.duration > 60 ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
-                          <Clock className="h-3 w-3 shrink-0" />
-                          {session.duration >= 60 ? `${Math.floor(session.duration / 60)} hr${session.duration % 60 > 0 ? ` ${session.duration % 60} min` : ""}` : `${session.duration} min`}
-                        </span>
-                      ) : (
-                        <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs"><Clock className="h-3.5 w-3.5 shrink-0" />{session.duration} min</p>
-                      )
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full text-white`}
+                        style={{ backgroundColor: session.duration > 60 ? "#DC373E" : "#0F3154" }}>
+                        <Clock className="h-3 w-3 shrink-0" />
+                        {session.duration >= 60
+                          ? `${Math.floor(session.duration / 60)} hr${session.duration % 60 > 0 ? ` ${session.duration % 60} min` : ""}`
+                          : `${session.duration} min`}
+                      </span>
                     )}
                   </div>
                 </div>

@@ -12,6 +12,10 @@ import { ChevronDown, ChevronUp, Mail, Users, RefreshCw, X, RotateCcw } from "lu
 interface Session {
   id: number; title: string; sport: string; city: string;
   dayOfWeek: string; time: string; spotsTotal: number; spotsLeft: number;
+  waitlistEnabled?: boolean;
+}
+interface WaitlistEntry {
+  id: number; sessionId: number; userName: string | null; userEmail: string; createdAt: string;
 }
 
 interface Booking {
@@ -32,6 +36,8 @@ export default function TrainerManagePage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [followers, setFollowers] = useState<Follower[]>([]);
+  const [waitlists, setWaitlists] = useState<Record<number, WaitlistEntry[]>>({});
+  const [notifying, setNotifying] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [modal, setModal] = useState<Modal>(null);
@@ -48,13 +54,36 @@ export default function TrainerManagePage() {
       fetch("/api/trainer/sessions").then((r) => r.json()),
       fetch("/api/trainer/bookings").then((r) => r.json()),
       fetch("/api/trainer/message-followers").then((r) => r.json()),
-    ]).then(([sess, bkgs, fols]) => {
-      setSessions(Array.isArray(sess) ? sess : []);
+    ]).then(async ([sess, bkgs, fols]) => {
+      const sessArr: Session[] = Array.isArray(sess) ? sess : [];
+      setSessions(sessArr);
       setBookings(Array.isArray(bkgs) ? bkgs : []);
       setFollowers(Array.isArray(fols) ? fols : []);
+      // Load waitlists for sessions that have waitlist enabled
+      const wlMap: Record<number, WaitlistEntry[]> = {};
+      await Promise.all(sessArr.map(async (s) => {
+        try {
+          const r = await fetch(`/api/sessions/${s.id}/waitlist`);
+          const data = await r.json();
+          if (Array.isArray(data) && data.length > 0) wlMap[s.id] = data;
+        } catch {}
+      }));
+      setWaitlists(wlMap);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [isLoaded, isSignedIn, router]);
+
+  async function handleNotifyWaitlist(sessionId: number) {
+    if (!confirm("Email everyone on the waitlist that booking is now open?")) return;
+    setNotifying(sessionId);
+    try {
+      const res = await fetch(`/api/trainer/sessions/${sessionId}/notify-waitlist`, { method: "POST" });
+      const d = await res.json();
+      alert(`Sent to ${d.sent} ${d.sent === 1 ? "person" : "people"} on the waitlist.`);
+    } finally {
+      setNotifying(null);
+    }
+  }
 
   async function handleRefund(bookingId: number) {
     if (!confirm("Refund this booking? This cannot be undone.")) return;
@@ -194,6 +223,45 @@ export default function TrainerManagePage() {
                     )}
                     {roster.length === 0 && (
                       <p className="text-xs text-muted-foreground mt-1.5">No registrations yet.</p>
+                    )}
+
+                    {/* Waitlist */}
+                    {waitlists[s.id]?.length > 0 && (
+                      <div className="mt-3 pt-3 border-t space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-muted-foreground">{waitlists[s.id].length} on waitlist</p>
+                          <button type="button"
+                            onClick={() => handleNotifyWaitlist(s.id)}
+                            disabled={notifying === s.id}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                            style={{ backgroundColor: "#DC373E" }}>
+                            <Mail className="h-3 w-3" />
+                            {notifying === s.id ? "Sending…" : "Notify — spots open!"}
+                          </button>
+                        </div>
+                        <div className="border rounded-lg overflow-hidden">
+                          <table className="w-full text-xs">
+                            <thead className="bg-muted/50">
+                              <tr>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Name</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Email</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {waitlists[s.id].map((w) => (
+                                <tr key={w.id} className="border-t">
+                                  <td className="px-3 py-2 font-medium">{w.userName || "—"}</td>
+                                  <td className="px-3 py-2 text-muted-foreground">{w.userEmail}</td>
+                                  <td className="px-3 py-2 text-muted-foreground">
+                                    {new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     )}
                   </div>
                 );
