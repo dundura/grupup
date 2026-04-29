@@ -8,7 +8,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { trainerSessions, trainers, bookings, sessionWaitlist } from "@/db/schema";
-import { eq, and, ne, count } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
+import { count } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
 import ContactTrainerForm from "@/components/sessions/ContactTrainerForm";
 import CopyLinkButton from "@/components/sessions/CopyLinkButton";
@@ -94,8 +95,10 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
     }
 
     // Waitlist count
-    const [{ value: wCount }] = await db.select({ value: count() }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
-    waitlistCount = wCount ?? 0;
+    try {
+      const [wRow] = await db.select({ value: count() }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+      waitlistCount = (wRow?.value as number) ?? 0;
+    } catch {}
 
     // Get trainer email from Clerk
     try {
