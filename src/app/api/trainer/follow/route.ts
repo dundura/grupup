@@ -29,20 +29,36 @@ export async function POST(req: NextRequest) {
 
   await db.insert(trainerFollows).values({ followerClerkId: userId, trainerClerkId, status: "pending" });
 
-  // Notify trainer of follow request
+  // Notify trainer of follow request with full follower profile
   try {
     const client = await clerkClient();
     const [follower, trainerUser] = await Promise.all([
       client.users.getUser(userId),
       client.users.getUser(trainerClerkId),
     ]);
-    const followerName = `${follower.firstName ?? ""} ${follower.lastName ?? ""}`.trim() || "Someone";
+    const meta = follower.publicMetadata as {
+      playerName?: string; sports?: string[]; skillLevel?: string;
+      city?: string; bio?: string; slug?: string;
+    };
+    const followerName = meta.playerName?.trim()
+      || `${follower.firstName ?? ""} ${follower.lastName ?? ""}`.trim()
+      || "Someone";
     const trainerEmail = trainerUser.emailAddresses?.[0]?.emailAddress ?? "";
     const [trainerProfile] = await db.select({ name: trainers.name }).from(trainers).where(eq(trainers.clerkId, trainerClerkId));
-    const trainerName = trainerProfile?.name ?? trainerUser.firstName ?? "Trainer";
+    const trainerName = trainerProfile?.name || `${trainerUser.firstName ?? ""} ${trainerUser.lastName ?? ""}`.trim() || "Trainer";
 
     if (trainerEmail) {
-      await sendTrainerNewFollower({ trainerEmail, trainerName, followerName });
+      await sendTrainerNewFollower({
+        trainerEmail,
+        trainerName,
+        followerName,
+        followerPhoto: follower.imageUrl ?? undefined,
+        followerSports: meta.sports ?? [],
+        followerLevel: meta.skillLevel ?? undefined,
+        followerCity: meta.city ?? undefined,
+        followerBio: meta.bio ?? undefined,
+        followerProfileId: meta.slug ?? userId,
+      });
     }
   } catch (err) {
     console.error("[follow] email error:", err);

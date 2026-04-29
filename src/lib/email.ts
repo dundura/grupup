@@ -115,26 +115,66 @@ export async function sendTrainerNewFollower({
   trainerEmail,
   trainerName,
   followerName,
+  followerPhoto,
+  followerSports,
+  followerLevel,
+  followerCity,
+  followerBio,
+  followerProfileId,
 }: {
   trainerEmail: string;
   trainerName: string;
   followerName: string;
+  followerPhoto?: string;
+  followerSports?: string[];
+  followerLevel?: string;
+  followerCity?: string;
+  followerBio?: string;
+  followerProfileId?: string;
 }) {
   if (!process.env.RESEND_API_KEY) return;
+  const sports = (followerSports ?? []).join(" · ");
+  const profileUrl = followerProfileId
+    ? `https://www.grupup.app/connect/${followerProfileId}`
+    : "https://www.grupup.app/dashboard";
+
   await getResend().emails.send({
     from: FROM,
     to: trainerEmail,
     bcc: ADMIN_BCC,
-    subject: `${followerName} is now following you on GrupUp`,
+    subject: `${followerName} wants to follow you on GrupUp`,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
-        <h1 style="color: #0F3154; margin: 0 0 8px;">New follower! 🎉</h1>
-        <p style="color: #6b7280; margin: 0 0 24px;">
-          <strong>${followerName}</strong> is now following you on GrupUp. They'll be notified whenever you post a new session.
-        </p>
-        <a href="https://grupup.app/dashboard" style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-          View Dashboard
-        </a>
+        <div style="background: #0F3154; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">New follow request 👋</h1>
+          <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Someone wants to follow you on GrupUp</p>
+        </div>
+
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+          <div style="background: #0F3154; padding: 20px 24px; text-align: center;">
+            ${followerPhoto
+              ? `<img src="${followerPhoto}" alt="${followerName}" width="80" height="80" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.3);margin-bottom:12px;" />`
+              : `<div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:800;color:white;">${followerName[0]?.toUpperCase() ?? "?"}</div>`
+            }
+            <div style="color:white;font-size:18px;font-weight:700;letter-spacing:0.5px;">${followerName.toUpperCase()}</div>
+            ${followerCity ? `<div style="color:rgba(255,255,255,0.65);font-size:13px;margin-top:4px;">📍 ${followerCity}</div>` : ""}
+            ${sports ? `<div style="color:rgba(255,255,255,0.65);font-size:13px;margin-top:4px;">${sports}</div>` : ""}
+            ${followerLevel ? `<div style="display:inline-block;background:rgba(255,255,255,0.15);color:white;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-top:8px;">${followerLevel}</div>` : ""}
+          </div>
+          ${followerBio ? `<div style="padding:16px 20px;background:white;"><p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">${followerBio}</p></div>` : ""}
+        </div>
+
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <a href="https://www.grupup.app/dashboard"
+            style="flex:1;display:block;background:#0F3154;color:white;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+            Approve Request
+          </a>
+          <a href="${profileUrl}"
+            style="flex:1;display:block;background:white;color:#0F3154;text-align:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;border:2px solid #0F3154;">
+            View Profile
+          </a>
+        </div>
+        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">Go to your dashboard to approve or deny this request.</p>
       </div>
     `,
   });
