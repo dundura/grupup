@@ -41,6 +41,10 @@ export default function DashboardPage() {
   const [stripeError, setStripeError] = useState("");
   const [followRequests, setFollowRequests] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [trainerFollowRequests, setTrainerFollowRequests] = useState<{ id: number; followerClerkId: string; name: string; photo: string }[]>([]);
+  const [trainingRequests, setTrainingRequests] = useState<Array<{
+    id: number; playerName: string; playerEmail: string; sport?: string; level?: string;
+    city?: string; preferredDate?: string; sessions?: string; budget?: string; message?: string; createdAt: string;
+  }>>([]);
   const [followers, setFollowers] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
   const [playerBookings, setPlayerBookings] = useState<Array<{
@@ -77,11 +81,13 @@ export default function DashboardPage() {
         fetch("/api/trainer/bookings").then((r) => r.json()),
         fetch("/api/trainer/stripe/status").then((r) => r.json()),
         fetch("/api/trainer/follow-requests").then((r) => r.json()),
-      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs]) => {
+        fetch("/api/training-requests").then((r) => r.json()).catch(() => []),
+      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs, tRequests]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
         setTrainerFollowRequests(Array.isArray(trainerReqs) ? trainerReqs : []);
+        if (Array.isArray(tRequests)) setTrainingRequests(tRequests);
         setIsArchived(profile?.isArchived ?? false);
         setStripeConnected(stripeStatus?.connected ?? false);
         setLoading(false);
@@ -855,6 +861,50 @@ export default function DashboardPage() {
                       className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-50 hover:text-red-600 hover:border-red-200">
                       Deny
                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Trainer: Training Requests inbox */}
+        {role === "trainer" && trainingRequests.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base font-bold">Training Requests</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Players near you looking for a trainer</p>
+              </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                {trainingRequests.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {trainingRequests.map((r) => (
+                <div key={r.id} className="border rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm">{r.playerName}</p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-1">
+                        {r.sport && <span>{r.sport}</span>}
+                        {r.level && <span>{r.level}</span>}
+                        {r.city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{r.city}</span>}
+                        {r.sessions && <span>{r.sessions} session{r.sessions !== "1" ? "s" : ""}</span>}
+                        {r.budget && <span className="font-semibold text-green-700">{r.budget}/session</span>}
+                      </div>
+                      {r.preferredDate && (
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <CalendarDays className="h-3 w-3" />{r.preferredDate}
+                        </p>
+                      )}
+                      {r.message && <p className="text-xs text-muted-foreground mt-1 italic">"{r.message}"</p>}
+                    </div>
+                    <Link href={`/trainer/requests/${r.id}/accept`}
+                      className="shrink-0 px-4 py-2 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: "#DC373E" }}>
+                      Accept
+                    </Link>
                   </div>
                 </div>
               ))}

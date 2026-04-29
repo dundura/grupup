@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 
 const findLinks = [
-  { href: "/groups",    label: "Group Sessions", desc: "Browse trainer-led group sessions near you" },
-  { href: "/trainers",  label: "Trainers",        desc: "Find and connect with coaches in your area" },
-  { href: "/free-play", label: "Free Play",        desc: "Join pickup games and scrimmages"           },
+  { href: "/groups",    label: "Group Sessions",   desc: "Browse trainer-led group sessions near you" },
+  { href: "/trainers",  label: "Trainers",          desc: "Find and connect with coaches in your area" },
+  { href: "/request",   label: "Request Training",  desc: "Post a request — local trainers respond"   },
+  { href: "/free-play", label: "Free Play",          desc: "Join pickup games and scrimmages"           },
 ];
 
 const otherLinks = [
