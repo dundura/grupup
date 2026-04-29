@@ -89,11 +89,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       .where(and(eq(bookings.sessionId, String(sessionId)), eq(bookings.status, "paid")));
 
     if (userId) {
-      const [follow] = await db.select().from(trainerFollows).where(
-        and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, session.trainerClerkId))
-      );
-      isFollowing = !!follow;
-      followStatus = follow?.status ?? null;
+      try {
+        const [follow] = await db.select().from(trainerFollows).where(
+          and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, session.trainerClerkId))
+        );
+        isFollowing = !!follow;
+        followStatus = (follow as any)?.status ?? null;
+      } catch {}
     }
 
     // Waitlist count

@@ -18,6 +18,7 @@ interface Session {
   spotsLeft: number; skillLevel: string; ageRange: string; notes: string;
   recurring: boolean; recurringWeeks: number | null;
   discountPct?: number; discountLabel?: string;
+  sessionDates?: Array<{ date: string; time: string }>;
 }
 interface Trainer {
   id: string; name: string; photo: string; bio: string; city: string;
@@ -54,6 +55,13 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
   const [sessionCount, setSessionCount] = useState(1);
   const maxSessions = session.recurringWeeks ?? (session.recurring ? 8 : 1);
 
+  // Date selection for session series
+  const today = new Date().toISOString().split("T")[0];
+  const upcomingDates = (session.sessionDates ?? []).filter((d) => d.date >= today);
+  const hasDates = upcomingDates.length > 0 && session.recurring;
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const effectiveCount = hasDates ? selectedDates.length : sessionCount;
+
   function setF(k: keyof typeof form, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
   const typeName = session.sessionType.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -77,7 +85,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
           email: form.email,
           phone: form.phone,
           notes: form.notes,
-          sessionCount,
+          sessionCount: effectiveCount || 1,
           password: !user ? form.password : undefined,
         }),
       });
@@ -263,37 +271,68 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
               </div>
             )}
 
-            {/* Step 3: Schedule */}
+            {/* Step 3: Schedule / Date selection */}
             {step === 3 && (
               <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <h2 className="text-lg font-bold mb-5">Confirm Schedule</h2>
+                <h2 className="text-lg font-bold mb-5">{hasDates ? "Choose Your Dates" : "Confirm Schedule"}</h2>
 
-                <div className="rounded-xl bg-[#f0f4f9] p-5 space-y-3 mb-5">
-                  {session.dayOfWeek && session.time && (
-                    <div className="flex items-start gap-3">
-                      <CalendarDays className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
-                      <div>
-                        <p className="font-semibold text-sm">{session.dayOfWeek}s at {session.time}</p>
-                        <p className="text-xs text-muted-foreground">Recurring weekly session</p>
+                {hasDates ? (
+                  <div className="space-y-2 mb-5">
+                    <p className="text-sm text-muted-foreground mb-3">Select the sessions you want to attend — you'll only pay for what you pick.</p>
+                    {upcomingDates.map((d) => {
+                      const checked = selectedDates.includes(d.date);
+                      const label = new Date(d.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+                      const timeLabel = d.time || session.time;
+                      return (
+                        <label key={d.date}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${checked ? "border-[#0F3154] bg-[#f0f4f9]" : "border-gray-200"}`}>
+                          <input type="checkbox" checked={checked} className="h-4 w-4 accent-[#0F3154]"
+                            onChange={() => setSelectedDates((prev) =>
+                              prev.includes(d.date) ? prev.filter((x) => x !== d.date) : [...prev, d.date]
+                            )} />
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">{label}</p>
+                            {timeLabel && <p className="text-xs text-muted-foreground">{timeLabel} · {session.duration} min</p>}
+                          </div>
+                          <p className="text-sm font-bold" style={{ color: "#0F3154" }}>${displayPrice}</p>
+                        </label>
+                      );
+                    })}
+                    {selectedDates.length > 0 && (
+                      <div className="mt-3 p-3 rounded-xl bg-[#f0f4f9] flex justify-between text-sm font-bold">
+                        <span>{selectedDates.length} session{selectedDates.length > 1 ? "s" : ""} selected</span>
+                        <span style={{ color: "#0F3154" }}>${displayPrice * selectedDates.length} total</span>
                       </div>
-                    </div>
-                  )}
-                  {session.duration && (
-                    <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 shrink-0" style={{ color: "#0F3154" }} />
-                      <p className="font-semibold text-sm">{session.duration} minutes</p>
-                    </div>
-                  )}
-                  {(session.venue || session.city) && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
-                      <div>
-                        {session.venue && <p className="font-semibold text-sm">{session.venue}</p>}
-                        <p className="text-sm text-muted-foreground">{session.city}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-[#f0f4f9] p-5 space-y-3 mb-5">
+                    {session.dayOfWeek && session.time && (
+                      <div className="flex items-start gap-3">
+                        <CalendarDays className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
+                        <div>
+                          <p className="font-semibold text-sm">{session.dayOfWeek}s at {session.time}</p>
+                          <p className="text-xs text-muted-foreground">Recurring weekly session</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                    {session.duration && (
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 shrink-0" style={{ color: "#0F3154" }} />
+                        <p className="font-semibold text-sm">{session.duration} minutes</p>
+                      </div>
+                    )}
+                    {(session.venue || session.city) && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
+                        <div>
+                          {session.venue && <p className="font-semibold text-sm">{session.venue}</p>}
+                          <p className="text-sm text-muted-foreground">{session.city}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="mb-5">
                   <label className="text-sm font-medium mb-1.5 block">Notes for the coach <span className="text-muted-foreground font-normal">(optional)</span></label>
@@ -308,7 +347,8 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     Back
                   </button>
                   <button onClick={() => setStep(4)}
-                    className="flex-1 py-3 rounded-xl text-white font-semibold text-sm"
+                    disabled={hasDates && selectedDates.length === 0}
+                    className="flex-1 py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-50"
                     style={{ backgroundColor: "#0F3154" }}>
                     Next Step <ChevronRight className="h-4 w-4 inline ml-1" />
                   </button>
