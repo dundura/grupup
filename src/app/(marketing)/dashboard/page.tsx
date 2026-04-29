@@ -233,6 +233,18 @@ export default function DashboardPage() {
     return t.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  function nextClassDate(dayOfWeek: string): string {
+    if (!dayOfWeek) return "";
+    const days: Record<string, number> = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+    const target = days[dayOfWeek.toLowerCase()];
+    if (target === undefined) return "";
+    const now = new Date();
+    const diff = (target - now.getDay() + 7) % 7 || 7;
+    const next = new Date(now);
+    next.setDate(now.getDate() + diff);
+    return next.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+
   const isPending = role === "trainer" && trainerProfile && !trainerProfile.isApproved;
 
   return (
@@ -951,7 +963,7 @@ export default function DashboardPage() {
                           {b.status === "refunded" ? <span className="line-through">${b.amountPaid}</span> : `$${b.amountPaid}`}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          {b.dayOfWeek ? nextClassDate(b.dayOfWeek) : new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </p>
                         {b.status === "refunded" ? (
                           <span className="inline-block mt-1.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
