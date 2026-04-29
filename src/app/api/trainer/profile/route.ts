@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
             <p><strong>City:</strong> ${body.city || "—"}, ${body.state || ""}</p>
             <p><strong>Sports:</strong> ${(body.sports ?? []).join(", ") || "—"}</p>
             <p style="margin-top:20px;">
-              <a href="https://grupup.app/admin" style="background:#DC373E;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Review in Admin</a>
+              <a href="https://www.grupup.app/admin" style="background:#DC373E;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Review in Admin</a>
             </p>
           </div>
         `,

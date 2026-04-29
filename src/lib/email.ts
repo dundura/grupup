@@ -52,13 +52,13 @@ export async function sendBookingConfirmation({
           </table>
         </div>
 
-        <a href="https://grupup.com/bookings"
+        <a href="https://www.grupup.app/bookings"
           style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
           View My Bookings
         </a>
 
         <p style="margin-top: 24px; font-size: 13px; color: #9ca3af; text-align: center;">
-          Questions? Reply to this email or visit <a href="https://grupup.com" style="color: #0F3154;">grupup.com</a>
+          Questions? Reply to this email or visit <a href="https://www.grupup.app" style="color: #0F3154;">www.grupup.app</a>
         </p>
       </div>
     `,
@@ -98,7 +98,7 @@ export async function sendWelcomeEmail({
           </ol>
         </div>
 
-        <a href="https://grupup.app/groups"
+        <a href="https://www.grupup.app/groups"
           style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 24px;">
           Find a Session Near You
         </a>
@@ -552,7 +552,7 @@ export async function sendTrainerNewBooking({
         <div style="background: #f0f4f9; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
           <p style="margin: 0; font-size: 14px; color: #0F3154;"><strong>Amount:</strong> $${amount} (you receive $${Math.round(amount * 0.85)} after platform fee)</p>
         </div>
-        <a href="https://grupup.com/dashboard" style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600;">View Dashboard</a>
+        <a href="https://www.grupup.app/dashboard" style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600;">View Dashboard</a>
       </div>
     `,
   });
