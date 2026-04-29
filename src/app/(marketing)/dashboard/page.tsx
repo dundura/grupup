@@ -47,7 +47,7 @@ export default function DashboardPage() {
     id: number; sessionTitle: string; trainerName: string;
     dayOfWeek: string; time: string; city: string; venue: string;
     athleteName: string; amountPaid: number; sessionCount: number;
-    bookingType: string; createdAt: string;
+    bookingType: string; status: string; createdAt: string;
   }>>([]);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
   const [cancelConfirmModal, setCancelConfirmModal] = useState<{ id: number; title: string; amount: number } | null>(null);
@@ -167,7 +167,7 @@ export default function DashboardPage() {
       const res = await fetch(`/api/player/bookings/${cancelConfirmModal.id}/cancel`, { method: "POST" });
       const d = await res.json();
       if (d.ok) {
-        setPlayerBookings((prev) => prev.filter((b) => b.id !== cancelConfirmModal.id));
+        setPlayerBookings((prev) => prev.map((b) => b.id === cancelConfirmModal.id ? { ...b, status: "refunded" } : b));
       } else {
         alert(d.error ?? "Cancellation failed. Please contact support.");
       }
@@ -947,16 +947,24 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold" style={{ color: "#0F3154" }}>${b.amountPaid}</p>
+                        <p className="text-sm font-bold" style={{ color: b.status === "refunded" ? "#9ca3af" : "#0F3154" }}>
+                          {b.status === "refunded" ? <span className="line-through">${b.amountPaid}</span> : `$${b.amountPaid}`}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </p>
-                        <button
-                          onClick={() => handleCancelBooking(b.id, b.createdAt, b.sessionTitle, b.amountPaid)}
-                          disabled={cancellingBooking === b.id}
-                          className="mt-1.5 text-xs text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50">
-                          {cancellingBooking === b.id ? "Cancelling…" : "Cancel"}
-                        </button>
+                        {b.status === "refunded" ? (
+                          <span className="inline-block mt-1.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                            Refunded
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleCancelBooking(b.id, b.createdAt, b.sessionTitle, b.amountPaid)}
+                            disabled={cancellingBooking === b.id}
+                            className="mt-1.5 text-xs text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50">
+                            {cancellingBooking === b.id ? "Cancelling…" : "Cancel"}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

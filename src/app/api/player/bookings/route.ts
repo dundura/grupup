@@ -13,7 +13,7 @@ export async function GET() {
       .where(eq(bookings.clerkUserId, userId))
       .orderBy(desc(bookings.createdAt));
 
-    const paid = rows.filter((b) => b.status === "paid");
+    const paid = rows.filter((b) => b.status === "paid" || b.status === "refunded");
 
     const enriched = await Promise.all(paid.map(async (b) => {
       let sessionTitle = b.bookingType === "private" ? "Private Session" : "Unknown Session";
@@ -57,6 +57,7 @@ export async function GET() {
         amountPaid: b.amountPaid ?? 0,
         sessionCount: b.sessionCount ?? 1,
         bookingType: b.bookingType ?? "group",
+        status: b.status ?? "paid",
         createdAt: b.createdAt,
       };
     }));
