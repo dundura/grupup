@@ -22,21 +22,34 @@ export default function JoinWaitlistButton({
   }, [user]);
   const [leaving, setLeaving] = useState(false);
   const [left, setLeft] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleJoin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
+  async function submit(n: string, e: string) {
+    if (!e.trim()) return;
     setSending(true);
+    setError("");
     try {
-      await fetch(`/api/sessions/${sessionId}/waitlist`, {
+      const res = await fetch(`/api/sessions/${sessionId}/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name: n, email: e, sessionTitle }),
       });
-      setDone(true);
+      if (res.ok) {
+        setDone(true);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? `Error ${res.status} — try again`);
+      }
+    } catch {
+      setError("Network error — try again");
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleJoin(e: React.FormEvent) {
+    e.preventDefault();
+    await submit(name, email);
   }
 
   async function handleLeave() {
@@ -77,33 +90,22 @@ export default function JoinWaitlistButton({
         <p className="text-xs text-center text-muted-foreground">{waitlistCount} {waitlistCount === 1 ? "person has" : "people have"} expressed interest</p>
       )}
       {!open ? (
-        <button
-          onClick={async () => {
-            if (email.trim()) {
-              // Signed-in user: one-click submit
-              setSending(true);
-              try {
-                await fetch(`/api/sessions/${sessionId}/waitlist`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ name, email, sessionTitle }),
-                });
-                setDone(true);
-              } finally { setSending(false); }
-            } else {
-              setOpen(true);
-            }
-          }}
-          disabled={sending}
-          className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white disabled:opacity-60"
-          style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-          {sending ? "Sending…" : "Express Interest"}
-        </button>
+        <>
+          <button
+            onClick={() => email.trim() ? submit(name, email) : setOpen(true)}
+            disabled={sending}
+            className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white disabled:opacity-60"
+            style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+            {sending ? "Sending…" : "Express Interest"}
+          </button>
+          {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+        </>
       ) : (
         <form onSubmit={handleJoin} className="space-y-2.5">
           <p className="text-xs text-muted-foreground">No charge — we'll email you when booking opens.</p>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required />
+          {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setOpen(false)}
               className="flex-1 py-2 rounded-xl text-sm border font-medium">Cancel</button>
