@@ -91,6 +91,13 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+    // Idempotency — don't double-record if Stripe retries
+    const [existingBooking] = await db.select({ id: bookings.id }).from(bookings).where(eq(bookings.stripeSessionId, cs.id));
+    if (existingBooking) {
+      console.log("[webhook] already recorded, skipping:", cs.id);
+      return NextResponse.json({ received: true });
+    }
+
     const [sessionRow] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
 
     // Record booking
@@ -126,41 +133,47 @@ export async function POST(req: NextRequest) {
 
     // Email player
     if (session && userEmail) {
-      await sendBookingConfirmation({
-        toEmail: userEmail,
-        toName: userName ?? "there",
-        sessionTitle: session.title,
-        trainerName: trainer?.name ?? "your trainer",
-        dayOfWeek: session.dayOfWeek ?? "",
-        time: session.time ?? "",
-        venue: session.venue ?? "",
-        city: session.city ?? "",
-        amount,
-      });
+      try {
+        await sendBookingConfirmation({
+          toEmail: userEmail,
+          toName: userName ?? "there",
+          sessionTitle: session.title,
+          trainerName: trainer?.name ?? "your trainer",
+          dayOfWeek: session.dayOfWeek ?? "",
+          time: session.time ?? "",
+          venue: session.venue ?? "",
+          city: session.city ?? "",
+          amount,
+        });
+      } catch (e) { console.error("[webhook] player email failed:", e); }
     }
 
     // Email trainer
     if (trainer?.clerkId) {
-      const trainerEmail = await getTrainerEmail(trainer.clerkId);
-      if (trainerEmail) {
-        await sendTrainerNewBooking({
-          trainerEmail,
-          trainerName: trainer.name,
-          playerName: userName ?? "Someone",
-          sessionTitle: session?.title ?? "your session",
-          amount,
-        });
-      }
+      try {
+        const trainerEmail = await getTrainerEmail(trainer.clerkId);
+        if (trainerEmail) {
+          await sendTrainerNewBooking({
+            trainerEmail,
+            trainerName: trainer.name,
+            playerName: userName ?? "Someone",
+            sessionTitle: session?.title ?? "your session",
+            amount,
+          });
+        }
+      } catch (e) { console.error("[webhook] trainer email failed:", e); }
     }
 
     // Email admin
-    await sendTrainerNewBooking({
-      trainerEmail: ADMIN_EMAIL,
-      trainerName: "Admin",
-      playerName: `${userName ?? "Someone"} → ${session?.title ?? "session"} (${trainer?.name ?? "unknown trainer"})`,
-      sessionTitle: session?.title ?? "Group Session",
-      amount,
-    });
+    try {
+      await sendTrainerNewBooking({
+        trainerEmail: ADMIN_EMAIL,
+        trainerName: "Admin",
+        playerName: `${userName ?? "Someone"} → ${session?.title ?? "session"} (${trainer?.name ?? "unknown trainer"})`,
+        sessionTitle: session?.title ?? "Group Session",
+        amount,
+      });
+    } catch (e) { console.error("[webhook] admin email failed:", e); }
 
     // Notify the booking player's followers
     if (userId && !userId.startsWith("guest-") && session) {
