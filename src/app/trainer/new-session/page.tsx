@@ -106,14 +106,6 @@ export default function NewSessionPage() {
         const duration = parseInt(val) || 60;
         next.pricePerPlayer = String(calcPrice(spots, duration));
       }
-      // Auto-generate recurring dates when start date or recurring weeks change
-      if ((key === "startDate" || key === "recurringWeeks") && f.recurring) {
-        const start = key === "startDate" ? val : f.startDate;
-        const weeks = parseInt(key === "recurringWeeks" ? val : f.recurringWeeks) || 4; // default 4
-        if (start) {
-          next.recurringDates = generateRecurringDates(start, weeks, f.time);
-        }
-      }
       return next;
     });
   }
@@ -330,50 +322,17 @@ export default function NewSessionPage() {
             <div className="border-t pt-4 space-y-3">
               {!form.isPlan && (
                 <div>
-                  <button type="button" onClick={() => setForm((f) => {
-                    const turningOn = !f.recurring;
-                    const defaultWeeks = "4";
-                    const newDates = turningOn && f.startDate
-                      ? generateRecurringDates(f.startDate, 4, f.time)
-                      : [];
-                    return { ...f, recurring: turningOn, recurringWeeks: turningOn ? defaultWeeks : "", recurringDates: newDates };
-                  })}
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, recurring: !f.recurring, recurringWeeks: "", recurringDates: [] }))}
                     className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
                     style={form.recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
                     <div className="text-left">
-                      <p className="font-semibold text-sm">Session Series</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {"Players choose which sessions to attend"}
-                      </p>
+                      <p className="font-semibold text-sm">Recurring Session</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Runs every week on the same day, time, and location — no end date</p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
                       <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.recurring ? "translate-x-4" : "translate-x-0"}`} />
                     </div>
                   </button>
-                  {form.recurring && (
-                    <div className="mt-2 px-1">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">How many sessions?</p>
-                      <div className="flex flex-wrap gap-2">
-                        {[2, 3, 4, 5, 6, 7, 8].map((w) => (
-                          <button key={w} type="button"
-                            onClick={() => setForm((f) => {
-                              const isDeselecting = f.recurringWeeks === String(w);
-                              const newWeeks = isDeselecting ? "" : String(w);
-                              const newDates = !isDeselecting && f.startDate
-                                ? generateRecurringDates(f.startDate, w, f.time)
-                                : [];
-                              return { ...f, recurringWeeks: newWeeks, recurringDates: newDates };
-                            })}
-                            className="px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-all"
-                            style={form.recurringWeeks === String(w)
-                              ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" }
-                              : { borderColor: "#e2e8f0", color: "#475569" }}>
-                            {w}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -496,54 +455,74 @@ export default function NewSessionPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">
-                    Start date{form.recurring && <span style={{ color: "#DC373E" }}> *</span>}
-                    {!form.recurring && <span className="font-normal text-xs text-muted-foreground ml-1">(optional)</span>}
+                    Start date <span className="font-normal text-xs text-muted-foreground">(optional — when the series begins)</span>
                   </label>
                   <Input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} />
                 </div>
-                {/* Editable recurring dates */}
-                {form.recurring && form.recurringDates.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium">Session dates</label>
+                {form.recurring && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <button type="button"
-                        onClick={() => setForm((f) => {
-                          const last = f.recurringDates[f.recurringDates.length - 1];
-                          const next = last ? new Date(last.date + "T12:00:00") : new Date();
-                          next.setDate(next.getDate() + 7);
-                          return { ...f, recurringDates: [...f.recurringDates, { date: next.toISOString().split("T")[0], time: last?.time || f.time || "" }] };
-                        })}
-                        className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
+                        onClick={() => setForm((f) => ({ ...f, recurringDates: [] }))}
+                        className="p-3 rounded-xl border-2 text-left transition-all"
+                        style={form.recurringDates.length === 0 ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                        <p className="text-sm font-semibold">No end date</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Runs every week forever</p>
+                      </button>
+                      <button type="button"
+                        onClick={() => {
+                          if (form.recurringDates.length === 0) {
+                            const start = form.startDate || new Date().toISOString().split("T")[0];
+                            setForm((f) => ({ ...f, recurringDates: generateRecurringDates(start, 4, f.time) }));
+                          }
+                        }}
+                        className="p-3 rounded-xl border-2 text-left transition-all"
+                        style={form.recurringDates.length > 0 ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
+                        <p className="text-sm font-semibold">Limited run</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Set specific dates (up to 8)</p>
+                      </button>
                     </div>
-                    <p className="text-xs text-muted-foreground">Edit to skip a session or adjust a date.</p>
-                    {form.recurringDates.map((d, i) => (
-                      <div key={i} className="flex gap-2 items-center">
-                        <Input type="date" value={d.date} className="flex-1"
-                          onChange={(e) => setForm((f) => {
-                            const dates = [...f.recurringDates];
-                            dates[i] = { ...dates[i], date: e.target.value };
-                            return { ...f, recurringDates: dates };
-                          })} />
-                        <Input type="time" value={d.time} className="w-28"
-                          onChange={(e) => setForm((f) => {
-                            const dates = [...f.recurringDates];
-                            dates[i] = { ...dates[i], time: e.target.value };
-                            return { ...f, recurringDates: dates };
-                          })} />
+                    {form.recurringDates.length === 0 && (
+                      <div className="rounded-xl bg-[#e8f0f9] px-3 py-2.5 text-xs text-[#0F3154]">
+                        This session runs every <strong>{form.dayOfWeek || "[day]"}</strong> indefinitely — same time, same location. Players book and work out scheduling with you.
+                      </div>
+                    )}
+                    {form.recurringDates.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-muted-foreground">Quick generate from start date</p>
+                          <div className="flex gap-1.5">
+                            {[2,3,4,5,6,7,8].map((w) => (
+                              <button key={w} type="button"
+                                onClick={() => setForm((f) => ({ ...f, recurringDates: generateRecurringDates(f.startDate || new Date().toISOString().split("T")[0], w, f.time) }))}
+                                className="w-7 h-7 rounded-lg text-xs font-semibold border-2 transition-all"
+                                style={form.recurringDates.length === w ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9", color: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                                {w}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        {form.recurringDates.map((d, i) => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <Input type="date" value={d.date} className="flex-1"
+                              onChange={(e) => setForm((f) => { const dates = [...f.recurringDates]; dates[i] = { ...dates[i], date: e.target.value }; return { ...f, recurringDates: dates }; })} />
+                            <Input type="time" value={d.time} className="w-28"
+                              onChange={(e) => setForm((f) => { const dates = [...f.recurringDates]; dates[i] = { ...dates[i], time: e.target.value }; return { ...f, recurringDates: dates }; })} />
+                            <button type="button"
+                              onClick={() => setForm((f) => ({ ...f, recurringDates: f.recurringDates.filter((_, j) => j !== i) }))}
+                              className="text-muted-foreground hover:text-red-500 text-lg leading-none px-1 shrink-0">×</button>
+                          </div>
+                        ))}
                         <button type="button"
                           onClick={() => setForm((f) => {
-                            const remaining = f.recurringDates.filter((_, j) => j !== i);
-                            const last = remaining[remaining.length - 1];
-                            if (last) {
-                              const next = new Date(last.date + "T12:00:00");
-                              next.setDate(next.getDate() + 7);
-                              remaining.push({ date: next.toISOString().split("T")[0], time: last.time });
-                            }
-                            return { ...f, recurringDates: remaining };
+                            const last = f.recurringDates[f.recurringDates.length - 1];
+                            const next = last ? new Date(last.date + "T12:00:00") : new Date();
+                            next.setDate(next.getDate() + 7);
+                            return { ...f, recurringDates: [...f.recurringDates, { date: next.toISOString().split("T")[0], time: last?.time || f.time || "" }] };
                           })}
-                          className="text-muted-foreground hover:text-red-500 text-lg leading-none px-1 shrink-0" title="Skip this date">×</button>
+                          className="text-xs font-semibold text-[#0F3154] hover:underline">+ Add date</button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
