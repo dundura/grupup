@@ -43,6 +43,12 @@ export default function DashboardPage() {
   const [trainerFollowRequests, setTrainerFollowRequests] = useState<{ id: number; followerClerkId: string; name: string; photo: string }[]>([]);
   const [followers, setFollowers] = useState<{ followerClerkId: string; name: string; photo: string }[]>([]);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
+  const [playerBookings, setPlayerBookings] = useState<Array<{
+    id: number; sessionTitle: string; trainerName: string;
+    dayOfWeek: string; time: string; city: string; venue: string;
+    athleteName: string; amountPaid: number; sessionCount: number;
+    bookingType: string; createdAt: string;
+  }>>([]);
   const [pendingQuestionnaires, setPendingQuestionnaires] = useState<Array<{
     bookingId: number; sessionTitle: string;
     questionnaire: { title: string; questions: Array<{ id: string; type: string; label: string; required: boolean; options?: string[] }> };
@@ -78,14 +84,16 @@ export default function DashboardPage() {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
-      // Player: load follow requests + pending questionnaires
+      // Player: load follow requests, questionnaires, and bookings
       Promise.all([
         fetch("/api/player/follows").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/questionnaires").then((r) => r.json()).catch(() => ({})),
-      ]).then(([followData, qData]) => {
+        fetch("/api/player/bookings").then((r) => r.json()).catch(() => []),
+      ]).then(([followData, qData, bkgs]) => {
         if (followData.pending) setFollowRequests(followData.pending);
         if (followData.approved) setFollowers(followData.approved);
         if (qData.pending) setPendingQuestionnaires(qData.pending);
+        if (Array.isArray(bkgs)) setPlayerBookings(bkgs);
         setLoading(false);
       });
     }
@@ -802,26 +810,67 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Player: Find sessions */}
+        {/* Player: My Sessions */}
         {role !== "trainer" && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">My Sessions</h2>
               <Link href="/groups" className="text-sm font-medium text-[#DC373E] hover:underline">Browse all →</Link>
             </div>
-            <div className="text-center py-8">
-              <div className="text-4xl mb-3">📅</div>
-              <p className="font-semibold mb-1">No sessions booked yet</p>
-              <p className="text-muted-foreground text-sm mb-5">
-                Find a group session near you and reserve your spot.
-              </p>
-              <Button style={{ backgroundColor: "#DC373E" }} asChild>
-                <Link href="/groups">
-                  <Search className="h-4 w-4 mr-2" />
-                  Find a group session
-                </Link>
-              </Button>
-            </div>
+
+            {playerBookings.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-3">📅</div>
+                <p className="font-semibold mb-1">No sessions booked yet</p>
+                <p className="text-muted-foreground text-sm mb-5">
+                  Find a group session near you and reserve your spot.
+                </p>
+                <Button style={{ backgroundColor: "#DC373E" }} asChild>
+                  <Link href="/groups">
+                    <Search className="h-4 w-4 mr-2" />
+                    Find a group session
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {playerBookings.map((b) => (
+                  <div key={b.id} className="border rounded-xl p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm leading-snug">{b.sessionTitle}</p>
+                        {b.trainerName && (
+                          <p className="text-xs text-muted-foreground mt-0.5">with {b.trainerName}</p>
+                        )}
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-1">
+                          {b.dayOfWeek && b.time && (
+                            <span className="flex items-center gap-1">
+                              <CalendarDays className="h-3 w-3" />{b.dayOfWeek}s at {b.time}
+                            </span>
+                          )}
+                          {(b.venue || b.city) && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />{[b.venue, b.city].filter(Boolean).join(", ")}
+                            </span>
+                          )}
+                          {b.athleteName && (
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />{b.athleteName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold" style={{ color: "#0F3154" }}>${b.amountPaid}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
