@@ -143,7 +143,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   {trainer.name.split(" ")[0]} isn't running any group sessions at the moment. Send a request and we'll let them know you're interested.
                 </p>
                 <a
-                  href={`mailto:bookings@soccer-near-me.com?subject=Session Request — ${encodeURIComponent(trainer.name)}&body=Hi, I'd like to request a group session with ${encodeURIComponent(trainer.name)} in ${encodeURIComponent(location || trainer.city || "my area")}. Please let me know when sessions become available.`}
+                  href={`mailto:bookings@soccer-near-me.com?bcc=neil@anytime-soccer.com&subject=Session Request — ${encodeURIComponent(trainer.name)}&body=Hi, I'd like to request a group session with ${encodeURIComponent(trainer.name)} in ${encodeURIComponent(location || trainer.city || "my area")}. Please let me know when sessions become available.`}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm w-full"
                   style={{ backgroundColor: "#DC373E" }}>
                   <Mail className="h-4 w-4" />
