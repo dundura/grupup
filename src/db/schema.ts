@@ -74,7 +74,7 @@ export const trainerReviews = pgTable("trainer_reviews", {
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
-  sessionId: varchar("session_id", { length: 50 }).references(() => sessions.id),
+  sessionId: varchar("session_id", { length: 50 }),
   clerkUserId: varchar("clerk_user_id", { length: 255 }).notNull(),
   userName: varchar("user_name", { length: 200 }),
   userEmail: varchar("user_email", { length: 255 }),

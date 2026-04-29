@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
     const { trainerSessionId, userId, userName, userEmail, athleteName, notes, sessionCount, type, trainerId } = cs.metadata ?? {};
     const amount = (cs.amount_total ?? 0) / 100;
 
+    console.log("[webhook] checkout.session.completed", { trainerSessionId, userId, userName, type, amount });
+
     // Private bookings
     if (type === "private" && trainerId) {
       const [trainerRow] = await db.select().from(trainers).where(eq(trainers.id, trainerId));
@@ -82,11 +84,15 @@ export async function POST(req: NextRequest) {
     }
 
     const sessionIdInt = parseInt(trainerSessionId ?? "");
-    if (isNaN(sessionIdInt)) return NextResponse.json({ received: true });
+    if (isNaN(sessionIdInt)) {
+      console.error("[webhook] invalid sessionId:", trainerSessionId);
+      return NextResponse.json({ received: true });
+    }
 
     const [sessionRow] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
 
     // Record booking
+    console.log("[webhook] inserting booking for sessionId:", sessionIdInt, "trainer:", sessionRow?.trainerClerkId);
     await db.insert(bookings).values({
       sessionId: trainerSessionId,
       clerkUserId: userId ?? "",
