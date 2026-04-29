@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
+    console.error("[webhook] signature failed:", err);
     return NextResponse.json({ error: "Webhook signature invalid" }, { status: 400 });
   }
 
@@ -89,6 +90,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
+    try {
     const [sessionRow] = await db.select().from(trainerSessions).where(eq(trainerSessions.id, sessionIdInt));
 
     // Record booking
@@ -196,6 +198,10 @@ export async function POST(req: NextRequest) {
           } catch {}
         }
       } catch {}
+    }
+    } catch (err) {
+      console.error("[webhook] booking processing failed:", err);
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
   }
 
