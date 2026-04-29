@@ -55,12 +55,12 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   let trainer;
   let trainerEmail = "";
   let otherSessions: typeof trainerSessions.$inferSelect[] = [];
-  let attendees: { userName: string | null }[] = [];
+  let attendees: { userName: string | null; photo?: string }[] = [];
   let isFollowing = false;
   let followStatus: string | null = null;
   let currentUserId: string | null = null;
   let waitlistCount = 0;
-  let waitlistEntries: { userName: string | null; clerkUserId: string | null }[] = [];
+  let waitlistEntries: { userName: string | null; clerkUserId: string | null; photo?: string }[] = [];
 
   try {
     const { userId } = await auth();
@@ -84,10 +84,20 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         )
       );
 
-    attendees = await db
-      .select({ userName: bookings.userName })
+    const attendeeRows = await db
+      .select({ userName: bookings.userName, clerkUserId: bookings.clerkUserId })
       .from(bookings)
       .where(and(eq(bookings.sessionId, String(sessionId)), eq(bookings.status, "paid")));
+    try {
+      const client = await clerkClient();
+      attendees = await Promise.all(attendeeRows.map(async (a) => {
+        if (!a.clerkUserId) return a;
+        try {
+          const u = await client.users.getUser(a.clerkUserId);
+          return { ...a, photo: u.imageUrl ?? undefined };
+        } catch { return a; }
+      }));
+    } catch { attendees = attendeeRows; }
 
     if (userId) {
       try {
@@ -99,11 +109,18 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
       } catch {}
     }
 
-    // Waitlist count + entries
+    // Waitlist count + entries + photos
     try {
       const wRows = await db.select({ userName: sessionWaitlist.userName, clerkUserId: sessionWaitlist.clerkUserId }).from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
-      waitlistEntries = wRows;
       waitlistCount = wRows.length;
+      const client = await clerkClient();
+      waitlistEntries = await Promise.all(wRows.map(async (w) => {
+        if (!w.clerkUserId) return w;
+        try {
+          const u = await client.users.getUser(w.clerkUserId);
+          return { ...w, photo: u.imageUrl ?? undefined };
+        } catch { return w; }
+      }));
     } catch {}
 
     // Get trainer email from Clerk
@@ -573,9 +590,13 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
                     return (
                       <div key={i} className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0 bg-amber-500">
-                          {initials}
-                        </div>
+                        {w.photo ? (
+                          <Image src={w.photo} alt={name} width={32} height={32} className="h-8 w-8 rounded-full object-cover shrink-0" unoptimized />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0 bg-amber-500">
+                            {initials}
+                          </div>
+                        )}
                         <span className="text-sm font-medium">{firstName} {lastInitial}</span>
                       </div>
                     );
@@ -598,10 +619,14 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     const lastInitial = name.split(" ")[1]?.[0] ? `${name.split(" ")[1][0]}.` : "";
                     return (
                       <div key={i} className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
-                          style={{ backgroundColor: "#0F3154" }}>
-                          {initials}
-                        </div>
+                        {(a as any).photo ? (
+                          <Image src={(a as any).photo} alt={name} width={32} height={32} className="h-8 w-8 rounded-full object-cover shrink-0" unoptimized />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
+                            style={{ backgroundColor: "#0F3154" }}>
+                            {initials}
+                          </div>
+                        )}
                         <span className="text-sm font-medium">{firstName} {lastInitial}</span>
                       </div>
                     );
