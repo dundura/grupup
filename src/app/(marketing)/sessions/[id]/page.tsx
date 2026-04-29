@@ -168,6 +168,68 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
             })()}
             <h1 className="text-2xl md:text-3xl font-bold leading-snug">{session.title}</h1>
 
+            {/* Trainer card — mobile/tablet only */}
+            {trainer && (
+              <div className="lg:hidden bg-white rounded-2xl border shadow-sm overflow-hidden">
+                <div className="relative h-52 w-full">
+                  {trainer.photo ? (
+                    <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="600px" unoptimized />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white"
+                      style={{ backgroundColor: "#0F3154" }}>
+                      {trainer.name?.[0] ?? "T"}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-bold text-base">{trainer.name}</p>
+                    <FollowButton
+                      trainerClerkId={session.trainerClerkId}
+                      initialIsFollowing={isFollowing}
+                      initialStatus={followStatus}
+                      isSignedIn={!!currentUserId}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
+                      ))}
+                    </div>
+                    <span className="font-bold text-sm">{trainer.rating?.toFixed(1) ?? "5.0"}</span>
+                    <span className="text-muted-foreground text-xs">· {trainer.reviewCount ?? 0} reviews</span>
+                  </div>
+                  {(trainer.yearsExperience ?? 0) > 0 && (
+                    <p className="text-xs text-muted-foreground">· {trainer.yearsExperience} yrs exp</p>
+                  )}
+                  {/* Compact icon row on mobile */}
+                  <div className="grid grid-cols-4 gap-2 sm:hidden">
+                    <ContactTrainerForm sessionId={session.id} sessionTitle={session.title} trainerName={trainer.name ?? "Trainer"} compact />
+                    <Link href={`/groups/${trainer.id}`} title="View trainer profile"
+                      className="flex flex-col items-center justify-center gap-1 w-full py-2 rounded-xl border hover:bg-muted transition-colors"
+                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                      <Users className="h-4 w-4" />
+                      <span className="text-[10px] font-semibold leading-none">Profile</span>
+                    </Link>
+                    <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} compact />
+                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} compact />
+                  </div>
+                  {/* Stacked buttons on tablet */}
+                  <div className="hidden sm:block space-y-2">
+                    <ContactTrainerForm sessionId={session.id} sessionTitle={session.title} trainerName={trainer.name ?? "Trainer"} />
+                    <Link href={`/groups/${trainer.id}`}
+                      className="block text-center text-sm font-semibold py-2.5 rounded-lg border hover:bg-muted transition-colors"
+                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                      View trainer profile
+                    </Link>
+                    <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} />
+                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* About + Booking + Details grid */}
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_220px] gap-4 items-start">
 
@@ -420,9 +482,9 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           <div>
             <div className="sticky top-28 space-y-5">
 
-            {/* Trainer card */}
+            {/* Trainer card — desktop only */}
             {trainer && (
-              <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="hidden lg:block bg-white rounded-2xl border shadow-sm overflow-hidden">
                 <div className="relative h-52 w-full">
                   {trainer.photo ? (
                     <Image src={trainer.photo} alt={trainer.name} fill className="object-cover object-top" sizes="320px" unoptimized />
