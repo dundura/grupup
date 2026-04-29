@@ -372,6 +372,16 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                     />
                   </div>
                 )}
+                {!(session as any).waitlistEnabled && !isFull && (
+                  <div className="pt-1 border-t">
+                    <JoinWaitlistButton
+                      sessionId={session.id}
+                      sessionTitle={session.title}
+                      waitlistCount={waitlistCount}
+                      initialJoined={currentUserId ? waitlistEntries.some((w) => w.clerkUserId === currentUserId) : false}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Session dates — spans full width, above Date/Time details */}

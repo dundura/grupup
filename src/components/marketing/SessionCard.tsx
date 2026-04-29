@@ -6,7 +6,7 @@ import Link from "next/link";
 import { MapPin, Clock, Users, Star, Bell, Share2, Check } from "lucide-react";
 import type { GroupSession } from "@/lib/types";
 import { SESSION_TYPE_LABELS, SESSION_TYPE_SPOTS } from "@/lib/types";
-import { useAuth } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 const skillColors: Record<string, string> = {
   Beginner: "bg-green-100 text-green-700",
@@ -22,16 +22,23 @@ interface SessionCardProps {
 export function SessionCard({ session }: SessionCardProps) {
   const [interested, setInterested] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { isSignedIn } = useAuth();
+  const { user } = useUser();
 
-  function handleInterested(e: React.MouseEvent) {
+  async function handleInterested(e: React.MouseEvent) {
     e.preventDefault();
-    if (!isSignedIn) { window.location.href = "/sign-in"; return; }
-    const next = !interested;
-    setInterested(next);
-    if (next) {
-      fetch(`/api/sessions/${session.id}/interested`, { method: "POST" }).catch(() => {});
-    }
+    if (!user) { window.location.href = "/sign-in"; return; }
+    if (interested) return;
+    const name = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+    const email = user.emailAddresses?.[0]?.emailAddress ?? "";
+    if (!email) return;
+    try {
+      await fetch(`/api/sessions/${session.id}/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, sessionTitle: session.title }),
+      });
+      setInterested(true);
+    } catch {}
   }
 
   function handleShare(e: React.MouseEvent) {
@@ -194,7 +201,7 @@ export function SessionCard({ session }: SessionCardProps) {
         </div>
         <button
           onClick={handleInterested}
-          title={interested ? "You're interested — your followers have been notified" : "Mark as interested — notifies your followers"}
+          title={interested ? "You've expressed interest — we'll email you when booking opens" : "Express interest — get notified when spots open"}
           className="flex items-center justify-center w-10 h-10 rounded-xl border transition-colors shrink-0"
           style={interested
             ? { backgroundColor: "#0F3154", borderColor: "#0F3154" }
