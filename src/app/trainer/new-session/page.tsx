@@ -358,7 +358,7 @@ export default function NewSessionPage() {
                 style={form.isPlan ? { borderColor: "#DC373E", backgroundColor: "#fff5f5" } : { borderColor: "#e2e8f0" }}>
                 <div className="text-left">
                   <p className="font-semibold text-sm">Package</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Player buys all sessions upfront at a discount — you set the dates</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Players must book the entire package upfront — discount applied automatically</p>
                 </div>
                 <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isPlan ? "bg-[#DC373E]" : "bg-gray-200"}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isPlan ? "translate-x-4" : "translate-x-0"}`} />
