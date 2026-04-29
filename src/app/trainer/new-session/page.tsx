@@ -318,9 +318,7 @@ export default function NewSessionPage() {
                     <div className="text-left">
                       <p className="font-semibold text-sm">Session Series</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {form.recurring
-                          ? `${form.recurringWeeks || 4} sessions · players choose which ones to join`
-                          : "Players pick and book individual sessions"}
+                        {"Players choose which sessions to attend"}
                       </p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>

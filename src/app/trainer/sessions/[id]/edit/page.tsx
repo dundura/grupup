@@ -391,9 +391,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                     <div className="text-left">
                       <p className="font-semibold text-sm">Session Series</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {(form as any).recurring
-                          ? `${(form as any).recurringWeeks || 4} sessions — dates shown below`
-                          : "Players book one session at a time"}
+                        {"Players choose which sessions to attend"}
                       </p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${(form as any).recurring ? "bg-[#0F3154]" : "bg-gray-200"}`}>
