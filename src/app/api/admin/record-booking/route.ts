@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeOpts } from "@/lib/stripe";
 import { db } from "@/db";
 import { bookings, trainerSessions, trainers } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const stripe = getStripe();
 
     // Find checkout session by payment intent
-    const sessions = await stripe.checkout.sessions.list({ payment_intent: pi, limit: 1 });
+    const sessions = await stripe.checkout.sessions.list({ payment_intent: pi, limit: 1 }, stripeOpts());
     const cs = sessions.data[0];
     if (!cs) return NextResponse.json({ error: "No checkout session found for this payment intent" }, { status: 404 });
 

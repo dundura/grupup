@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react";
 import { db } from "@/db";
 import { bookings, trainerSessions, trainers } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeOpts } from "@/lib/stripe";
 import { sendBookingConfirmation, sendTrainerNewBooking } from "@/lib/email";
 import { clerkClient } from "@clerk/nextjs/server";
 
@@ -19,7 +19,7 @@ async function ensureBookingRecorded(checkoutSessionId: string) {
 
     const stripe = getStripe();
     // Retrieve without stripeOpts — always from platform account
-    const cs = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+    const cs = await stripe.checkout.sessions.retrieve(checkoutSessionId, {}, stripeOpts());
     console.log("[success] cs.payment_status:", cs.payment_status, "metadata:", cs.metadata);
     if (cs.payment_status !== "paid") return;
 
