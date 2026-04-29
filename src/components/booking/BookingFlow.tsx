@@ -397,10 +397,19 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
                         {typeName} — {session.title}
-                        {sessionCount > 1 && <span className="ml-1 text-xs">× {sessionCount}</span>}
+                        {effectiveCount > 1 && <span className="ml-1 text-xs">× {effectiveCount}</span>}
                       </span>
-                      <span className="font-semibold">${session.pricePerPlayer}.00{sessionCount > 1 ? ` × ${sessionCount}` : ""}</span>
+                      <span className="font-semibold">
+                        {discPct > 0 && <span className="line-through text-muted-foreground mr-1">${session.pricePerPlayer}</span>}
+                        ${displayPrice}{effectiveCount > 1 ? ` × ${effectiveCount}` : ""}
+                      </span>
                     </div>
+                    {discPct > 0 && (
+                      <div className="flex justify-between font-semibold" style={{ color: "#DC373E" }}>
+                        <span>{session.discountLabel || `${discPct}% off`}</span>
+                        <span>−${(session.pricePerPlayer - displayPrice) * effectiveCount}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-muted-foreground">
                       <span>Athlete</span>
                       <span>{form.athleteName}</span>
@@ -413,7 +422,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     )}
                     <div className="flex justify-between font-bold text-base border-t pt-2 mt-1">
                       <span>Total due today</span>
-                      <span>${(session.pricePerPlayer * sessionCount).toFixed(2)}</span>
+                      <span style={discPct > 0 ? { color: "#DC373E" } : {}}>${(displayPrice * effectiveCount).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -433,7 +442,7 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     disabled={submitting}
                     className="flex-1 py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-60 transition-opacity"
                     style={{ backgroundColor: "#DC373E" }}>
-                    {submitting ? "Redirecting to payment…" : `Pay $${(session.pricePerPlayer * sessionCount).toFixed(2)} & Reserve${sessionCount > 1 ? ` ${sessionCount} Spots` : " Spot"}`}
+                    {submitting ? "Redirecting to payment…" : `Pay $${(displayPrice * effectiveCount).toFixed(2)} & Reserve${effectiveCount > 1 ? ` ${effectiveCount} Spots` : " Spot"}`}
                   </button>
                 </div>
               </div>
