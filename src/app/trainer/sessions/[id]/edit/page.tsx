@@ -389,7 +389,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                     className="flex items-center justify-between w-full p-4 rounded-xl border-2 transition-all"
                     style={(form as any).recurring ? { borderColor: "#0F3154", backgroundColor: "#f0f4f9" } : { borderColor: "#e2e8f0" }}>
                     <div className="text-left">
-                      <p className="font-semibold text-sm">Recurring session</p>
+                      <p className="font-semibold text-sm">Session Series</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {(form as any).recurring
                           ? `${(form as any).recurringWeeks || 4} sessions — dates shown below`
