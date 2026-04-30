@@ -75,16 +75,16 @@ export function SessionCard({ session }: SessionCardProps) {
               🔁 {session.recurringWeeks ? `${session.recurringWeeks}-week series` : "Weekly"}
             </span>
           )}
+          {offer && (
+            <span className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full text-white shadow" style={{ backgroundColor: "#DC373E" }}>
+              🏷️ {offer.label}
+            </span>
+          )}
         </div>
       )}
 
       {/* Header */}
       <div className="px-5 pt-5 pb-4">
-        {offer && (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold mb-3" style={{ backgroundColor: "#DC373E", color: "#fff" }}>
-            🏷️ {offer.label}
-          </div>
-        )}
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 mb-1">

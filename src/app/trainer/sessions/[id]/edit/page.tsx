@@ -20,9 +20,7 @@ const levels = ["Beginner", "Intermediate", "Advanced", "Elite"];
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
 const sessionTypes = [
-  { value: "semi-private", label: "Semi-Private", desc: "2–3 players" },
-  { value: "small-group",  label: "Small Group",  desc: "4–6 players" },
-  { value: "clinic",       label: "Clinic",        desc: "7+ players" },
+  { value: "semi-private", label: "Group", desc: "Multiple players" },
 ];
 
 function baseHourlyRate(spots: number): number {
@@ -149,7 +147,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       if (key === "spotsTotal") {
         const spots = Math.max(2, parseInt(val) || 2);
         next.pricePerPlayer = String(calcPrice(spots, parseInt(f.duration) || 60));
-        next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
+        next.sessionType = "semi-private";
       }
       if (key === "duration") {
         next.pricePerPlayer = String(calcPrice(parseInt(f.spotsTotal) || 1, parseInt(val) || 60));

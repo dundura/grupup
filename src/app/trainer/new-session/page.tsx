@@ -13,15 +13,11 @@ const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 const ageRanges = ["6–8", "8–10", "10–12", "12–14", "14–16", "16–18", "Adults (18+)", "All ages"];
 
 const sessionTypes = [
-  { value: "semi-private", label: "Semi-Private", desc: "2–3 players · $35/player", spots: 3 },
-  { value: "small-group",  label: "Small Group",  desc: "4–6 players · $30/player", spots: 6 },
-  { value: "clinic",       label: "Clinic",        desc: "7+ players · $22/player", spots: 10 },
+  { value: "semi-private", label: "Group", desc: "Multiple players", spots: 6 },
 ];
 
 const defaultPrices: Record<string, number> = {
-  "semi-private": 35,
-  "small-group":  30,
-  "clinic":       22,
+  "semi-private": 30,
   "private":      85,
 };
 
@@ -32,7 +28,7 @@ export default function NewSessionPage() {
   const [done, setDone] = useState(false);
   const [sessionTypeOpen, setSessionTypeOpen] = useState(false);
   const [form, setForm] = useState({
-    title: "", sport: "", sessionType: "small-group", city: "", zipCode: "", venue: "",
+    title: "", sport: "", sessionType: "semi-private", city: "", zipCode: "", venue: "",
     dayOfWeek: "", time: "", duration: "60", ageRanges: [] as string[], skillLevels: [] as string[],
     spotsTotal: "6", pricePerPlayer: "30",
     notes: "This session focuses on improving key skills in a small group environment. Players will get high-quality reps, real competition, and personalized feedback.",
@@ -99,7 +95,7 @@ export default function NewSessionPage() {
         const spots = Math.max(2, parseInt(val) || 2);
         const duration = parseInt(f.duration) || 60;
         next.pricePerPlayer = String(calcPrice(spots, duration));
-        next.sessionType = spots <= 3 ? "semi-private" : spots <= 6 ? "small-group" : "clinic";
+        next.sessionType = "semi-private";
       }
       if (key === "duration") {
         const spots = parseInt(f.spotsTotal) || 1;
@@ -185,7 +181,7 @@ export default function NewSessionPage() {
                 className="w-full accent-[#0F3154]" />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>2</span>
-                <span>20 (clinic)</span>
+                <span>Max {form.spotsTotal}</span>
               </div>
             </div>
             <div>

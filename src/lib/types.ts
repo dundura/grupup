@@ -108,27 +108,25 @@ export interface GroupSession {
 
 export type SessionType = "private" | "semi-private" | "small-group" | "clinic";
 
-export const SESSION_TYPE_LABELS: Record<SessionType, string> = {
+export const SESSION_TYPE_LABELS: Record<string, string> = {
   "private": "Private",
-  "semi-private": "Semi-Private",
-  "small-group": "Small Group",
-  "clinic": "Clinic",
+  "semi-private": "Group",
+  "small-group": "Group",
+  "clinic": "Group",
 };
 
-export const SESSION_TYPE_SPOTS: Record<SessionType, string> = {
+export const SESSION_TYPE_SPOTS: Record<string, string> = {
   "private": "1 player",
-  "semi-private": "2–3 players",
-  "small-group": "4–6 players",
-  "clinic": "7+ players",
+  "semi-private": "Group",
+  "small-group": "Group",
+  "clinic": "Group",
 };
 
-// Platform sets all prices — trainers pick the format, not the rate (Uber model)
-// Rates calibrated for NC youth soccer market (Cary/Raleigh)
-export const STANDARD_PRICES: Record<SessionType, number> = {
-  "private": 85,        // per session (trainer-set; this is the reference rate)
-  "semi-private": 35,   // per player (2–3 players)
-  "small-group": 30,    // per player (4–6 players)
-  "clinic": 22,         // per player (7+ players)
+export const STANDARD_PRICES: Record<string, number> = {
+  "private": 85,
+  "semi-private": 30,
+  "small-group": 30,
+  "clinic": 22,
 };
 
 export const PLATFORM_FEE = 0.15;
