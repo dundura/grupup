@@ -29,6 +29,7 @@ export const trainers = pgTable("trainers", {
   gender: varchar("gender", { length: 50 }),
   isApproved: boolean("is_approved").default(true),
   isArchived: boolean("is_archived").default(false),
+  coachingLocations: json("coaching_locations").$type<Array<{ name: string; city?: string; logo?: string }>>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -50,6 +50,7 @@ export default function TrainerSetupPage() {
     hourlyRate: "85",
     customSpecialty: "",
     customCert: "",
+    coachingLocations: [] as Array<{ name: string; city: string; logo: string }>,
   });
 
   // Pre-load existing trainer profile so photo + all fields persist
@@ -78,6 +79,7 @@ export default function TrainerSetupPage() {
             skillLevels: (existing.skillLevels ?? []).length > 0 ? existing.skillLevels : f.skillLevels,
             yearsExperience: existing.yearsExperience > 0 ? String(existing.yearsExperience) : f.yearsExperience,
             hourlyRate: existing.hourlyRate > 0 ? String(existing.hourlyRate) : f.hourlyRate,
+            coachingLocations: (existing as any).coachingLocations ?? [],
           }));
         } else {
           setForm((f) => ({ ...f, photo: "" }));
@@ -277,6 +279,70 @@ export default function TrainerSetupPage() {
                   <label className="text-sm font-medium mb-1.5 block">Zip / Postal Code</label>
                   <Input value={form.zipCode} onChange={(e) => set("zipCode", e.target.value)} placeholder="e.g. 27513" />
                 </div>
+              </div>
+
+              {/* Coaching Locations */}
+              <div className="bg-white rounded-2xl border p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground block mb-1">Where you coach</label>
+                  <p className="text-xs text-muted-foreground">Add up to 2 facilities or fields where you train players.</p>
+                </div>
+                {(form.coachingLocations.length === 0 ? [{ name: "", city: "", logo: "" }] : form.coachingLocations).map((loc, i) => (
+                  <div key={i} className="border rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Location {i + 1}</p>
+                      {form.coachingLocations.length > 0 && (
+                        <button type="button"
+                          onClick={() => setForm((f) => ({ ...f, coachingLocations: f.coachingLocations.filter((_, j) => j !== i) }))}
+                          className="text-muted-foreground hover:text-red-500 transition-colors">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">Facility / field name</label>
+                        <Input value={loc.name} placeholder="e.g. WakeMed Soccer Park"
+                          onChange={(e) => setForm((f) => {
+                            const locs = f.coachingLocations.length > 0 ? [...f.coachingLocations] : [{ name: "", city: "", logo: "" }];
+                            locs[i] = { ...locs[i], name: e.target.value };
+                            return { ...f, coachingLocations: locs };
+                          })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">City</label>
+                        <Input value={loc.city} placeholder="e.g. Cary"
+                          onChange={(e) => setForm((f) => {
+                            const locs = f.coachingLocations.length > 0 ? [...f.coachingLocations] : [{ name: "", city: "", logo: "" }];
+                            locs[i] = { ...locs[i], city: e.target.value };
+                            return { ...f, coachingLocations: locs };
+                          })} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Facility logo <span className="font-normal text-muted-foreground">(optional)</span></label>
+                      <ImageUpload
+                        currentUrl={loc.logo}
+                        onUploaded={(url) => setForm((f) => {
+                          const locs = f.coachingLocations.length > 0 ? [...f.coachingLocations] : [{ name: "", city: "", logo: "" }];
+                          locs[i] = { ...locs[i], logo: url };
+                          return { ...f, coachingLocations: locs };
+                        })}
+                        label="Upload logo"
+                      />
+                    </div>
+                  </div>
+                ))}
+                {form.coachingLocations.length < 2 && (
+                  <button type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      coachingLocations: [...(f.coachingLocations.length > 0 ? f.coachingLocations : [{ name: "", city: "", logo: "" }]), { name: "", city: "", logo: "" }].slice(0, 2),
+                    }))}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] hover:underline">
+                    <Plus className="h-4 w-4" /> Add {form.coachingLocations.length === 0 ? "a" : "second"} location
+                  </button>
+                )}
               </div>
 
               {/* Sports */}

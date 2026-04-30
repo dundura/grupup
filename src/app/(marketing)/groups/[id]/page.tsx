@@ -261,39 +261,42 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Training location card */}
-            {location && (
-              <div className="bg-white rounded-2xl border shadow-sm p-5">
-                <p className="font-bold text-sm mb-3">Training Locations</p>
-                <div className="h-48 rounded-xl overflow-hidden mb-3 border">
-                  <iframe
-                    title="Training location map"
-                    width="100%"
-                    height="100%"
-                    loading="lazy"
-                    style={{ border: 0 }}
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(location)}&output=embed&z=13`}
-                  />
-                </div>
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 mt-0.5"
-                    style={{ backgroundColor: "#0F3154" }}>1</span>
-                  <div>
-                    <p className="font-medium">{trainer.city}</p>
-                    {trainer.state && <p className="text-xs text-muted-foreground">{trainer.state}</p>}
+            {(() => {
+              const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | undefined;
+              const hasCustomLocs = locs && locs.length > 0;
+              if (!location && !hasCustomLocs) return null;
+              const mapQuery = hasCustomLocs ? `${locs![0].name} ${locs![0].city ?? ""}`.trim() : location;
+              const displayLocs = hasCustomLocs ? locs! : [{ name: trainer.city!, city: trainer.state ?? undefined, logo: undefined }];
+              return (
+                <div className="bg-white rounded-2xl border shadow-sm p-5">
+                  <p className="font-bold text-sm mb-3">Where I Coach</p>
+                  <div className="h-48 rounded-xl overflow-hidden mb-4 border">
+                    <iframe title="Training location map" width="100%" height="100%" loading="lazy"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed&z=13`} />
                   </div>
-                </div>
-                {sessions[0]?.venue && (
-                  <div className="flex items-start gap-2 text-sm mt-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 mt-0.5"
-                      style={{ backgroundColor: "#0F3154" }}>2</span>
-                    <p className="font-medium">{sessions[0].venue}</p>
+                  <div className="space-y-3">
+                    {displayLocs.map((loc, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        {loc.logo ? (
+                          <img src={loc.logo} alt={loc.name} className="h-10 w-10 rounded-lg object-contain border bg-white shrink-0" />
+                        ) : (
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-bold shrink-0"
+                            style={{ backgroundColor: "#0F3154" }}>{i + 1}</span>
+                        )}
+                        <div>
+                          <p className="font-semibold text-sm">{loc.name}</p>
+                          {loc.city && <p className="text-xs text-muted-foreground">{loc.city}</p>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-3">
-                  Trainer may travel within the local area. Contact for specific field locations.
-                </p>
-              </div>
-            )}
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Trainer may travel within the local area. Contact for specific field locations.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Guarantee */}
             <div className="bg-white rounded-2xl border shadow-sm p-5 text-sm text-center">

@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
         hourlyRate: parseInt(body.hourlyRate) || 85,
         skillLevels: body.skillLevels ?? [],
         photo: body.photo || user?.imageUrl || "",
+        coachingLocations: (body.coachingLocations ?? []).filter((l: any) => l.name?.trim()),
       }).where(eq(trainers.clerkId, userId));
       return NextResponse.json({ id: existing.id });
     }
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
       yearsExperience: parseInt(body.yearsExperience) || 0,
       hourlyRate: parseInt(body.hourlyRate) || 85,
       skillLevels: body.skillLevels ?? [],
+      coachingLocations: (body.coachingLocations ?? []).filter((l: any) => l.name?.trim()),
       rating: 5.0,
       reviewCount: 0,
       isApproved: false,
