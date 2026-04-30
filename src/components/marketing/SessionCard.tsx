@@ -93,8 +93,8 @@ export function SessionCard({ session }: SessionCardProps) {
               <span className="text-muted-foreground text-xs">·</span>
               <span className="text-muted-foreground text-xs font-semibold">{SESSION_TYPE_LABELS[session.sessionType]}</span>
             </div>
-            <h3 className="font-bold text-base leading-tight">{session.title}</h3>
-            <p className="text-muted-foreground text-xs mt-0.5">{session.focus}</p>
+            <h3 className="font-bold text-base leading-tight line-clamp-1">{session.title}</h3>
+            <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">{session.focus}</p>
           </div>
           <div className="text-right shrink-0">
             {offer && discountedPrice !== null ? (
@@ -154,9 +154,9 @@ export function SessionCard({ session }: SessionCardProps) {
             <span>·</span>
             <span>{session.duration} min</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span>{session.venue}, {session.city}</span>
+            <span className="truncate">{session.venue}, {session.city}</span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-3.5 w-3.5 shrink-0" />
