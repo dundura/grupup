@@ -57,6 +57,11 @@ export default function DashboardPage() {
     id: number; sport?: string; level?: string; city?: string; budget?: string;
     trainingType?: string; status: string; sendCount?: number; createdAt: string;
   }>>([]);
+  const [playerProfiles, setPlayerProfiles] = useState<Array<{
+    id: number; name: string; birthYear?: number; sport?: string; skillLevel?: string; notes?: string; isDefault?: boolean;
+  }>>([]);
+  const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string } | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [reminding, setReminding] = useState<number | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
   const [cancelConfirmModal, setCancelConfirmModal] = useState<{ id: number; title: string; amount: number } | null>(null);
@@ -104,12 +109,14 @@ export default function DashboardPage() {
         fetch("/api/player/questionnaires").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/bookings").then((r) => r.json()).catch(() => []),
         fetch("/api/player/requests").then((r) => r.json()).catch(() => []),
-      ]).then(([followData, qData, bkgs, reqs]) => {
+        fetch("/api/player/profiles").then((r) => r.json()).catch(() => []),
+      ]).then(([followData, qData, bkgs, reqs, profiles]) => {
         if (followData.pending) setFollowRequests(followData.pending);
         if (followData.approved) setFollowers(followData.approved);
         if (qData.pending) setPendingQuestionnaires(qData.pending);
         if (Array.isArray(bkgs)) setPlayerBookings(bkgs);
         if (Array.isArray(reqs)) setPlayerRequests(reqs);
+        if (Array.isArray(profiles)) setPlayerProfiles(profiles);
         setLoading(false);
       });
     }
@@ -163,6 +170,46 @@ export default function DashboardPage() {
     setActiveQuestionnaire(null);
     setQResponses({});
     setQSubmitting(false);
+  }
+
+  async function saveProfile() {
+    if (!profileModal || !profileModal.name.trim()) return;
+    setSavingProfile(true);
+    try {
+      const isEdit = !!profileModal.id;
+      const url = isEdit ? `/api/player/profiles/${profileModal.id}` : "/api/player/profiles";
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profileModal.name,
+          birthYear: profileModal.birthYear || null,
+          sport: profileModal.sport || null,
+          skillLevel: profileModal.skillLevel || null,
+          notes: profileModal.notes || null,
+        }),
+      });
+      const saved = await res.json();
+      setPlayerProfiles((prev) =>
+        isEdit ? prev.map((p) => p.id === saved.id ? saved : p) : [...prev, saved]
+      );
+      setProfileModal(null);
+    } finally { setSavingProfile(false); }
+  }
+
+  async function deleteProfile(id: number) {
+    await fetch(`/api/player/profiles/${id}`, { method: "DELETE" });
+    setPlayerProfiles((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  async function setDefaultProfile(id: number) {
+    const res = await fetch(`/api/player/profiles/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isDefault: true, name: playerProfiles.find((p) => p.id === id)?.name }),
+    });
+    const updated = await res.json();
+    setPlayerProfiles((prev) => prev.map((p) => ({ ...p, isDefault: p.id === id })));
   }
 
   function handleCancelBooking(bookingId: number, createdAt: string, title: string, amount: number) {
@@ -982,6 +1029,71 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Player: My Players */}
+        {role !== "trainer" && (
+          <div className="bg-white rounded-2xl border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">My Players</h2>
+              <button
+                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "" })}
+                className="text-sm font-semibold px-3 py-1.5 rounded-lg text-white"
+                style={{ backgroundColor: "#0F3154" }}>
+                + Add Player
+              </button>
+            </div>
+
+            {playerProfiles.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-muted-foreground mb-3">Add player profiles to speed up booking — name, age, sport, and skill level saved for each child or athlete.</p>
+                <button
+                  onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "" })}
+                  className="text-sm font-semibold px-4 py-2 rounded-xl border-2 border-dashed transition-colors hover:bg-muted"
+                  style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+                  + Add your first player
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {playerProfiles.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white shrink-0"
+                        style={{ backgroundColor: "#0F3154" }}>
+                        {p.name[0]?.toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm">{p.name}
+                          {p.isDefault && <span className="ml-2 text-xs font-normal text-muted-foreground">(default)</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {[p.sport, p.skillLevel, p.birthYear ? `b. ${p.birthYear}` : ""].filter(Boolean).join(" · ") || "No details"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!p.isDefault && (
+                        <button onClick={() => setDefaultProfile(p.id)}
+                          className="text-xs text-muted-foreground hover:text-foreground">
+                          Set default
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setProfileModal({ id: p.id, name: p.name, birthYear: p.birthYear ? String(p.birthYear) : "", sport: p.sport ?? "", skillLevel: p.skillLevel ?? "", notes: p.notes ?? "" })}
+                        className="text-xs font-semibold text-[#0F3154] hover:underline">
+                        Edit
+                      </button>
+                      <button onClick={() => deleteProfile(p.id)}
+                        className="text-xs text-muted-foreground hover:text-red-600">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Player: My Sessions */}
         {role !== "trainer" && (
           <div className="bg-white rounded-2xl border p-6">
@@ -1182,5 +1294,67 @@ export default function DashboardPage() {
 
       </div>
     </div>
+
+      {/* Player Profile Modal */}
+      {profileModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <h2 className="text-lg font-bold">{profileModal.id ? "Edit Player" : "Add Player"}</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Player name *</label>
+                <input value={profileModal.name}
+                  onChange={(e) => setProfileModal((p) => p ? { ...p, name: e.target.value } : p)}
+                  placeholder="e.g. Emma"
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Birth year</label>
+                  <input type="number" value={profileModal.birthYear}
+                    onChange={(e) => setProfileModal((p) => p ? { ...p, birthYear: e.target.value } : p)}
+                    placeholder="e.g. 2015"
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Sport</label>
+                  <input value={profileModal.sport}
+                    onChange={(e) => setProfileModal((p) => p ? { ...p, sport: e.target.value } : p)}
+                    placeholder="e.g. Soccer"
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Skill level</label>
+                <select value={profileModal.skillLevel}
+                  onChange={(e) => setProfileModal((p) => p ? { ...p, skillLevel: e.target.value } : p)}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option value="">Select level</option>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                  <option>Elite</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Notes <span className="font-normal">(optional)</span></label>
+                <input value={profileModal.notes}
+                  onChange={(e) => setProfileModal((p) => p ? { ...p, notes: e.target.value } : p)}
+                  placeholder="e.g. goalkeeper, left-footed"
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => setProfileModal(null)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium border">Cancel</button>
+              <button onClick={saveProfile} disabled={savingProfile || !profileModal.name.trim()}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                style={{ backgroundColor: "#0F3154" }}>
+                {savingProfile ? "Saving…" : profileModal.id ? "Save changes" : "Add player"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
   );
 }

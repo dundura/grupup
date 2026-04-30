@@ -250,3 +250,15 @@ export const trainerSessions = pgTable("trainer_sessions", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const playerProfiles = pgTable("player_profiles", {
+  id: serial("id").primaryKey(),
+  clerkUserId: varchar("clerk_user_id", { length: 255 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  birthYear: integer("birth_year"),
+  sport: varchar("sport", { length: 100 }),
+  skillLevel: varchar("skill_level", { length: 50 }),
+  notes: text("notes"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -52,6 +52,25 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
     notes: "",
   });
   const [confirmed, setConfirmed] = useState(false);
+  const [savedProfiles, setSavedProfiles] = useState<Array<{ id: number; name: string; sport?: string; skillLevel?: string; isDefault?: boolean }>>([]);
+
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        firstName: f.firstName || (user.firstName ?? ""),
+        lastName: f.lastName || (user.lastName ?? ""),
+        email: f.email || (user.emailAddresses?.[0]?.emailAddress ?? ""),
+      }));
+      fetch("/api/player/profiles").then((r) => r.json()).then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSavedProfiles(data);
+          const def = data.find((p: any) => p.isDefault) ?? data[0];
+          setForm((f) => ({ ...f, athleteName: f.athleteName || def.name }));
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   // Date selection for session series
   const today = new Date().toISOString().split("T")[0];
@@ -191,8 +210,21 @@ export function BookingFlow({ session, trainer }: { session: Session; trainer: T
                     <Input type="tel" value={form.phone} onChange={(e) => setF("phone", e.target.value)} placeholder="(123) 456-7890" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Athlete Name <span style={{ color: "#DC373E" }}>*</span></label>
-                    <Input value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)} placeholder="Who is this session for?" />
+                    <label className="text-sm font-medium mb-1.5 block">Who is this for? <span style={{ color: "#DC373E" }}>*</span></label>
+                    {savedProfiles.length > 0 ? (
+                      <select value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring h-10">
+                        {savedProfiles.map((p) => (
+                          <option key={p.id} value={p.name}>{p.name}{p.sport ? ` · ${p.sport}` : ""}{p.skillLevel ? ` (${p.skillLevel})` : ""}</option>
+                        ))}
+                        <option value="__other__">Someone else…</option>
+                      </select>
+                    ) : (
+                      <Input value={form.athleteName} onChange={(e) => setF("athleteName", e.target.value)} placeholder="Who is this session for?" />
+                    )}
+                    {form.athleteName === "__other__" && (
+                      <Input className="mt-2" placeholder="Enter name" onChange={(e) => setF("athleteName", e.target.value)} />
+                    )}
                   </div>
                 </div>
 
