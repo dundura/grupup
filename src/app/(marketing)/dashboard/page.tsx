@@ -524,7 +524,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h2 className="text-base font-bold">My Profiles</h2>
+              <h2 className="text-base font-bold">My Account</h2>
               {/* Profile type switcher — shown when user has both player + trainer profiles */}
               {trainerProfile && (
                 <div className="flex rounded-lg border overflow-hidden text-xs font-semibold">
@@ -556,11 +556,6 @@ export default function DashboardPage() {
                   <DollarSign className="h-3.5 w-3.5" /> Payout
                 </Link>
               )}
-              <Link href="/onboarding"
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#f0f4f9]"
-                style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                <Plus className="h-3.5 w-3.5" /> Add Profile
-              </Link>
               <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit
