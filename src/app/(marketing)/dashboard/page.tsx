@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (role === "trainer") {
+    if (isTrainerMode) {
       Promise.all([
         fetch("/api/trainer/profile").then((r) => r.json()),
         fetch("/api/trainer/sessions").then((r) => r.json()),
@@ -311,11 +311,14 @@ export default function DashboardPage() {
     ? playerProfiles.find((p) => p.id === activePlayerProfileId) ?? null
     : null;
 
+  // isTrainerMode is driven by trainerProfile existence + no kid active — not by Clerk role
+  const isTrainerMode = !activeKid && !!trainerProfile;
+
   const photo = activeKid
     ? ((activeKid as any).photo || "")
     : (trainerProfile?.photo || user?.imageUrl || "");
   const displayName = activeKid ? activeKid.name : firstName;
-  const profileComplete = role === "trainer"
+  const profileComplete = isTrainerMode
     ? !!(trainerProfile && ((trainerProfile.sports ?? []).length > 0 || trainerProfile.sport))
     : !!(meta.city && meta.sport);
 
@@ -335,7 +338,7 @@ export default function DashboardPage() {
     return next.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   }
 
-  const isPending = role === "trainer" && trainerProfile && !trainerProfile.isApproved;
+  const isPending = isTrainerMode && trainerProfile && !trainerProfile.isApproved;
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
@@ -525,7 +528,7 @@ export default function DashboardPage() {
               </h1>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="inline-block bg-white/15 text-white/90 text-xs font-semibold px-2 py-0.5 rounded-full">
-                  {activeKid ? "Player" : role === "trainer" ? "Coach" : "Player"}
+                  {activeKid ? "Player" : isTrainerMode ? "Coach" : "Player"}
                 </span>
                 {activeKid ? (
                   <>
@@ -545,7 +548,7 @@ export default function DashboardPage() {
                     </span>
                   )
                 )}
-                {role === "trainer" && trainerProfile?.rating != null && (
+                {isTrainerMode && trainerProfile?.rating != null && (
                   <span className="flex items-center gap-1 text-white/60 text-xs">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                     {trainerProfile.rating.toFixed(1)} ({trainerProfile.reviewCount} reviews)
@@ -609,12 +612,12 @@ export default function DashboardPage() {
               </button>
             ))}
 
-            {/* Add player */}
-            <button onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
+            {/* Add player profile */}
+            <Link href="/onboarding"
               className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-all">
               <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-400">+</div>
               <p className="text-xs font-semibold text-muted-foreground">Add Profile</p>
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -657,12 +660,12 @@ export default function DashboardPage() {
         )}
 
         {/* ── Trainer profile card (only when trainer is active) ── */}
-        {!activeKid && role === "trainer" && trainerProfile && (
+        {!activeKid && isTrainerMode && trainerProfile && (
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold">Trainer Profile</h2>
             <div className="flex items-center gap-3">
-              {role === "trainer" && (
+              {isTrainerMode && (
                 <Link href="/trainer/payout"
                   className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
                   <DollarSign className="h-3.5 w-3.5" /> Payout
@@ -675,7 +678,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {role === "trainer" && trainerProfile ? (
+          {isTrainerMode && trainerProfile ? (
             <div className="space-y-3">
               {profileComplete ? (
                 <div className="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg px-3 py-2 text-sm">
@@ -732,7 +735,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-          ) : role === "trainer" && !trainerProfile ? (
+          ) : isTrainerMode && !trainerProfile ? (
             <div className="text-center py-6">
               <AlertCircle className="h-8 w-8 mx-auto mb-2 text-amber-500" />
               <p className="font-semibold mb-1">Coaching profile not set up yet</p>
@@ -761,7 +764,7 @@ export default function DashboardPage() {
         )}
 
         {/* Player: Pending Questionnaires */}
-        {role !== "trainer" && pendingQuestionnaires.length > 0 && (
+        {!isTrainerMode && pendingQuestionnaires.length > 0 && (
           <div className="bg-white rounded-2xl border p-6 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <ClipboardList className="h-5 w-5" style={{ color: "#DC373E" }} />
@@ -787,7 +790,7 @@ export default function DashboardPage() {
         )}
 
         {/* Player: Follow Requests & Followers */}
-        {role !== "trainer" && (followRequests.length > 0 || followers.length > 0) && (
+        {!isTrainerMode && (followRequests.length > 0 || followers.length > 0) && (
           <div className="bg-white rounded-2xl border p-6 space-y-5">
             {followRequests.length > 0 && (
               <div>
@@ -872,7 +875,7 @@ export default function DashboardPage() {
         )}
 
         {/* Trainer: Sessions */}
-        {role === "trainer" && (
+        {isTrainerMode && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold">
@@ -1017,7 +1020,7 @@ export default function DashboardPage() {
         )}
 
         {/* Trainer: Follow Requests */}
-        {role === "trainer" && trainerFollowRequests.length > 0 && (
+        {isTrainerMode && trainerFollowRequests.length > 0 && (
           <div className="bg-white rounded-2xl border p-6">
             <h2 className="text-base font-bold mb-4 flex items-center gap-2">
               Follow Requests
@@ -1066,7 +1069,7 @@ export default function DashboardPage() {
         )}
 
         {/* Trainer: Training Requests inbox */}
-        {role === "trainer" && trainingRequests.length > 0 && (
+        {isTrainerMode && trainingRequests.length > 0 && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -1120,7 +1123,7 @@ export default function DashboardPage() {
         )}
 
         {/* Trainer: Earnings / Bookings */}
-        {role === "trainer" && trainerBookings.length > 0 && (
+        {isTrainerMode && trainerBookings.length > 0 && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -1168,7 +1171,7 @@ export default function DashboardPage() {
 
 
         {/* Player: My Sessions */}
-        {role !== "trainer" && (
+        {!isTrainerMode && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">My Sessions</h2>
@@ -1246,7 +1249,7 @@ export default function DashboardPage() {
         )}
 
         {/* Player: My Training Requests */}
-        {role !== "trainer" && playerRequests.length > 0 && (
+        {!isTrainerMode && playerRequests.length > 0 && (
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">My Training Requests</h2>
@@ -1293,7 +1296,7 @@ export default function DashboardPage() {
         )}
 
         {/* Stripe Payouts — trainers only */}
-        {role === "trainer" && stripeConnected !== null && (
+        {isTrainerMode && stripeConnected !== null && (
           <div className="bg-white rounded-2xl border p-6">
             <h2 className="text-base font-bold mb-1">Payouts</h2>
             <p className="text-xs text-muted-foreground mb-5">Connect Stripe to receive automatic payouts after each session.</p>
