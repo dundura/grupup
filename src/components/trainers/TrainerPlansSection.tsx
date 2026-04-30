@@ -71,7 +71,8 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
         <Sparkles className="h-4 w-4 text-amber-500" />
         <p className="font-bold text-base" style={{ color: "#DC373E" }}>Gauge Interest</p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">These are potential dates this trainer is thinking about offering — not confirmed yet. Tap to show interest and help them decide whether to launch.</p>
+      <p className="text-xs font-semibold mb-1" style={{ color: "#DC373E" }}>These are potential sessions — not yet confirmed.</p>
+      <p className="text-xs text-muted-foreground mb-4">Your trainer is considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.</p>
 
       <div className="space-y-3">
         {plans.map((plan) => {
