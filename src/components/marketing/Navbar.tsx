@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { Menu, X, Zap, ChevronDown, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth, useClerk } from "@clerk/nextjs";
 
 const findLinks = [
   { href: "/groups",    label: "Group Sessions",   desc: "Browse trainer-led group sessions near you" },
@@ -25,6 +25,7 @@ export function Navbar() {
   const [open, setOpen]       = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const { isSignedIn }        = useAuth();
+  const { signOut }           = useClerk();
   const dropdownRef           = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -157,9 +158,10 @@ export function Navbar() {
                 <Button variant="outline" size="lg" className="w-full" asChild>
                   <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
                 </Button>
-                <div className="flex justify-center pt-1">
-                  <UserButton />
-                </div>
+                <Button variant="outline" size="lg" className="w-full"
+                  onClick={() => { setOpen(false); signOut({ redirectUrl: "/" }); }}>
+                  Sign Out
+                </Button>
               </>
             )}
           </div>
