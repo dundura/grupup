@@ -120,10 +120,34 @@ export function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={cn("md:hidden border-t overflow-hidden transition-all duration-200", open ? "max-h-[32rem]" : "max-h-0")}>
+      <div className={cn("md:hidden border-t transition-all duration-200 overflow-y-auto", open ? "max-h-[80vh]" : "max-h-0 overflow-hidden")}>
         <div className="container py-4 flex flex-col gap-1">
 
-          {/* Find group under mobile */}
+          {/* Auth buttons — always at top so they're always visible */}
+          <div className="flex flex-col gap-2 pb-3 border-b mb-2">
+            {!isSignedIn ? (
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="lg" className="w-full" onClick={() => setOpen(false)}>Sign In</Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => setOpen(false)}>Get Started</Button>
+                </SignUpButton>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="lg" className="w-full" asChild>
+                  <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
+                </Button>
+                <Button variant="outline" size="lg" className="w-full"
+                  onClick={() => { setOpen(false); signOut({ redirectUrl: "/" }); }}>
+                  Sign Out
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Find links */}
           <p className="px-2 pt-1 pb-0.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Find</p>
           {findLinks.map((link) => (
             <Link key={link.href} href={link.href}
@@ -143,28 +167,6 @@ export function Navbar() {
             </Link>
           ))}
 
-          <div className="flex flex-col gap-2 pt-3 border-t mt-2">
-            {!isSignedIn ? (
-              <>
-                <SignInButton mode="modal">
-                  <Button variant="outline" size="lg" className="w-full" onClick={() => setOpen(false)}>Sign In</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button size="lg" className="w-full" style={{ backgroundColor: "#DC373E" }} onClick={() => setOpen(false)}>Get Started</Button>
-                </SignUpButton>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="lg" className="w-full" asChild>
-                  <Link href="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
-                </Button>
-                <Button variant="outline" size="lg" className="w-full"
-                  onClick={() => { setOpen(false); signOut({ redirectUrl: "/" }); }}>
-                  Sign Out
-                </Button>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </header>
