@@ -612,12 +612,14 @@ export default function DashboardPage() {
               </button>
             ))}
 
-            {/* Add player profile */}
-            <Link href="/onboarding"
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-all">
-              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-400">+</div>
-              <p className="text-xs font-semibold text-muted-foreground">Add Profile</p>
-            </Link>
+            {/* Add player profile — max 5 */}
+            {playerProfiles.length < 5 && (
+              <Link href="/onboarding"
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-all">
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-400">+</div>
+                <p className="text-xs font-semibold text-muted-foreground">Add Profile</p>
+              </Link>
+            )}
           </div>
         </div>
 
