@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     const [plan] = await db.insert(trainerPlans).values({
       trainerClerkId: userId,
       date: body.date || null,
+      dayOfWeek: body.dayOfWeek || null,
       time: body.time || null,
       sport: body.sport || null,
       city: body.city || null,

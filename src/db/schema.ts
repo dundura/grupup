@@ -256,6 +256,7 @@ export const trainerPlans = pgTable("trainer_plans", {
   id: serial("id").primaryKey(),
   trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
   date: varchar("date", { length: 20 }),
+  dayOfWeek: varchar("day_of_week", { length: 20 }),
   time: varchar("time", { length: 20 }),
   sport: varchar("sport", { length: 100 }),
   city: varchar("city", { length: 100 }),

@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { CalendarDays, Check, Sparkles } from "lucide-react";
 
 interface Plan {
-  id: number; date?: string; time?: string; sport?: string; city?: string;
+  id: number; date?: string; dayOfWeek?: string; time?: string; sport?: string; city?: string;
   note?: string; interestCount: number;
 }
 
@@ -85,8 +85,11 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm">
-                    {plan.date ? new Date(plan.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : "Date TBD"}
-                    {plan.time && ` · ${formatTime(plan.time)}`}
+                    {plan.dayOfWeek
+                      ? `Every ${plan.dayOfWeek}${plan.time ? ` · ${formatTime(plan.time)}` : ""}`
+                      : plan.date
+                        ? new Date(plan.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (plan.time ? ` · ${formatTime(plan.time)}` : "")
+                        : "Date TBD"}
                   </p>
                   {(plan.sport || plan.city || plan.note) && (
                     <p className="text-xs text-muted-foreground truncate">
