@@ -532,12 +532,6 @@ export default function DashboardPage() {
                 style={{ color: "#0F3154", borderColor: "#0F3154" }}>
                 <Plus className="h-3.5 w-3.5" /> Add Profile
               </Link>
-              {role === "trainer" && (
-                <Link href="/trainer/manage"
-                  className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
-                  <ClipboardList className="h-3.5 w-3.5" /> Manage
-                </Link>
-              )}
               <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit
