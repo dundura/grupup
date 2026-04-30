@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, X, SlidersHorizontal, ChevronDown, Sparkles, MapPin, Check } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronDown, Sparkles, MapPin, Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SessionCard } from "@/components/marketing/SessionCard";
@@ -23,7 +23,9 @@ function SessionsPageInner() {
   const initialSport = searchParams.get("sport") || "";
 
   const { user } = useUser();
+  const isAdmin = user?.emailAddresses?.some((e) => e.emailAddress === "neil@anytime-soccer.com") ?? false;
   const [allSessions, setAllSessions] = useState<GroupSession[]>([]);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedSport, setSelectedSport] = useState(
@@ -45,6 +47,26 @@ function SessionsPageInner() {
       .then((data) => { if (Array.isArray(data)) setUpcomingPlans(data); })
       .catch(() => {});
   }, []);
+
+  async function toggleFeatured(e: React.MouseEvent, session: GroupSession) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (togglingId === session.id) return;
+    setTogglingId(session.id);
+    const newVal = !session.isFeatured;
+    try {
+      await fetch("/api/admin/feature-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: session.id, featured: newVal }),
+      });
+      setAllSessions((prev) =>
+        prev.map((s) => s.id === session.id ? { ...s, isFeatured: newVal } : s)
+      );
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   async function expressInterest(plan: UpcomingPlan) {
     if (actingPlan === plan.id) return;
@@ -187,7 +209,29 @@ function SessionsPageInner() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filtered.map((session) => <SessionCard key={session.id} session={session} />)}
+              {filtered.map((session) => (
+                <div key={session.id} className="relative">
+                  <SessionCard session={session} />
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => toggleFeatured(e, session)}
+                      disabled={togglingId === session.id}
+                      title={session.isFeatured ? "Remove from homepage featured" : "Feature on homepage"}
+                      className="absolute top-2 left-2 z-20 flex items-center justify-center w-8 h-8 rounded-full shadow-lg border transition-colors"
+                      style={{
+                        backgroundColor: session.isFeatured ? "#DC373E" : "white",
+                        borderColor: session.isFeatured ? "#DC373E" : "#e2e8f0",
+                      }}
+                    >
+                      <Star
+                        className="h-4 w-4"
+                        style={{ color: session.isFeatured ? "white" : "#94a3b8" }}
+                        fill={session.isFeatured ? "white" : "none"}
+                      />
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

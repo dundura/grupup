@@ -10,8 +10,8 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <TrustSection />
       <FeaturedTrainersCarousel />
+      <TrustSection />
       <BlogPreview />
       <Testimonials />
       <AppDownloadSection />
