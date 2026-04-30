@@ -199,9 +199,9 @@ function SessionsPageInner() {
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-6 flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-amber-900">These are potential sessions — not yet confirmed</p>
+              <p className="font-bold text-sm text-amber-900">These are potential sessions — not yet confirmed.</p>
               <p className="text-sm text-amber-800 mt-0.5">
-                Your trainers are considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.
+                Your trainer is considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.
               </p>
             </div>
           </div>
