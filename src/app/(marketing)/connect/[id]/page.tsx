@@ -111,15 +111,12 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
-      <div className="max-w-5xl mx-auto px-4 py-10 lg:flex lg:gap-8 lg:items-start lg:justify-between">
-      <div className="flex-1 min-w-0">
-        <Link href="/connect" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+      <div className="max-w-5xl mx-auto px-4 pt-10 pb-2">
+        <Link href="/connect" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
           <ChevronLeft className="h-4 w-4" /> Back to Connect
         </Link>
-
-        {/* Pending banner */}
         {isOwner && !meta.isApproved && (
-          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
             <Clock className="h-5 w-5 text-amber-600 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-amber-800">Profile pending approval</p>
@@ -127,6 +124,9 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
             </div>
           </div>
         )}
+      </div>
+      <div className="max-w-5xl mx-auto px-4 pb-10 lg:flex lg:gap-8 lg:items-start lg:justify-between">
+      <div className="flex-1 min-w-0">
 
         {/* Profile card */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5">
