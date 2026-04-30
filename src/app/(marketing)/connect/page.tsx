@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users, Pencil } from "lucide-react";
 import { db } from "@/db";
-import { playerFollows } from "@/db/schema";
+import { playerFollows, playerProfiles } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
 import ConnectFilters from "./ConnectFilters";
@@ -56,7 +56,17 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
   }[] = [];
 
   try {
-    const { data: clerkUsers } = await client.users.getUserList({ limit: 500 });
+    const [{ data: clerkUsers }, allPlayerProfiles] = await Promise.all([
+      client.users.getUserList({ limit: 500 }),
+      db.select().from(playerProfiles),
+    ]);
+
+    // Group player_profiles by parent clerkUserId
+    const profilesByUser: Record<string, typeof allPlayerProfiles> = {};
+    for (const p of allPlayerProfiles) {
+      if (!profilesByUser[p.clerkUserId]) profilesByUser[p.clerkUserId] = [];
+      profilesByUser[p.clerkUserId].push(p);
+    }
 
     for (const u of clerkUsers) {
       const meta = u.publicMetadata as {
@@ -71,6 +81,30 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
           bio: string; isHidden: boolean;
         }>;
       };
+
+      // Show player_profiles (kids/athletes) for ANY account role
+      const dbProfiles = profilesByUser[u.id] ?? [];
+      for (const p of dbProfiles) {
+        approvedPlayers.push({
+          id: `player-${p.id}`,
+          clerkId: u.id,
+          name: p.name,
+          photo: "",
+          city: meta.city ?? "",
+          country: meta.country ?? "",
+          zipCode: meta.zipCode ?? "",
+          sports: p.sport ? [p.sport] : [],
+          level: p.skillLevel ?? "",
+          league: "",
+          bio: p.notes ?? "",
+          team: "",
+          birthYear: p.birthYear ? String(p.birthYear) : "",
+          gender: "",
+          availableForFreePlay: false,
+          openToTrain: false,
+          followerCount: 0,
+        });
+      }
 
       if (!(meta.role === "player" || meta.role === "parent")) continue;
 
