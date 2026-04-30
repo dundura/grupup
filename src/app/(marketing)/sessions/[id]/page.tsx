@@ -22,6 +22,27 @@ import { trainerFollows } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  try {
+    const [session] = await db
+      .select({ title: trainerSessions.title, sessionPhoto: trainerSessions.sessionPhoto, sport: trainerSessions.sport, city: trainerSessions.city, trainerClerkId: trainerSessions.trainerClerkId })
+      .from(trainerSessions).where(eq(trainerSessions.id, parseInt(id)));
+    if (!session) return {};
+    const [trainer] = await db.select({ name: trainers.name, photo: trainers.photo })
+      .from(trainers).where(eq(trainers.clerkId, session.trainerClerkId));
+    const image = session.sessionPhoto || trainer?.photo || "https://www.grupup.app/og-default.png";
+    const title = `${session.title} — GrupUp`;
+    const description = `${session.sport} session${session.city ? ` in ${session.city}` : ""} with ${trainer?.name ?? "a GrupUp trainer"}`;
+    return {
+      title,
+      description,
+      openGraph: { title, description, images: [{ url: image, width: 1200, height: 630 }], type: "website" },
+      twitter: { card: "summary_large_image", title, description, images: [image] },
+    };
+  } catch { return {}; }
+}
+
 function toEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
@@ -245,7 +266,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       <span className="text-[10px] font-semibold leading-none">Profile</span>
                     </Link>
                     <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} compact />
-                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} compact />
+                    <CopyLinkButton url={`https://www.grupup.app/sessions/${session.id}`} compact />
                   </div>
                   {/* Stacked buttons on tablet */}
                   <div className="hidden sm:block space-y-2">
@@ -256,7 +277,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       View trainer profile
                     </Link>
                     <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} />
-                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
+                    <CopyLinkButton url={`https://www.grupup.app/sessions/${session.id}`} />
                   </div>
                 </div>
               </div>
@@ -569,7 +590,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       <span className="text-[10px] font-semibold leading-none">Profile</span>
                     </Link>
                     <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} compact />
-                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} compact />
+                    <CopyLinkButton url={`https://www.grupup.app/sessions/${session.id}`} compact />
                   </div>
                   {/* Desktop: stacked buttons */}
                   <div className="hidden sm:block space-y-2">
@@ -580,7 +601,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       View trainer profile
                     </Link>
                     <AddToCalendarButton title={session.title} dayOfWeek={session.dayOfWeek ?? ""} time={session.time ?? ""} durationMin={session.duration ?? 60} location={session.venue ? `${session.venue}, ${session.city}` : session.city ?? ""} description={session.notes ?? undefined} />
-                    <CopyLinkButton url={`https://grupup.app/sessions/${session.id}`} />
+                    <CopyLinkButton url={`https://www.grupup.app/sessions/${session.id}`} />
                   </div>
                 </div>
               </div>

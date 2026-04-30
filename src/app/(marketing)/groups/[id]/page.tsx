@@ -18,6 +18,25 @@ import TrainerPlansSection from "@/components/trainers/TrainerPlansSection";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  try {
+    const [trainer] = await db.select({ name: trainers.name, photo: trainers.photo, sport: trainers.sport, city: trainers.city, state: trainers.state })
+      .from(trainers).where(eq(trainers.id, id));
+    if (!trainer) return {};
+    const image = trainer.photo || "https://www.grupup.app/og-default.png";
+    const location = [trainer.city, trainer.state].filter(Boolean).join(", ");
+    const title = `${trainer.name} — ${trainer.sport ?? "Sports"} Trainer${location ? ` in ${location}` : ""} | GrupUp`;
+    const description = `Book group training sessions with ${trainer.name} on GrupUp.`;
+    return {
+      title,
+      description,
+      openGraph: { title, description, images: [{ url: image, width: 1200, height: 630 }], type: "profile" },
+      twitter: { card: "summary_large_image", title, description, images: [image] },
+    };
+  } catch { return {}; }
+}
+
 export default async function TrainerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
