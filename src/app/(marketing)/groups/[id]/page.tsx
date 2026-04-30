@@ -14,6 +14,7 @@ import { PackageBooking } from "@/components/trainers/PackageBooking";
 import MessageButton from "@/components/messaging/MessageButton";
 import FollowButton from "@/components/sessions/FollowButton";
 import RequestSessionModal from "@/components/trainers/RequestSessionModal";
+import TrainerPlansSection from "@/components/trainers/TrainerPlansSection";
 
 export const dynamic = "force-dynamic";
 
@@ -174,6 +175,9 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 <p className="text-xs text-muted-foreground mt-3">We'll follow up within 24 hours.</p>
               </div>
             )}
+
+            {/* Pre-launch planned dates */}
+            <TrainerPlansSection trainerId={trainer.id} />
 
             {/* Package booking — client component */}
             <PackageBooking

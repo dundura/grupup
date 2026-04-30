@@ -252,6 +252,34 @@ export const trainerSessions = pgTable("trainer_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const trainerPlans = pgTable("trainer_plans", {
+  id: serial("id").primaryKey(),
+  trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
+  date: varchar("date", { length: 20 }),
+  time: varchar("time", { length: 20 }),
+  sport: varchar("sport", { length: 100 }),
+  city: varchar("city", { length: 100 }),
+  note: text("note"),
+  interestCount: integer("interest_count").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const trainerPlanInterests = pgTable("trainer_plan_interests", {
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id"),
+  trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
+  playerClerkId: varchar("player_clerk_id", { length: 255 }),
+  playerName: varchar("player_name", { length: 200 }),
+  playerEmail: varchar("player_email", { length: 255 }),
+  type: varchar("type", { length: 20 }).notNull().default("interest"),
+  suggestedDate: varchar("suggested_date", { length: 20 }),
+  suggestedTime: varchar("suggested_time", { length: 20 }),
+  message: text("message"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const playerProfiles = pgTable("player_profiles", {
   id: serial("id").primaryKey(),
   clerkUserId: varchar("clerk_user_id", { length: 255 }).notNull(),
