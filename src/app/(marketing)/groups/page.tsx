@@ -33,6 +33,7 @@ function SessionsPageInner() {
   const [upcomingPlans, setUpcomingPlans] = useState<UpcomingPlan[]>([]);
   const [interestedPlanIds, setInterestedPlanIds] = useState<Set<number>>(new Set());
   const [actingPlan, setActingPlan] = useState<number | null>(null);
+  const [view, setView] = useState<"sessions" | "gauge">("sessions");
 
   useEffect(() => {
     fetch("/api/sessions")
@@ -130,13 +131,37 @@ function SessionsPageInner() {
         </div>
       </div>
 
-      {/* Results count + clear */}
+      {/* Results count + view toggle */}
       <div className="bg-white border-b py-3 px-4">
         <div className="container max-w-7xl flex items-center gap-3">
+          {/* View dropdown */}
+          <div className="flex rounded-lg border overflow-hidden text-sm font-semibold shrink-0">
+            <button
+              onClick={() => setView("sessions")}
+              className="px-4 py-1.5 transition-colors"
+              style={view === "sessions" ? { backgroundColor: "#0F3154", color: "white" } : { color: "#6b7280" }}>
+              Active Sessions
+            </button>
+            <button
+              onClick={() => setView("gauge")}
+              className="px-4 py-1.5 transition-colors border-l flex items-center gap-1.5"
+              style={view === "gauge" ? { backgroundColor: "#DC373E", color: "white" } : { color: "#6b7280" }}>
+              Gauge Interest
+              {upcomingPlans.length > 0 && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={view === "gauge" ? { backgroundColor: "rgba(255,255,255,0.25)" } : { backgroundColor: "#fee2e2", color: "#DC373E" }}>
+                  {upcomingPlans.length}
+                </span>
+              )}
+            </button>
+          </div>
+
           <span className="text-sm text-muted-foreground">
-            {loading ? "…" : <><strong>{filtered.length}</strong> session{filtered.length === 1 ? "" : "s"} found</>}
+            {loading ? "…" : view === "sessions"
+              ? <><strong>{filtered.length}</strong> session{filtered.length === 1 ? "" : "s"} found</>
+              : <><strong>{upcomingPlans.length}</strong> plan{upcomingPlans.length === 1 ? "" : "s"}</>}
           </span>
-          {hasFilters && (
+          {hasFilters && view === "sessions" && (
             <button onClick={resetFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" /> Clear
             </button>
@@ -144,43 +169,35 @@ function SessionsPageInner() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="container max-w-7xl py-8 px-4">
-        {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />)}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white border rounded-2xl p-12 text-center">
-            <div className="text-5xl mb-4">⚽</div>
-            <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
-            <p className="text-muted-foreground mb-6">
-              {hasFilters ? "Try adjusting your filters." : "Be the first trainer to post a session."}
-            </p>
-            {hasFilters && <Button onClick={resetFilters}>Clear all filters</Button>}
-          </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filtered.map((session) => <SessionCard key={session.id} session={session} />)}
-          </div>
-        )}
-      </div>
-
-      {/* Coming Soon section */}
-      {upcomingPlans.length > 0 && (
-        <div className="border-t bg-white py-10 px-4">
-          <div className="container max-w-7xl">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-500" />
-                <div>
-                  <h2 className="text-lg font-bold">Gauge Interest</h2>
-                  <p className="text-sm text-muted-foreground">Trainers planning upcoming sessions — let them know you're interested.</p>
-                </div>
-              </div>
+      {/* Session grid */}
+      {view === "sessions" && (
+        <div className="container max-w-7xl py-8 px-4">
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />)}
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {upcomingPlans.slice(0, 3).map((plan) => {
+          ) : filtered.length === 0 ? (
+            <div className="bg-white border rounded-2xl p-12 text-center">
+              <div className="text-5xl mb-4">⚽</div>
+              <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
+              <p className="text-muted-foreground mb-6">
+                {hasFilters ? "Try adjusting your filters." : "Be the first trainer to post a session."}
+              </p>
+              {hasFilters && <Button onClick={resetFilters}>Clear all filters</Button>}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filtered.map((session) => <SessionCard key={session.id} session={session} />)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Gauge Interest section */}
+      {view === "gauge" && (
+        <div className="container max-w-7xl py-8 px-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {upcomingPlans.map((plan) => {
                 const interested = interestedPlanIds.has(plan.id);
                 const label = plan.dayOfWeek
                   ? `Every ${plan.dayOfWeek}${plan.time ? ` · ${fmt(plan.time)}` : ""}`
@@ -233,7 +250,6 @@ function SessionsPageInner() {
                 );
               })}
             </div>
-          </div>
         </div>
       )}
     </div>
