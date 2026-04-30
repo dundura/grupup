@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft, MapPin, Star, Clock, Users, CalendarDays,
-  Shield, ChevronRight,
+  Shield, ChevronRight, Pencil,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
@@ -177,10 +177,19 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
 
       {/* Back */}
       <div className="bg-white border-b sticky top-16 z-10">
-        <div className="container py-3">
+        <div className="container py-3 flex items-center justify-between">
           <Link href="/groups" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to sessions
           </Link>
+          {isAdminUser && (
+            <Link
+              href={`/trainer/sessions/${session.id}/edit`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#0F3154" }}
+            >
+              <Pencil className="h-3.5 w-3.5" /> Edit Listing
+            </Link>
+          )}
         </div>
       </div>
 
