@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SessionCard } from "@/components/marketing/SessionCard";
@@ -20,6 +20,7 @@ function SessionsPageInner() {
   const [selectedSport, setSelectedSport] = useState(
     initialSport ? initialSport.charAt(0).toUpperCase() + initialSport.slice(1) : "All Sports"
   );
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/sessions")
@@ -54,24 +55,47 @@ function SessionsPageInner() {
     <div className="min-h-screen bg-[#f7f8fa]">
 
       {/* Search bar */}
-      <div className="bg-white border-b py-6 px-4">
+      <div className="bg-white border-b px-4">
         <div className="container max-w-7xl">
-          <h1 className="text-2xl font-bold mb-5">Find a Group Session</h1>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input type="text" placeholder="Search by city or zip code…"
-                value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-white h-11" />
-            </div>
-            <select value={selectedSport} onChange={(e) => setSelectedSport(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-input text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring h-11">
-              {sports.map((s) => <option key={s}>{s}</option>)}
-            </select>
-            <button className="px-6 h-11 rounded-xl text-white font-semibold text-sm whitespace-nowrap"
-              style={{ backgroundColor: "#0F3154" }}>
-              <Search className="h-4 w-4 inline mr-2" />Find Sessions
+
+          {/* Mobile: compact header row */}
+          <div className="sm:hidden flex items-center justify-between py-4">
+            <h1 className="text-lg font-bold">Find a Session</h1>
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-xl border transition-colors"
+              style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+              <SlidersHorizontal className="h-4 w-4" />
+              {hasFilters ? "Filters (on)" : "Filters"}
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
             </button>
           </div>
+
+          {/* Desktop: always visible; Mobile: collapsible */}
+          <div className={`${filtersOpen ? "block" : "hidden"} sm:block pb-6 sm:pt-6`}>
+            <h1 className="text-2xl font-bold mb-5 hidden sm:block">Find a Group Session</h1>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input type="text" placeholder="Search by city, zip code, or trainer…"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); }}
+                  className="pl-9 bg-white h-11" />
+              </div>
+              <select value={selectedSport}
+                onChange={(e) => { setSelectedSport(e.target.value); setFiltersOpen(false); }}
+                className="px-3 py-2 rounded-lg border border-input text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ring h-11">
+                {sports.map((s) => <option key={s}>{s}</option>)}
+              </select>
+              <button
+                onClick={() => setFiltersOpen(false)}
+                className="px-6 h-11 rounded-xl text-white font-semibold text-sm whitespace-nowrap"
+                style={{ backgroundColor: "#0F3154" }}>
+                <Search className="h-4 w-4 inline mr-2" />Find Sessions
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
