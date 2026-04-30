@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { completeOnboarding } from "@/app/onboarding/_actions";
-import { CheckCircle, Plus, X, Camera, Loader2, ExternalLink } from "lucide-react";
+import { CheckCircle, Plus, X, Camera, Loader2, ExternalLink, ImagePlus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PhotoCropModal } from "@/components/ui/PhotoCropModal";
@@ -74,6 +74,9 @@ export default function ProfilePage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
+  const [uploadingGridPhoto, setUploadingGridPhoto] = useState(false);
+  const gridPhotoRef = useRef<HTMLInputElement>(null);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; country?: string; city?: string; sport?: string; sports?: string[]; level?: string;
@@ -85,6 +88,7 @@ export default function ProfilePage() {
     position?: string; improvementAreas?: string[];
     socials?: { instagram?: string; tiktok?: string; twitter?: string; youtube?: string; facebook?: string; snapchat?: string };
     playerSports?: string[]; videoLinks?: string[]; childProfiles?: ChildProfile[];
+    profilePhotos?: string[];
   };
 
   function buildForm(u: typeof user) {
@@ -131,9 +135,45 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isLoaded && user) {
       setForm(buildForm(user));
+      const m = user.publicMetadata as { profilePhotos?: string[] };
+      setProfilePhotos(m.profilePhotos ?? []);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
+
+  async function uploadGridPhoto(file: File) {
+    if (!file.type.startsWith("image/")) return;
+    if (profilePhotos.length >= 6) return;
+    setUploadingGridPhoto(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      });
+      const json = await res.json();
+      await fetch(json.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+      const updated = [...profilePhotos, json.cdnUrl];
+      setProfilePhotos(updated);
+      await fetch("/api/player/photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photos: updated }),
+      });
+    } finally {
+      setUploadingGridPhoto(false);
+    }
+  }
+
+  async function removeGridPhoto(url: string) {
+    const updated = profilePhotos.filter((p) => p !== url);
+    setProfilePhotos(updated);
+    await fetch("/api/player/photos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ photos: updated }),
+    });
+  }
 
   function set(key: string, val: string | boolean) { setForm((f) => ({ ...f, [key]: val })); }
 
@@ -609,6 +649,39 @@ export default function ProfilePage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Photo grid */}
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">
+                  Highlight photos <span className="text-muted-foreground font-normal">(up to 6 · auto-saves)</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {profilePhotos.map((url) => (
+                    <div key={url} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group">
+                      <Image src={url} alt="Highlight" fill className="object-cover" sizes="120px" unoptimized />
+                      <button
+                        type="button"
+                        onClick={() => removeGridPhoto(url)}
+                        className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {profilePhotos.length < 6 && (
+                    <button
+                      type="button"
+                      onClick={() => gridPhotoRef.current?.click()}
+                      disabled={uploadingGridPhoto}
+                      className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-[#0F3154]/50 flex items-center justify-center transition-colors">
+                      {uploadingGridPhoto
+                        ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        : <ImagePlus className="h-5 w-5 text-muted-foreground" />}
+                    </button>
+                  )}
+                </div>
+                <input ref={gridPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadGridPhoto(f); e.target.value = ""; }} />
               </div>
 
               {/* Video links */}

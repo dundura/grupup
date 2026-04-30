@@ -42,6 +42,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     videoLinks?: string[]; disableMessages?: boolean;
     availableForFreePlay?: boolean; openToTrain?: boolean;
     position?: string; improvementAreas?: string[];
+    profilePhotos?: string[];
     socials?: { instagram?: string; tiktok?: string; twitter?: string; youtube?: string; facebook?: string; snapchat?: string };
   };
   const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
@@ -110,7 +111,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
-      <div className="max-w-5xl mx-auto px-4 py-10 lg:flex lg:gap-8 lg:items-start">
+      <div className="max-w-5xl mx-auto px-4 py-10 lg:flex lg:gap-8 lg:items-start lg:justify-between">
       <div className="flex-1 min-w-0">
         <Link href="/connect" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ChevronLeft className="h-4 w-4" /> Back to Connect
@@ -273,6 +274,20 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
           )}
         </div>
 
+        {/* Highlight photos */}
+        {(meta.profilePhotos ?? []).length > 0 && (
+          <div className="bg-white rounded-2xl border shadow-sm p-5 mb-5">
+            <h2 className="font-bold text-sm uppercase tracking-wider text-muted-foreground mb-3">Photos</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(meta.profilePhotos ?? []).map((url, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" sizes="200px" unoptimized />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Highlight videos */}
         {meta.videoLinks && meta.videoLinks.length > 0 && (
           <div className="bg-white rounded-2xl border shadow-sm p-5 mb-5">
@@ -356,7 +371,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
         {/* Followers sidebar */}
         {followerProfiles.length > 0 && (
           <div className="hidden lg:block w-64 shrink-0">
-            <div className="bg-white rounded-2xl border shadow-sm p-4 sticky top-6">
+            <div className="bg-white rounded-2xl border shadow-sm p-4 sticky top-24">
               <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
                 Followers <span style={{ color: "#0F3154" }}>({followerCount})</span>
               </h2>
