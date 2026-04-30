@@ -61,7 +61,21 @@ export default function DashboardPage() {
     id: number; name: string; birthYear?: number; sport?: string; skillLevel?: string; notes?: string; isDefault?: boolean;
   }>>([]);
   const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string; photo: string; city: string; bio: string; isPublic: boolean } | null>(null);
-  const [activePlayerProfileId, setActivePlayerProfileId] = useState<number | null>(null);
+  const [activePlayerProfileId, setActivePlayerProfileId] = useState<number | null>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("activePlayerProfileId");
+      return stored ? parseInt(stored) : null;
+    }
+    return null;
+  });
+
+  function switchProfile(id: number | null) {
+    setActivePlayerProfileId(id);
+    if (typeof window !== "undefined") {
+      if (id === null) localStorage.removeItem("activePlayerProfileId");
+      else localStorage.setItem("activePlayerProfileId", String(id));
+    }
+  }
   const [savingProfile, setSavingProfile] = useState(false);
   const [reminding, setReminding] = useState<number | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
@@ -293,7 +307,14 @@ export default function DashboardPage() {
     );
   }
 
-  const photo = trainerProfile?.photo || user?.imageUrl || "";
+  const activeKid = activePlayerProfileId !== null
+    ? playerProfiles.find((p) => p.id === activePlayerProfileId) ?? null
+    : null;
+
+  const photo = activeKid
+    ? ((activeKid as any).photo || "")
+    : (trainerProfile?.photo || user?.imageUrl || "");
+  const displayName = activeKid ? activeKid.name : firstName;
   const profileComplete = role === "trainer"
     ? !!(trainerProfile && ((trainerProfile.sports ?? []).length > 0 || trainerProfile.sport))
     : !!(meta.city && meta.sport);
@@ -500,16 +521,29 @@ export default function DashboardPage() {
             )}
             <div>
               <h1 className="text-2xl font-bold text-white">
-                {firstName ? `Hey, ${firstName}` : "Your Dashboard"}
+                {activeKid ? activeKid.name : (firstName ? `Hey, ${firstName}` : "Your Dashboard")}
               </h1>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="inline-block bg-white/15 text-white/90 text-xs font-semibold px-2 py-0.5 rounded-full">
-                  {role === "trainer" ? "Coach" : "Player"}
+                  {activeKid ? "Player" : role === "trainer" ? "Coach" : "Player"}
                 </span>
-                {meta.city && (
-                  <span className="flex items-center gap-1 text-white/60 text-xs">
-                    <MapPin className="h-3 w-3" />{meta.city}
-                  </span>
+                {activeKid ? (
+                  <>
+                    {(activeKid as any).city && (
+                      <span className="flex items-center gap-1 text-white/60 text-xs">
+                        <MapPin className="h-3 w-3" />{(activeKid as any).city}
+                      </span>
+                    )}
+                    {activeKid.sport && (
+                      <span className="text-white/60 text-xs">{activeKid.sport}</span>
+                    )}
+                  </>
+                ) : (
+                  meta.city && (
+                    <span className="flex items-center gap-1 text-white/60 text-xs">
+                      <MapPin className="h-3 w-3" />{meta.city}
+                    </span>
+                  )
                 )}
                 {role === "trainer" && trainerProfile?.rating != null && (
                   <span className="flex items-center gap-1 text-white/60 text-xs">
@@ -526,7 +560,7 @@ export default function DashboardPage() {
             <div className="mt-5 flex items-center gap-2 flex-wrap">
               {trainerProfile && (
                 <button
-                  onClick={() => { setActivePlayerProfileId(null); }}
+                  onClick={() => switchProfile(null)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                   style={activePlayerProfileId === null
                     ? { backgroundColor: "white", color: "#0F3154" }
@@ -540,7 +574,7 @@ export default function DashboardPage() {
               {playerProfiles.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => setActivePlayerProfileId(p.id)}
+                  onClick={() => switchProfile(p.id)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                   style={activePlayerProfileId === p.id
                     ? { backgroundColor: "#DC373E", color: "white" }
@@ -551,6 +585,14 @@ export default function DashboardPage() {
                   {p.name.split(" ")[0]}
                 </button>
               ))}
+              {/* Add profile button */}
+              <button
+                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
+                className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold transition-colors"
+                style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "white" }}
+                title="Add a player profile">
+                +
+              </button>
             </div>
           )}
         </div>
@@ -593,6 +635,46 @@ export default function DashboardPage() {
 
       <div className="container max-w-4xl py-8 space-y-6">
 
+        {/* Kid profile card — shown when a player profile is active */}
+        {activeKid && (
+          <div className="bg-white rounded-2xl border shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">Profile</h2>
+              <div className="flex items-center gap-3">
+                <Link href={`/connect/player/${activeKid.id}`}
+                  className="text-xs font-semibold text-[#0F3154] hover:underline">
+                  View public profile →
+                </Link>
+                <button
+                  onClick={() => setProfileModal({ id: activeKid.id, name: activeKid.name, birthYear: activeKid.birthYear ? String(activeKid.birthYear) : "", sport: activeKid.sport ?? "", skillLevel: activeKid.skillLevel ?? "", notes: activeKid.notes ?? "", photo: (activeKid as any).photo ?? "", city: (activeKid as any).city ?? "", bio: (activeKid as any).bio ?? "", isPublic: (activeKid as any).isPublic !== false })}
+                  className="text-xs font-medium text-[#0F3154] hover:underline">
+                  Edit
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              {(activeKid as any).photo ? (
+                <img src={(activeKid as any).photo} alt={activeKid.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow shrink-0" />
+              ) : (
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white shrink-0" style={{ backgroundColor: "#DC373E" }}>
+                  {activeKid.name[0]?.toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p className="font-bold text-lg">{activeKid.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {[activeKid.sport, activeKid.skillLevel, activeKid.birthYear ? `Born ${activeKid.birthYear}` : "", (activeKid as any).city].filter(Boolean).join(" · ") || "No details yet — tap Edit to add"}
+                </p>
+              </div>
+            </div>
+            {(activeKid as any).bio && (
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{(activeKid as any).bio}</p>
+            )}
+          </div>
+        )}
+
+        {/* Profile card — only show when no kid is active */}
+        {!activeKid && (<>
         {/* Profile card */}
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
@@ -1125,70 +1207,9 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* My Players — always shown, any role can have kids */}
-        {(
-          <div className="bg-white rounded-2xl border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold">My Players</h2>
-              <button
-                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
-                className="text-sm font-semibold px-3 py-1.5 rounded-lg text-white"
-                style={{ backgroundColor: "#0F3154" }}>
-                + Add Player
-              </button>
-            </div>
+        {/* Close the !activeKid wrapper before My Players so it always shows */}
+        </>)}
 
-            {playerProfiles.length === 0 ? (
-              <div className="text-center py-6">
-                <p className="text-sm text-muted-foreground mb-3">Add player profiles to speed up booking — name, age, sport, and skill level saved for each child or athlete.</p>
-                <button
-                  onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
-                  className="text-sm font-semibold px-4 py-2 rounded-xl border-2 border-dashed transition-colors hover:bg-muted"
-                  style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-                  + Add your first player
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {playerProfiles.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white shrink-0"
-                        style={{ backgroundColor: "#0F3154" }}>
-                        {p.name[0]?.toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm">{p.name}
-                          {p.isDefault && <span className="ml-2 text-xs font-normal text-muted-foreground">(default)</span>}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {[p.sport, p.skillLevel, p.birthYear ? `b. ${p.birthYear}` : ""].filter(Boolean).join(" · ") || "No details"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!p.isDefault && (
-                        <button onClick={() => setDefaultProfile(p.id)}
-                          className="text-xs text-muted-foreground hover:text-foreground">
-                          Set default
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setProfileModal({ id: p.id, name: p.name, birthYear: p.birthYear ? String(p.birthYear) : "", sport: p.sport ?? "", skillLevel: p.skillLevel ?? "", notes: p.notes ?? "", photo: (p as any).photo ?? "", city: (p as any).city ?? "", bio: (p as any).bio ?? "", isPublic: (p as any).isPublic !== false })}
-                        className="text-xs font-semibold text-[#0F3154] hover:underline">
-                        Edit
-                      </button>
-                      <button onClick={() => deleteProfile(p.id)}
-                        className="text-xs text-muted-foreground hover:text-red-600">
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Player: My Sessions */}
         {role !== "trainer" && (
