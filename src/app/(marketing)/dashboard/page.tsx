@@ -92,12 +92,14 @@ export default function DashboardPage() {
         fetch("/api/trainer/stripe/status").then((r) => r.json()),
         fetch("/api/trainer/follow-requests").then((r) => r.json()),
         fetch("/api/training-requests").then((r) => r.json()).catch(() => []),
-      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs, tRequests]) => {
+        fetch("/api/player/profiles").then((r) => r.json()).catch(() => []),
+      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs, tRequests, profiles]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
         setTrainerFollowRequests(Array.isArray(trainerReqs) ? trainerReqs : []);
         if (Array.isArray(tRequests)) setTrainingRequests(tRequests);
+        if (Array.isArray(profiles)) setPlayerProfiles(profiles);
         setIsArchived(profile?.isArchived ?? false);
         setStripeConnected(stripeStatus?.connected ?? false);
         setLoading(false);
@@ -1055,8 +1057,8 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Player: My Players */}
-        {role !== "trainer" && (
+        {/* My Players — always shown, any role can have kids */}
+        {(
           <div className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">My Players</h2>
