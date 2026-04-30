@@ -557,3 +557,74 @@ export async function sendTrainerNewBooking({
     `,
   });
 }
+
+export async function sendGaugeInterestToFollowers({
+  followerEmails,
+  trainerName,
+  trainerPhoto,
+  trainerId,
+  dateLabel,
+  sport,
+  city,
+  note,
+}: {
+  followerEmails: { email: string; name: string }[];
+  trainerName: string;
+  trainerPhoto?: string;
+  trainerId: string;
+  dateLabel: string;
+  sport?: string;
+  city?: string;
+  note?: string;
+}) {
+  const resend = getResend();
+  const profileUrl = `https://www.grupup.app/groups/${trainerId}`;
+  const details = [sport, city].filter(Boolean).join(" · ");
+
+  for (const { email, name } of followerEmails) {
+    try {
+      await resend.emails.send({
+        from: FROM,
+        to: email,
+        bcc: ADMIN_BCC,
+        subject: `${trainerName} is gauging interest for an upcoming session`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
+
+            <!-- Header -->
+            <div style="background: #0F3154; padding: 28px 32px; border-radius: 12px 12px 0 0;">
+              <p style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">
+                Grup<span style="color: #DC373E;">Up</span>
+              </p>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+
+              ${trainerPhoto ? `<img src="${trainerPhoto}" alt="${trainerName}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 3px solid #f0f4f9;" />` : ""}
+
+              <h1 style="margin: 0 0 6px; font-size: 20px; color: #0F3154; font-weight: 800;">${trainerName} is planning a session</h1>
+              <p style="margin: 0 0 24px; color: #6b7280; font-size: 15px;">Hey ${name}, a trainer you follow is gauging interest for an upcoming session. Let them know you're in!</p>
+
+              <!-- Plan card -->
+              <div style="background: #fff8f8; border: 2px solid #DC373E; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; font-size: 18px; font-weight: 800; color: #0F3154;">${dateLabel}</p>
+                ${details ? `<p style="margin: 0 0 8px; font-size: 14px; color: #6b7280;">${details}</p>` : ""}
+                ${note ? `<p style="margin: 0; font-size: 13px; color: #6b7280; font-style: italic;">"${note}"</p>` : ""}
+              </div>
+
+              <a href="${profileUrl}" style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; margin-bottom: 20px;">
+                I'm Interested →
+              </a>
+
+              <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">
+                You're receiving this because you follow ${trainerName} on GrupUp.<br />
+                <a href="https://www.grupup.app/dashboard" style="color: #9ca3af;">Manage your follows</a>
+              </p>
+            </div>
+          </div>
+        `,
+      });
+    } catch {}
+  }
+}
