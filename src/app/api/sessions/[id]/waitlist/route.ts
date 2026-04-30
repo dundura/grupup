@@ -55,7 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     // Return success immediately — emails fire after
-    const sessionUrl = `https://grupup.app/sessions/${sessionId}`;
+    const sessionUrl = `https://www.grupup.app/sessions/${sessionId}`;
 
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
