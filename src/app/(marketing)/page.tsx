@@ -1,5 +1,6 @@
 import { Hero } from "@/components/marketing/Hero";
 import { TrustSection } from "@/components/marketing/TrustSection";
+import { FeaturedTrainersCarousel } from "@/components/marketing/FeaturedTrainersCarousel";
 import { BlogPreview } from "@/components/marketing/BlogPreview";
 import { Testimonials } from "@/components/marketing/Testimonials";
 import { AppDownloadSection } from "@/components/marketing/AppDownloadSection";
@@ -10,6 +11,7 @@ export default function HomePage() {
     <>
       <Hero />
       <TrustSection />
+      <FeaturedTrainersCarousel />
       <BlogPreview />
       <Testimonials />
       <AppDownloadSection />
