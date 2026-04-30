@@ -282,6 +282,19 @@ export const trainerPlanInterests = pgTable("trainer_plan_interests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const trainerClients = pgTable("trainer_clients", {
+  id: serial("id").primaryKey(),
+  trainerClerkId: varchar("trainer_clerk_id", { length: 255 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 30 }),
+  sport: varchar("sport", { length: 100 }),
+  level: varchar("level", { length: 50 }),
+  groupTag: varchar("group_tag", { length: 100 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const playerProfiles = pgTable("player_profiles", {
   id: serial("id").primaryKey(),
   clerkUserId: varchar("clerk_user_id", { length: 255 }).notNull(),

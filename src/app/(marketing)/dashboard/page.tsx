@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import TrainerCrm from "@/components/trainer/TrainerCrm";
 import {
   Plus, Users, Search, Star, MapPin, Pencil,
   CheckCircle, AlertCircle, ExternalLink,
@@ -1171,6 +1172,9 @@ export default function DashboardPage() {
         )}
 
 
+
+        {/* Trainer: CRM */}
+        {isTrainerMode && <TrainerCrm />}
 
         {/* Player: My Sessions */}
         {!isTrainerMode && (
