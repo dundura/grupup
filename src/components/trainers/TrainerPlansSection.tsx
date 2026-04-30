@@ -69,9 +69,9 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
     <div className="rounded-2xl border-2 shadow-sm p-5 overflow-hidden" style={{ borderColor: "#DC373E", backgroundColor: "#fff8f8" }}>
       <div className="flex items-center gap-2 mb-1">
         <Sparkles className="h-4 w-4 text-amber-500" />
-        <p className="font-bold text-base" style={{ color: "#DC373E" }}>Coming Soon</p>
+        <p className="font-bold text-base" style={{ color: "#DC373E" }}>Gauge Interest</p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">Dates being considered — tap to express interest and be first to know.</p>
+      <p className="text-xs text-muted-foreground mb-4">Dates being considered — tap to let this trainer know you're interested.</p>
 
       <div className="space-y-3">
         {plans.map((plan) => {

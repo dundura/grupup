@@ -174,8 +174,8 @@ function SessionsPageInner() {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-amber-500" />
                 <div>
-                  <h2 className="text-lg font-bold">Coming Soon</h2>
-                  <p className="text-sm text-muted-foreground">Trainers planning upcoming sessions — express interest to get notified first.</p>
+                  <h2 className="text-lg font-bold">Gauge Interest</h2>
+                  <p className="text-sm text-muted-foreground">Trainers planning upcoming sessions — let them know you're interested.</p>
                 </div>
               </div>
             </div>
