@@ -563,6 +563,28 @@ export default function DashboardPage() {
       </div>
 
 
+      {/* Trainer quick-nav */}
+      {isTrainerMode && (
+        <div className="border-b bg-white sticky top-0 z-10">
+          <div className="container max-w-4xl flex gap-1 overflow-x-auto py-2 px-4 scrollbar-hide">
+            {[
+              { label: "Sessions", href: "#sessions" },
+              { label: "Requests", href: "#requests" },
+              { label: "Earnings", href: "#earnings" },
+              { label: "My Clients", href: "#crm" },
+            ].map(({ label, href }) => (
+              <a
+                key={href}
+                href={href}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50 transition-colors text-[#0F3154]"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="container max-w-4xl py-8 space-y-6">
 
         {/* ── Profile picker ── */}
@@ -879,7 +901,7 @@ export default function DashboardPage() {
 
         {/* Trainer: Sessions */}
         {isTrainerMode && (
-          <div className="bg-white rounded-2xl border p-6">
+          <div id="sessions" className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold">
                 My Sessions
@@ -1073,7 +1095,7 @@ export default function DashboardPage() {
 
         {/* Trainer: Training Requests inbox */}
         {isTrainerMode && trainingRequests.length > 0 && (
-          <div className="bg-white rounded-2xl border p-6">
+          <div id="requests" className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-bold">Training Requests</h2>
@@ -1127,7 +1149,7 @@ export default function DashboardPage() {
 
         {/* Trainer: Earnings / Bookings */}
         {isTrainerMode && trainerBookings.length > 0 && (
-          <div className="bg-white rounded-2xl border p-6">
+          <div id="earnings" className="bg-white rounded-2xl border p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-base font-bold">Earnings</h2>
@@ -1174,7 +1196,7 @@ export default function DashboardPage() {
 
 
         {/* Trainer: CRM */}
-        {isTrainerMode && <TrainerCrm />}
+        {isTrainerMode && <div id="crm"><TrainerCrm /></div>}
 
         {/* Player: My Sessions */}
         {!isTrainerMode && (
