@@ -83,20 +83,20 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
       };
 
       // Show player_profiles (kids/athletes) for ANY account role, unless parent is hidden
-      const dbProfiles = meta.isHidden ? [] : (profilesByUser[u.id] ?? []);
+      const dbProfiles = meta.isHidden ? [] : (profilesByUser[u.id] ?? []).filter((p) => p.isPublic !== false);
       for (const p of dbProfiles) {
         approvedPlayers.push({
-          id: `player-${p.id}`,
+          id: `player/${p.id}`,
           clerkId: u.id,
           name: p.name,
-          photo: "",
-          city: meta.city ?? "",
+          photo: p.photo ?? "",
+          city: p.city ?? meta.city ?? "",
           country: meta.country ?? "",
           zipCode: meta.zipCode ?? "",
           sports: p.sport ? [p.sport] : [],
           level: p.skillLevel ?? "",
           league: "",
-          bio: p.notes ?? "",
+          bio: p.bio ?? p.notes ?? "",
           team: "",
           birthYear: p.birthYear ? String(p.birthYear) : "",
           gender: "",

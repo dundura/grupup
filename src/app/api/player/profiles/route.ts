@@ -14,15 +14,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { name, birthYear, sport, skillLevel, notes, isDefault } = await req.json();
+  const { name, birthYear, sport, skillLevel, notes, isDefault, photo, city, bio, isPublic } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  // If setting as default, clear existing defaults
   if (isDefault) {
     await db.update(playerProfiles).set({ isDefault: false }).where(eq(playerProfiles.clerkUserId, userId));
   }
 
-  // First profile is always default
   const existing = await db.select().from(playerProfiles).where(eq(playerProfiles.clerkUserId, userId));
   const [profile] = await db.insert(playerProfiles).values({
     clerkUserId: userId,
@@ -31,6 +29,10 @@ export async function POST(req: NextRequest) {
     sport: sport?.trim() || null,
     skillLevel: skillLevel?.trim() || null,
     notes: notes?.trim() || null,
+    photo: photo?.trim() || null,
+    city: city?.trim() || null,
+    bio: bio?.trim() || null,
+    isPublic: isPublic !== false,
     isDefault: isDefault || existing.length === 0,
   }).returning();
 

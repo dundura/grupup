@@ -8,7 +8,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { name, birthYear, sport, skillLevel, notes, isDefault } = await req.json();
+  const { name, birthYear, sport, skillLevel, notes, isDefault, photo, city, bio, isPublic } = await req.json();
 
   if (isDefault) {
     await db.update(playerProfiles).set({ isDefault: false }).where(eq(playerProfiles.clerkUserId, userId));
@@ -21,6 +21,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       sport: sport?.trim() || null,
       skillLevel: skillLevel?.trim() || null,
       notes: notes?.trim() || null,
+      photo: photo?.trim() || null,
+      city: city?.trim() || null,
+      bio: bio?.trim() || null,
+      isPublic: isPublic !== false,
       isDefault: isDefault ?? false,
     })
     .where(and(eq(playerProfiles.id, parseInt(id)), eq(playerProfiles.clerkUserId, userId)))
@@ -38,7 +42,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     .where(and(eq(playerProfiles.id, parseInt(id)), eq(playerProfiles.clerkUserId, userId)))
     .returning();
 
-  // If deleted profile was default, make the first remaining profile default
   if (deleted?.isDefault) {
     const remaining = await db.select().from(playerProfiles).where(eq(playerProfiles.clerkUserId, userId));
     if (remaining.length > 0) {

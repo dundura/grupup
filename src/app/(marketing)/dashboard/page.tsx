@@ -60,7 +60,8 @@ export default function DashboardPage() {
   const [playerProfiles, setPlayerProfiles] = useState<Array<{
     id: number; name: string; birthYear?: number; sport?: string; skillLevel?: string; notes?: string; isDefault?: boolean;
   }>>([]);
-  const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string } | null>(null);
+  const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string; photo: string; city: string; bio: string; isPublic: boolean } | null>(null);
+  const [activePlayerProfileId, setActivePlayerProfileId] = useState<number | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [reminding, setReminding] = useState<number | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<number | null>(null);
@@ -191,6 +192,10 @@ export default function DashboardPage() {
           sport: profileModal.sport || null,
           skillLevel: profileModal.skillLevel || null,
           notes: profileModal.notes || null,
+          photo: profileModal.photo || null,
+          city: profileModal.city || null,
+          bio: profileModal.bio || null,
+          isPublic: profileModal.isPublic,
         }),
       });
       const saved = await res.json();
@@ -515,8 +520,76 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Profile switcher — Trainer + all kids */}
+          {(trainerProfile || playerProfiles.length > 0) && (
+            <div className="mt-5 flex items-center gap-2 flex-wrap">
+              {trainerProfile && (
+                <button
+                  onClick={() => { setActivePlayerProfileId(null); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
+                  style={activePlayerProfileId === null
+                    ? { backgroundColor: "white", color: "#0F3154" }
+                    : { backgroundColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}>
+                  {trainerProfile.photo
+                    ? <img src={trainerProfile.photo} className="h-5 w-5 rounded-full object-cover" />
+                    : <span className="h-5 w-5 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold">{firstName?.[0]}</span>}
+                  {firstName} <span className="opacity-60">· Trainer</span>
+                </button>
+              )}
+              {playerProfiles.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setActivePlayerProfileId(p.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
+                  style={activePlayerProfileId === p.id
+                    ? { backgroundColor: "#DC373E", color: "white" }
+                    : { backgroundColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}>
+                  {(p as any).photo
+                    ? <img src={(p as any).photo} className="h-5 w-5 rounded-full object-cover" />
+                    : <span className="h-5 w-5 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold">{p.name[0]}</span>}
+                  {p.name.split(" ")[0]}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Active player profile banner */}
+      {activePlayerProfileId !== null && (() => {
+        const activeP = playerProfiles.find((p) => p.id === activePlayerProfileId);
+        if (!activeP) return null;
+        return (
+          <div className="bg-[#DC373E]/10 border-b border-[#DC373E]/20 px-4 py-3">
+            <div className="container max-w-4xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  {activeP.name[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-sm">{activeP.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[activeP.sport, activeP.skillLevel, activeP.birthYear ? `b. ${activeP.birthYear}` : ""].filter(Boolean).join(" · ") || "Player"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link href={`/connect/player/${activeP.id}`}
+                  className="text-xs font-semibold text-[#DC373E] hover:underline">
+                  View profile →
+                </Link>
+                <button
+                  onClick={() => setProfileModal({ id: activeP.id, name: activeP.name, birthYear: activeP.birthYear ? String(activeP.birthYear) : "", sport: activeP.sport ?? "", skillLevel: activeP.skillLevel ?? "", notes: activeP.notes ?? "", photo: (activeP as any).photo ?? "", city: (activeP as any).city ?? "", bio: (activeP as any).bio ?? "", isPublic: (activeP as any).isPublic !== false })}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground">
+                  Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="container max-w-4xl py-8 space-y-6">
 
@@ -1058,7 +1131,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">My Players</h2>
               <button
-                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "" })}
+                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
                 className="text-sm font-semibold px-3 py-1.5 rounded-lg text-white"
                 style={{ backgroundColor: "#0F3154" }}>
                 + Add Player
@@ -1069,7 +1142,7 @@ export default function DashboardPage() {
               <div className="text-center py-6">
                 <p className="text-sm text-muted-foreground mb-3">Add player profiles to speed up booking — name, age, sport, and skill level saved for each child or athlete.</p>
                 <button
-                  onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "" })}
+                  onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
                   className="text-sm font-semibold px-4 py-2 rounded-xl border-2 border-dashed transition-colors hover:bg-muted"
                   style={{ borderColor: "#0F3154", color: "#0F3154" }}>
                   + Add your first player
@@ -1101,7 +1174,7 @@ export default function DashboardPage() {
                         </button>
                       )}
                       <button
-                        onClick={() => setProfileModal({ id: p.id, name: p.name, birthYear: p.birthYear ? String(p.birthYear) : "", sport: p.sport ?? "", skillLevel: p.skillLevel ?? "", notes: p.notes ?? "" })}
+                        onClick={() => setProfileModal({ id: p.id, name: p.name, birthYear: p.birthYear ? String(p.birthYear) : "", sport: p.sport ?? "", skillLevel: p.skillLevel ?? "", notes: p.notes ?? "", photo: (p as any).photo ?? "", city: (p as any).city ?? "", bio: (p as any).bio ?? "", isPublic: (p as any).isPublic !== false })}
                         className="text-xs font-semibold text-[#0F3154] hover:underline">
                         Edit
                       </button>
@@ -1317,8 +1390,8 @@ export default function DashboardPage() {
 
       {/* Player Profile Modal */}
       {profileModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4 my-auto">
             <h2 className="text-lg font-bold">{profileModal.id ? "Edit Player" : "Add Player"}</h2>
             <div className="space-y-3">
               <div>
@@ -1344,25 +1417,48 @@ export default function DashboardPage() {
                     className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Skill level</label>
-                <select value={profileModal.skillLevel}
-                  onChange={(e) => setProfileModal((p) => p ? { ...p, skillLevel: e.target.value } : p)}
-                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option value="">Select level</option>
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
-                  <option>Elite</option>
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Skill level</label>
+                  <select value={profileModal.skillLevel}
+                    onChange={(e) => setProfileModal((p) => p ? { ...p, skillLevel: e.target.value } : p)}
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">Select level</option>
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                    <option>Elite</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">City</label>
+                  <input value={profileModal.city}
+                    onChange={(e) => setProfileModal((p) => p ? { ...p, city: e.target.value } : p)}
+                    placeholder="e.g. Cary"
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Notes <span className="font-normal">(optional)</span></label>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Bio <span className="font-normal">(optional — shown on their profile page)</span></label>
+                <textarea value={profileModal.bio}
+                  onChange={(e) => setProfileModal((p) => p ? { ...p, bio: e.target.value } : p)}
+                  placeholder="e.g. Goalkeeper looking to improve footwork and distribution..."
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Notes <span className="font-normal">(private — for booking only)</span></label>
                 <input value={profileModal.notes}
                   onChange={(e) => setProfileModal((p) => p ? { ...p, notes: e.target.value } : p)}
-                  placeholder="e.g. goalkeeper, left-footed"
+                  placeholder="e.g. left-footed, needs extra attention on defending"
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" checked={profileModal.isPublic}
+                  onChange={(e) => setProfileModal((p) => p ? { ...p, isPublic: e.target.checked } : p)}
+                  className="accent-[#0F3154] h-4 w-4" />
+                <span className="text-sm font-medium">Show on Connect page</span>
+              </label>
             </div>
             <div className="flex gap-3 pt-1">
               <button onClick={() => setProfileModal(null)}

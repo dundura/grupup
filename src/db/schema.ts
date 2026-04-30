@@ -289,6 +289,10 @@ export const playerProfiles = pgTable("player_profiles", {
   sport: varchar("sport", { length: 100 }),
   skillLevel: varchar("skill_level", { length: 50 }),
   notes: text("notes"),
+  photo: text("photo"),
+  city: varchar("city", { length: 100 }),
+  bio: text("bio"),
+  isPublic: boolean("is_public").default(true),
   isDefault: boolean("is_default").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
