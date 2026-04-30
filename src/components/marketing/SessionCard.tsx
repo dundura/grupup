@@ -158,9 +158,9 @@ export function SessionCard({ session }: SessionCardProps) {
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{session.venue}, {session.city}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Users className="h-3.5 w-3.5 shrink-0" />
-            <span>Ages {session.ageRange}</span>
+            <span className="truncate">Ages {session.ageRange}</span>
           </div>
         </div>
 
