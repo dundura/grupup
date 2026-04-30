@@ -249,6 +249,7 @@ export const trainerSessions = pgTable("trainer_sessions", {
   allowLateBooking: boolean("allow_late_booking").default(true),
   waitlistEnabled: boolean("waitlist_enabled").default(false),
   isActive: boolean("is_active").default(true),
+  isFeatured: boolean("is_featured").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

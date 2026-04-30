@@ -68,6 +68,7 @@ export async function GET() {
         ageRange: s.ageRange ?? "",
         recurring: s.recurring ?? false,
         recurringWeeks: (s as any).recurringWeeks ?? null,
+        isFeatured: s.isFeatured ?? false,
         specialOffer: (s.discountPct && s.discountPct > 0)
           ? { label: s.discountLabel || `${s.discountPct}% Off`, discountPct: s.discountPct }
           : undefined,
