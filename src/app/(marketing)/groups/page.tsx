@@ -196,6 +196,22 @@ function SessionsPageInner() {
       {/* Gauge Interest section */}
       {view === "gauge" && (
         <div className="container max-w-7xl py-8 px-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-6 flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm text-amber-900">These are potential sessions — not yet confirmed</p>
+              <p className="text-sm text-amber-800 mt-0.5">
+                Your trainers are considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.
+              </p>
+            </div>
+          </div>
+          {upcomingPlans.length === 0 ? (
+            <div className="bg-white border rounded-2xl p-12 text-center">
+              <Sparkles className="h-10 w-10 mx-auto mb-3 text-amber-400" />
+              <p className="font-semibold text-base mb-1">No plans posted yet</p>
+              <p className="text-sm text-muted-foreground">Check back soon — trainers will post potential sessions here.</p>
+            </div>
+          ) : null}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {upcomingPlans.map((plan) => {
                 const interested = interestedPlanIds.has(plan.id);
