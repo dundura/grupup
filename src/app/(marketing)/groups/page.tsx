@@ -179,8 +179,8 @@ function SessionsPageInner() {
                 </div>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {upcomingPlans.map((plan) => {
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {upcomingPlans.slice(0, 3).map((plan) => {
                 const interested = interestedPlanIds.has(plan.id);
                 const label = plan.dayOfWeek
                   ? `Every ${plan.dayOfWeek}${plan.time ? ` · ${fmt(plan.time)}` : ""}`
@@ -188,42 +188,47 @@ function SessionsPageInner() {
                     ? new Date(plan.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (plan.time ? ` · ${fmt(plan.time)}` : "")
                     : plan.time ? fmt(plan.time) : "Date TBD";
                 return (
-                  <div key={plan.id} className="bg-white rounded-2xl border-2 p-4 flex flex-col gap-3" style={{ borderColor: "#f1f5f9" }}>
-                    {/* Trainer row */}
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 rounded-full overflow-hidden shrink-0 bg-[#0F3154]">
-                        {plan.trainerPhoto ? (
-                          <Image src={plan.trainerPhoto} alt={plan.trainerName} fill className="object-cover" sizes="32px" unoptimized />
-                        ) : (
-                          <span className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
-                            {plan.trainerName[0]}
-                          </span>
-                        )}
-                      </div>
-                      <a href={`/groups/${plan.trainerId}`} className="text-sm font-semibold hover:underline truncate" style={{ color: "#0F3154" }}>
+                  <div key={plan.id} className="bg-white rounded-2xl border overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                    {/* Trainer photo */}
+                    <a href={`/groups/${plan.trainerId}`} className="block relative w-full aspect-[4/3] overflow-hidden bg-[#0F3154]">
+                      {plan.trainerPhoto ? (
+                        <Image src={plan.trainerPhoto} alt={plan.trainerName} fill className="object-cover object-top" sizes="400px" unoptimized />
+                      ) : (
+                        <span className="absolute inset-0 flex items-center justify-center text-5xl font-extrabold text-white/30">
+                          {plan.trainerName[0]}
+                        </span>
+                      )}
+                      {/* Gauge interest badge */}
+                      <span className="absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>
+                        ✦ Gauge Interest
+                      </span>
+                    </a>
+
+                    {/* Content */}
+                    <div className="px-4 pt-4 pb-4 flex flex-col flex-1 gap-2">
+                      <a href={`/groups/${plan.trainerId}`} className="text-xs font-semibold text-muted-foreground hover:underline truncate">
                         {plan.trainerName}
                       </a>
-                    </div>
-                    {/* Date label */}
-                    <div>
-                      <p className="font-bold text-sm">{label}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      <p className="font-bold text-base leading-tight line-clamp-1">{label}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {[plan.sport, plan.city].filter(Boolean).join(" · ") || plan.note || ""}
                       </p>
                       {plan.interestCount > 0 && (
-                        <p className="text-[11px] text-muted-foreground mt-1">{plan.interestCount} interested</p>
+                        <p className="text-[11px] text-muted-foreground">{plan.interestCount} interested</p>
                       )}
+
+                      <button
+                        onClick={() => expressInterest(plan)}
+                        disabled={interested || actingPlan === plan.id}
+                        className="mt-auto w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                        style={interested
+                          ? { backgroundColor: "#0F3154", color: "white" }
+                          : { backgroundColor: "#DC373E", color: "white" }}>
+                        {interested
+                          ? <span className="flex items-center justify-center gap-1.5"><Check className="h-3.5 w-3.5" /> Interested</span>
+                          : "I'm interested"}
+                      </button>
                     </div>
-                    {/* Action */}
-                    <button
-                      onClick={() => expressInterest(plan)}
-                      disabled={interested || actingPlan === plan.id}
-                      className="mt-auto w-full py-2 rounded-xl text-sm font-semibold transition-colors"
-                      style={interested
-                        ? { backgroundColor: "#0F3154", color: "white" }
-                        : { backgroundColor: "#DC373E", color: "white" }}>
-                      {interested ? <span className="flex items-center justify-center gap-1.5"><Check className="h-3.5 w-3.5" /> Interested</span> : "I'm interested"}
-                    </button>
                   </div>
                 );
               })}
