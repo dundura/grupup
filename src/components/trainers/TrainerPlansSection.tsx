@@ -66,12 +66,12 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   if (loading || plans.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl border shadow-sm p-6">
+    <div className="rounded-2xl border-2 shadow-sm p-5 overflow-hidden" style={{ borderColor: "#DC373E", backgroundColor: "#fff8f8" }}>
       <div className="flex items-center gap-2 mb-1">
         <Sparkles className="h-4 w-4 text-amber-500" />
-        <p className="font-bold text-sm">Coming Soon</p>
+        <p className="font-bold text-base" style={{ color: "#DC373E" }}>Coming Soon</p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">Dates being considered — express interest and you'll be first to know when it's confirmed.</p>
+      <p className="text-xs text-muted-foreground mb-4">Dates being considered — tap to express interest and be first to know.</p>
 
       <div className="space-y-3">
         {plans.map((plan) => {
@@ -107,7 +107,7 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
                 className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors shrink-0"
                 style={interested
                   ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
-                  : { color: "#0F3154", borderColor: "#0F3154" }}>
+                  : { backgroundColor: "#DC373E", color: "white", borderColor: "#DC373E" }}>
                 {interested ? <><Check className="h-3 w-3" /> Interested</> : "I'm interested"}
               </button>
             </div>

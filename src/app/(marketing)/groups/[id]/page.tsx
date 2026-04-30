@@ -176,9 +176,6 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
 
-            {/* Pre-launch planned dates */}
-            <TrainerPlansSection trainerId={trainer.id} />
-
             {/* Package booking — client component */}
             <PackageBooking
               trainerId={trainer.id}
@@ -201,6 +198,9 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
 
           {/* ── RIGHT COLUMN (sidebar) ── */}
           <div className="space-y-5 lg:sticky lg:top-24">
+
+            {/* Pre-launch plans — top of sidebar */}
+            <TrainerPlansSection trainerId={trainer.id} />
 
             {/* Trainer card — desktop only */}
             <div className="hidden lg:block bg-white rounded-2xl border shadow-sm overflow-hidden">
