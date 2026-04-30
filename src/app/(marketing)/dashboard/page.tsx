@@ -758,6 +758,7 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Player: Pending Questionnaires */}
         {role !== "trainer" && pendingQuestionnaires.length > 0 && (
