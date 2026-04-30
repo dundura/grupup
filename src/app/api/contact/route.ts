@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export async function POST(req: NextRequest) {
-  const { firstName, lastName, email, subject, message } = await req.json();
+  const { firstName, lastName, email, subject, message, turnstileToken } = await req.json();
 
   if (!firstName || !lastName || !email || !message) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+
+  if (!await verifyTurnstile(turnstileToken)) {
+    return NextResponse.json({ error: "Bot check failed" }, { status: 403 });
   }
 
   if (!process.env.RESEND_API_KEY) {

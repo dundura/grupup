@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -18,7 +20,7 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -139,9 +141,15 @@ export default function ContactPage() {
               </p>
             )}
 
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={setTurnstileToken}
+              options={{ size: "invisible" }}
+            />
+
             <button
               type="submit"
-              disabled={status === "sending"}
+              disabled={status === "sending" || !turnstileToken}
               className="w-full py-3.5 rounded-lg text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-60"
               style={{ backgroundColor: "#0F3154" }}
             >

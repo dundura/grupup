@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { db } from "@/db";
 import { trainers, trainingRequests, trainingRequestResponses } from "@/db/schema";
 import { eq, or, ilike } from "drizzle-orm";
@@ -12,10 +13,14 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
     const body = await req.json();
-    const { name, email, sport, level, city, zipCode, preferredDate, preferredTime, sessions, budget, message, trainingType, groupSize } = body;
+    const { name, email, sport, level, city, zipCode, preferredDate, preferredTime, sessions, budget, message, trainingType, groupSize, turnstileToken } = body;
 
     if (!name?.trim() || !email?.trim()) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    }
+
+    if (!await verifyTurnstile(turnstileToken)) {
+      return NextResponse.json({ error: "Bot check failed" }, { status: 403 });
     }
 
     const [request] = await db.insert(trainingRequests).values({

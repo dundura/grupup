@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { CheckCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const SPORTS = ["Soccer", "Basketball", "Tennis", "Baseball", "Volleyball", "Speed & Agility", "Multi-sport", "Other"];
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "Elite"];
@@ -14,6 +15,7 @@ export default function RequestTrainingPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notified, setNotified] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [form, setForm] = useState({
     name: user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "",
     email: user?.emailAddresses?.[0]?.emailAddress ?? "",
@@ -44,7 +46,7 @@ export default function RequestTrainingPage() {
       const res = await fetch("/api/training-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       const d = await res.json();
       if (d.ok) { setSubmitted(true); setNotified(d.notified ?? 0); }
@@ -222,7 +224,13 @@ export default function RequestTrainingPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={!valid || submitting}
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={setTurnstileToken}
+            options={{ size: "invisible" }}
+          />
+
+          <button type="submit" disabled={!valid || submitting || !turnstileToken}
             className="w-full py-4 rounded-xl text-white font-bold text-base disabled:opacity-50 transition-opacity"
             style={{ backgroundColor: "#DC373E" }}>
             {submitting ? "Sending to trainers…" : "Post Training Request"}
