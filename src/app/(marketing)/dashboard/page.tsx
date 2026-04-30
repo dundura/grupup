@@ -519,7 +519,32 @@ export default function DashboardPage() {
         {/* Profile card */}
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold">My Profiles</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-base font-bold">My Profiles</h2>
+              {/* Profile type switcher — shown when user has both player + trainer profiles */}
+              {trainerProfile && (
+                <div className="flex rounded-lg border overflow-hidden text-xs font-semibold">
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/user/switch-role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "player" }) });
+                      window.location.reload();
+                    }}
+                    className="px-3 py-1.5 transition-colors"
+                    style={role !== "trainer" ? { backgroundColor: "#0F3154", color: "white" } : { color: "#6b7280" }}>
+                    Player
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/user/switch-role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "trainer" }) });
+                      window.location.reload();
+                    }}
+                    className="px-3 py-1.5 transition-colors border-l"
+                    style={role === "trainer" ? { backgroundColor: "#0F3154", color: "white" } : { color: "#6b7280" }}>
+                    Trainer
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               {role === "trainer" && (
                 <Link href="/trainer/payout"
