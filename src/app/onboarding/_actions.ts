@@ -115,10 +115,12 @@ export async function completeOnboarding(formData: {
       profileFields.profileSlug = `${slugBase}-${suffix}`;
     }
 
+    const nameUpdate = (!existingMeta.onboardingComplete || !existing.firstName)
+      ? { firstName: formData.firstName, lastName: formData.lastName }
+      : {};
     await client.users.updateUser(userId, {
       publicMetadata: { ...existingMeta, ...profileFields },
-      firstName: formData.firstName,
-      lastName: formData.lastName,
+      ...nameUpdate,
     });
 
     // Notify admin on first-time signup (any role)

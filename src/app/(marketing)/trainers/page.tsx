@@ -266,13 +266,24 @@ function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: Traine
       {/* Content */}
       <div className="px-4 pt-4 pb-4 flex flex-col flex-1">
 
-        {/* Name + rating */}
+        {/* Name + follow icon + rating */}
         <div className="flex items-start justify-between gap-2 mb-1.5">
-          <Link href={`/groups/${t.id}`}
-            className="font-bold text-lg leading-snug hover:underline"
-            style={{ color: "#0F3154" }}>
-            {t.name}
-          </Link>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Link href={`/groups/${t.id}`}
+              className="font-bold text-lg leading-snug hover:underline truncate"
+              style={{ color: "#0F3154" }}>
+              {t.name}
+            </Link>
+            {t.clerkId && (
+              <FollowButton
+                trainerClerkId={t.clerkId}
+                initialIsFollowing={!!followStatus}
+                initialStatus={followStatus}
+                isSignedIn={isSignedIn}
+                iconOnly
+              />
+            )}
+          </div>
           <div className="flex items-center gap-0.5 shrink-0">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
             <span className="text-sm font-bold">{t.rating?.toFixed(1) ?? "5.0"}</span>
@@ -339,14 +350,6 @@ function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: Traine
               View Profile
             </Link>
           </div>
-          {t.clerkId && (
-            <FollowButton
-              trainerClerkId={t.clerkId}
-              initialIsFollowing={!!followStatus}
-              initialStatus={followStatus}
-              isSignedIn={isSignedIn}
-            />
-          )}
         </div>
       </div>
     </div>

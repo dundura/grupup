@@ -9,11 +9,13 @@ export default function FollowButton({
   initialIsFollowing,
   initialStatus,
   isSignedIn,
+  iconOnly = false,
 }: {
   trainerClerkId: string;
   initialIsFollowing: boolean;
   initialStatus?: string | null;
   isSignedIn: boolean;
+  iconOnly?: boolean;
 }) {
   const [status, setStatus] = useState<string | null>(
     initialIsFollowing ? (initialStatus ?? "approved") : null
@@ -23,7 +25,7 @@ export default function FollowButton({
 
   async function handleClick() {
     if (!isSignedIn) { router.push("/sign-in"); return; }
-    if (status === "pending") return; // locked while pending
+    if (status === "pending") return;
     setLoading(true);
     try {
       const res = await fetch("/api/trainer/follow", {
@@ -38,6 +40,30 @@ export default function FollowButton({
     } finally {
       setLoading(false);
     }
+  }
+
+  if (iconOnly) {
+    const title = status === "approved" ? "Following (click to unfollow)" : status === "pending" ? "Request sent" : "Follow trainer";
+    return (
+      <button
+        onClick={handleClick}
+        disabled={loading || status === "pending"}
+        title={title}
+        className="flex items-center justify-center h-6 w-6 rounded-full transition-colors shrink-0"
+        style={
+          status === "approved"
+            ? { backgroundColor: "#0F3154", color: "white" }
+            : { backgroundColor: "transparent", color: "#94a3b8" }
+        }>
+        {status === "approved" ? (
+          <UserCheck className="h-3.5 w-3.5" />
+        ) : status === "pending" ? (
+          <Clock className="h-3.5 w-3.5" />
+        ) : (
+          <UserPlus className="h-3.5 w-3.5" />
+        )}
+      </button>
+    );
   }
 
   if (status === "approved") return (

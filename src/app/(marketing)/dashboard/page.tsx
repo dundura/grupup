@@ -103,20 +103,22 @@ export default function DashboardPage() {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
-      // Player: load follow requests, questionnaires, and bookings
+      // Player: load follow requests, questionnaires, bookings, and check for trainer profile
       Promise.all([
         fetch("/api/player/follows").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/questionnaires").then((r) => r.json()).catch(() => ({})),
         fetch("/api/player/bookings").then((r) => r.json()).catch(() => []),
         fetch("/api/player/requests").then((r) => r.json()).catch(() => []),
         fetch("/api/player/profiles").then((r) => r.json()).catch(() => []),
-      ]).then(([followData, qData, bkgs, reqs, profiles]) => {
+        fetch("/api/trainer/profile").then((r) => r.json()).catch(() => null),
+      ]).then(([followData, qData, bkgs, reqs, profiles, trainerProf]) => {
         if (followData.pending) setFollowRequests(followData.pending);
         if (followData.approved) setFollowers(followData.approved);
         if (qData.pending) setPendingQuestionnaires(qData.pending);
         if (Array.isArray(bkgs)) setPlayerBookings(bkgs);
         if (Array.isArray(reqs)) setPlayerRequests(reqs);
         if (Array.isArray(profiles)) setPlayerProfiles(profiles);
+        if (trainerProf?.id) setTrainerProfile(trainerProf);
         setLoading(false);
       });
     }
