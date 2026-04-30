@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (isTrainerMode) {
+    if (role === "trainer") {
       Promise.all([
         fetch("/api/trainer/profile").then((r) => r.json()),
         fetch("/api/trainer/sessions").then((r) => r.json()),
