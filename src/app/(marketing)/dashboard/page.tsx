@@ -555,87 +555,70 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Profile switcher — Trainer + all kids */}
-          {(trainerProfile || playerProfiles.length > 0) && (
-            <div className="mt-5 flex items-center gap-2 flex-wrap">
-              {trainerProfile && (
-                <button
-                  onClick={() => switchProfile(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                  style={activePlayerProfileId === null
-                    ? { backgroundColor: "white", color: "#0F3154" }
-                    : { backgroundColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}>
-                  {trainerProfile.photo
-                    ? <img src={trainerProfile.photo} className="h-5 w-5 rounded-full object-cover" />
-                    : <span className="h-5 w-5 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold">{firstName?.[0]}</span>}
-                  {firstName} <span className="opacity-60">· Trainer</span>
-                </button>
-              )}
-              {playerProfiles.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => switchProfile(p.id)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                  style={activePlayerProfileId === p.id
-                    ? { backgroundColor: "#DC373E", color: "white" }
-                    : { backgroundColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}>
-                  {(p as any).photo
-                    ? <img src={(p as any).photo} className="h-5 w-5 rounded-full object-cover" />
-                    : <span className="h-5 w-5 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold">{p.name[0]}</span>}
-                  {p.name.split(" ")[0]}
-                </button>
-              ))}
-              {/* Add profile button */}
-              <button
-                onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
-                className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold transition-colors"
-                style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "white" }}
-                title="Add a player profile">
-                +
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Active player profile banner */}
-      {activePlayerProfileId !== null && (() => {
-        const activeP = playerProfiles.find((p) => p.id === activePlayerProfileId);
-        if (!activeP) return null;
-        return (
-          <div className="bg-[#DC373E]/10 border-b border-[#DC373E]/20 px-4 py-3">
-            <div className="container max-w-4xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  {activeP.name[0]?.toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-bold text-sm">{activeP.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {[activeP.sport, activeP.skillLevel, activeP.birthYear ? `b. ${activeP.birthYear}` : ""].filter(Boolean).join(" · ") || "Player"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link href={`/connect/player/${activeP.id}`}
-                  className="text-xs font-semibold text-[#DC373E] hover:underline">
-                  View profile →
-                </Link>
-                <button
-                  onClick={() => setProfileModal({ id: activeP.id, name: activeP.name, birthYear: activeP.birthYear ? String(activeP.birthYear) : "", sport: activeP.sport ?? "", skillLevel: activeP.skillLevel ?? "", notes: activeP.notes ?? "", photo: (activeP as any).photo ?? "", city: (activeP as any).city ?? "", bio: (activeP as any).bio ?? "", isPublic: (activeP as any).isPublic !== false })}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground">
-                  Edit
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       <div className="container max-w-4xl py-8 space-y-6">
 
-        {/* Kid profile card — shown when a player profile is active */}
+        {/* ── Profile picker ── */}
+        <div className="bg-white rounded-2xl border p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold">Profiles</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+            {/* Trainer profile */}
+            {trainerProfile && (
+              <button onClick={() => switchProfile(null)}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+                style={activeKid === null
+                  ? { borderColor: "#0F3154", backgroundColor: "#EFF6FF" }
+                  : { borderColor: "#e5e7eb", backgroundColor: "white" }}>
+                <div className="relative w-14 h-14 rounded-full overflow-hidden bg-[#0F3154] shrink-0">
+                  {trainerProfile.photo
+                    ? <img src={trainerProfile.photo} alt={firstName} className="w-full h-full object-cover" />
+                    : <span className="w-full h-full flex items-center justify-center text-xl font-bold text-white">{firstName?.[0]}</span>}
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-sm truncate max-w-[100px]">{firstName}</p>
+                  <p className="text-xs text-muted-foreground">Trainer</p>
+                </div>
+                {activeKid === null && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>Active</span>}
+              </button>
+            )}
+
+            {/* Player profiles */}
+            {playerProfiles.map((p) => (
+              <button key={p.id} onClick={() => switchProfile(p.id)}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+                style={activeKid?.id === p.id
+                  ? { borderColor: "#DC373E", backgroundColor: "#fff8f8" }
+                  : { borderColor: "#e5e7eb", backgroundColor: "white" }}>
+                <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0"
+                  style={{ backgroundColor: "#DC373E" }}>
+                  {(p as any).photo
+                    ? <img src={(p as any).photo} alt={p.name} className="w-full h-full object-cover" />
+                    : <span className="w-full h-full flex items-center justify-center text-xl font-bold text-white">{p.name[0]}</span>}
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-sm truncate max-w-[100px]">{p.name.split(" ")[0]}</p>
+                  <p className="text-xs text-muted-foreground">{p.sport || "Player"}</p>
+                </div>
+                {activeKid?.id === p.id && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>Active</span>}
+              </button>
+            ))}
+
+            {/* Add player */}
+            <button onClick={() => setProfileModal({ name: "", birthYear: "", sport: "", skillLevel: "", notes: "", photo: "", city: "", bio: "", isPublic: true })}
+              className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-all">
+              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-400">+</div>
+              <p className="text-xs font-semibold text-muted-foreground">Add Profile</p>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Active kid profile card ── */}
         {activeKid && (
           <div className="bg-white rounded-2xl border shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
@@ -673,37 +656,11 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Profile card — only show when no kid is active */}
-        {!activeKid && (<>
-        {/* Profile card */}
+        {/* ── Trainer profile card (only when trainer is active) ── */}
+        {!activeKid && role === "trainer" && trainerProfile && (
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-bold">My Account</h2>
-              {/* Profile type switcher — shown when user has both player + trainer profiles */}
-              {trainerProfile && (
-                <div className="flex rounded-lg border overflow-hidden text-xs font-semibold">
-                  <button
-                    onClick={async () => {
-                      await fetch("/api/user/switch-role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "player" }) });
-                      window.location.reload();
-                    }}
-                    className="px-3 py-1.5 transition-colors"
-                    style={role !== "trainer" ? { backgroundColor: "#0F3154", color: "white" } : { color: "#6b7280" }}>
-                    Player
-                  </button>
-                  <button
-                    onClick={async () => {
-                      await fetch("/api/user/switch-role", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: "trainer" }) });
-                      window.location.reload();
-                    }}
-                    className="px-3 py-1.5 transition-colors border-l"
-                    style={role === "trainer" ? { backgroundColor: "#0F3154", color: "white" } : { color: "#6b7280" }}>
-                    Trainer
-                  </button>
-                </div>
-              )}
-            </div>
+            <h2 className="text-base font-bold">Trainer Profile</h2>
             <div className="flex items-center gap-3">
               {role === "trainer" && (
                 <Link href="/trainer/payout"
@@ -711,7 +668,7 @@ export default function DashboardPage() {
                   <DollarSign className="h-3.5 w-3.5" /> Payout
                 </Link>
               )}
-              <Link href={role === "trainer" ? "/trainer/setup" : "/profile"}
+              <Link href="/trainer/setup"
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Link>
@@ -1207,8 +1164,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Close the !activeKid wrapper before My Players so it always shows */}
-        </>)}
 
 
         {/* Player: My Sessions */}
