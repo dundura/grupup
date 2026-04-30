@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ChevronLeft, Clock } from "lucide-react";
 import { db } from "@/db";
-import { bookings, freePlayEvents, trainerSessions, playerFollows, userBlocks } from "@/db/schema";
+import { bookings, freePlayEvents, trainerSessions, playerFollows, userBlocks, playerProfiles } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import FollowPlayerButton from "./FollowPlayerButton";
 import MessageButton from "@/components/messaging/MessageButton";
@@ -18,8 +18,22 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   const client = await clerkClient();
 
-  let target: Awaited<ReturnType<typeof client.users.getUser>>;
-  let targetUserId: string;
+  let target!: Awaited<ReturnType<typeof client.users.getUser>>;
+  let targetUserId!: string;
+
+  // Handle player_profiles entries (id = "player-{numericId}")
+  if (id.startsWith("player-")) {
+    const numericId = parseInt(id.replace("player-", ""));
+    if (isNaN(numericId)) notFound();
+    const [pp] = await db.select().from(playerProfiles).where(eq(playerProfiles.id, numericId));
+    if (!pp) notFound();
+    // Check parent's isHidden flag
+    const parentUser = await client.users.getUser(pp.clerkUserId);
+    const parentMeta = parentUser.publicMetadata as { isHidden?: boolean };
+    if (parentMeta.isHidden) redirect("/connect");
+    // Redirect to parent's profile since player_profiles don't have own pages
+    redirect(`/connect/${pp.clerkUserId}`);
+  }
 
   // Resolve: if it looks like a Clerk userId use directly, otherwise search by profileSlug
   if (id.startsWith("user_")) {
