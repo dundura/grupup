@@ -130,148 +130,149 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
         {/* Profile card */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5">
-          {/* Header image */}
-          <div className="relative h-40 overflow-hidden bg-[#0F3154]">
-            {photo ? (
-              <Image src={photo} alt={name} fill className="object-contain" sizes="672px" unoptimized />
-            ) : (
-              <div className="w-full h-full flex items-end justify-center pb-0">
-                {/* Silhouette SVG */}
-                <svg viewBox="0 0 120 100" className="h-36 w-auto opacity-20" fill="white">
-                  <circle cx="60" cy="28" r="20" />
-                  <path d="M20 100 Q20 60 60 60 Q100 60 100 100Z" />
-                </svg>
-              </div>
-            )}
-          </div>
+          <div className="sm:flex">
 
-          <div className="p-6">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl font-bold">{name}</h1>
-                {(meta.city || meta.country) && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {[meta.city, meta.country].filter(Boolean).join(", ")}
+            {/* Photo — portrait on left */}
+            <div className="relative sm:w-52 lg:w-64 sm:shrink-0 aspect-[3/4] sm:aspect-auto bg-[#0F3154]">
+              {photo ? (
+                <Image src={photo} alt={name} fill className="object-cover object-top" sizes="(max-width: 640px) 100vw, 256px" unoptimized />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-6xl font-extrabold text-white/30">{name[0]?.toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Info — right side */}
+            <div className="flex-1 p-6 flex flex-col">
+
+              {/* Name + action */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h1 className="text-2xl font-bold leading-tight">{name}</h1>
+                  {(meta.city || meta.country) && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {[meta.city, meta.country].filter(Boolean).join(", ")}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    <span className="font-semibold text-foreground">{followerCount}</span> follower{followerCount !== 1 ? "s" : ""}
                   </p>
+                </div>
+                {isOwner && (
+                  <Link href="/profile"
+                    className="shrink-0 px-4 py-2 rounded-xl border text-sm font-semibold transition-colors hover:bg-[#f0f4f9]"
+                    style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                    Edit
+                  </Link>
                 )}
-                <p className="text-sm text-muted-foreground mt-1">
-                  <span className="font-semibold text-foreground">{followerCount}</span> follower{followerCount !== 1 ? "s" : ""}
-                </p>
               </div>
+
+              {/* Sport / level / league / team tags */}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {playerSports.map((s) => (
+                  <span key={s} className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f0f4f9] border" style={{ color: "#0F3154" }}>{s}</span>
+                ))}
+                {meta.level && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.level}</span>
+                )}
+                {meta.league && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>{meta.league}</span>
+                )}
+                {meta.team && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.team}</span>
+                )}
+                {meta.gender && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">{meta.gender}</span>
+                )}
+                {meta.birthYear && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">Born {meta.birthYear}</span>
+                )}
+              </div>
+
+              {/* Availability */}
+              {(meta.availableForFreePlay || meta.openToTrain) && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {meta.availableForFreePlay && (
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
+                      style={{ backgroundColor: "#fef2f2", color: "#DC373E", border: "1px solid #fca5a5" }}>
+                      Seeking Free Play
+                    </span>
+                  )}
+                  {meta.openToTrain && (
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
+                      style={{ backgroundColor: "#eff6ff", color: "#3b82f6", border: "1px solid #93c5fd" }}>
+                      Seeking Training
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Bio / position / focus */}
+              {(meta.bio || meta.position || (meta.improvementAreas?.length ?? 0) > 0) && (
+                <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden mb-4">
+                  {meta.bio && (
+                    <div className="flex gap-3 px-4 py-3">
+                      <span className="text-xs text-muted-foreground w-24 shrink-0 pt-0.5 font-medium">Looking for</span>
+                      <p className="text-sm leading-relaxed text-foreground flex-1">{meta.bio}</p>
+                    </div>
+                  )}
+                  {meta.position && (
+                    <div className="flex gap-3 px-4 py-3 items-center">
+                      <span className="text-xs text-muted-foreground w-24 shrink-0 font-medium">Position</span>
+                      <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>{meta.position}</p>
+                    </div>
+                  )}
+                  {(meta.improvementAreas?.length ?? 0) > 0 && (
+                    <div className="flex gap-3 px-4 py-3 items-start">
+                      <span className="text-xs text-muted-foreground w-24 shrink-0 pt-1 font-medium">Focus</span>
+                      <div className="flex flex-wrap gap-1.5 flex-1">
+                        {(meta.improvementAreas ?? []).map((area) => (
+                          <span key={area} className="text-xs font-medium px-2.5 py-1 rounded-full"
+                            style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{area}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Socials */}
+              {meta.socials && Object.values(meta.socials).some(Boolean) && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {[
+                    { key: "instagram", label: "Instagram", color: "#E1306C", icon: "📷" },
+                    { key: "tiktok",    label: "TikTok",    color: "#000000", icon: "🎵" },
+                    { key: "twitter",   label: "X",         color: "#1DA1F2", icon: "𝕏" },
+                    { key: "youtube",   label: "YouTube",   color: "#FF0000", icon: "▶" },
+                    { key: "facebook",  label: "Facebook",  color: "#1877F2", icon: "f" },
+                    { key: "snapchat",  label: "Snapchat",  color: "#FFFC00", icon: "👻" },
+                  ].map(({ key, label, color, icon }) => {
+                    const url = (meta.socials as any)?.[key];
+                    if (!url) return null;
+                    const href = url.startsWith("http") ? url : `https://${url}`;
+                    return (
+                      <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
+                        style={{ backgroundColor: color === "#FFFC00" ? "#FFFC00" : `${color}18`, color: color === "#FFFC00" ? "#000" : color, border: `1px solid ${color}30` }}>
+                        <span>{icon}</span> {label}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Follow / message actions — pinned to bottom */}
               {!isOwner && (
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap mt-auto pt-2">
                   <FollowPlayerButton targetClerkId={targetUserId} initialFollowing={isFollowing} />
                   {isFollowing && <MessageButton toClerkId={targetUserId} toName={name} />}
                   <BlockButton targetClerkId={targetUserId} targetName={name} initialBlocked={isBlocked} />
                 </div>
               )}
-              {isOwner && (
-                <Link href="/profile"
-                  className="shrink-0 px-4 py-2 rounded-xl border text-sm font-semibold transition-colors hover:bg-[#f0f4f9]"
-                  style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                  Edit profile
-                </Link>
-              )}
             </div>
-
-            {/* Stats row */}
-            <div className="flex flex-wrap gap-3 mb-4">
-              {playerSports.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {playerSports.map((s) => (
-                    <span key={s} className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f0f4f9] border" style={{ color: "#0F3154" }}>{s}</span>
-                  ))}
-                </div>
-              )}
-              {meta.gender && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">{meta.gender}</span>
-              )}
-              {meta.birthYear && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f8fafc] border text-muted-foreground">Born {meta.birthYear}</span>
-              )}
-              {meta.level && (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.level}</span>
-              )}
-              {meta.league && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#fff3cd", color: "#92400e" }}>{meta.league}</span>
-              )}
-              {meta.team && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{meta.team}</span>
-              )}
-            </div>
-
-            {/* Availability pills */}
-            {(meta.availableForFreePlay || meta.openToTrain) && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {meta.availableForFreePlay && (
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
-                    style={{ backgroundColor: "#fef2f2", color: "#DC373E", border: "1px solid #fca5a5" }}>
-                    Seeking Free Play
-                  </span>
-                )}
-                {meta.openToTrain && (
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold animate-pulse"
-                    style={{ backgroundColor: "#eff6ff", color: "#3b82f6", border: "1px solid #93c5fd" }}>
-                    Seeking Training
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Table: bio / position / focus areas */}
-            {(meta.bio || meta.position || (meta.improvementAreas?.length ?? 0) > 0) && (
-              <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden">
-                {meta.bio && (
-                  <div className="flex gap-4 px-4 py-3">
-                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-0.5 font-medium">Looking for</span>
-                    <p className="text-sm leading-relaxed text-foreground flex-1">{meta.bio}</p>
-                  </div>
-                )}
-                {meta.position && (
-                  <div className="flex gap-4 px-4 py-3 items-center">
-                    <span className="text-xs text-muted-foreground w-28 shrink-0 font-medium">Position</span>
-                    <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>{meta.position}</p>
-                  </div>
-                )}
-                {(meta.improvementAreas?.length ?? 0) > 0 && (
-                  <div className="flex gap-4 px-4 py-3 items-start">
-                    <span className="text-xs text-muted-foreground w-28 shrink-0 pt-1 font-medium">Focus Areas</span>
-                    <div className="flex flex-wrap gap-1.5 flex-1">
-                      {(meta.improvementAreas ?? ["Ball Skills"]).map((area) => (
-                        <span key={area} className="text-xs font-medium px-2.5 py-1 rounded-full"
-                          style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{area}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-          {/* Socials */}
-          {meta.socials && Object.values(meta.socials).some(Boolean) && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {[
-                { key: "instagram", label: "Instagram", color: "#E1306C", icon: "📷" },
-                { key: "tiktok",    label: "TikTok",    color: "#000000", icon: "🎵" },
-                { key: "twitter",   label: "X",         color: "#1DA1F2", icon: "𝕏" },
-                { key: "youtube",   label: "YouTube",   color: "#FF0000", icon: "▶" },
-                { key: "facebook",  label: "Facebook",  color: "#1877F2", icon: "f" },
-                { key: "snapchat",  label: "Snapchat",  color: "#FFFC00", icon: "👻" },
-              ].map(({ key, label, color, icon }) => {
-                const url = (meta.socials as any)?.[key];
-                if (!url) return null;
-                const href = url.startsWith("http") ? url : `https://${url}`;
-                return (
-                  <a key={key} href={href} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
-                    style={{ backgroundColor: color === "#FFFC00" ? "#FFFC00" : `${color}18`, color: color === "#FFFC00" ? "#000" : color, border: `1px solid ${color}30` }}>
-                    <span>{icon}</span> {label}
-                  </a>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Highlight photos */}
