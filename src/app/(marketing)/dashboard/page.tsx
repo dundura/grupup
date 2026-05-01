@@ -210,6 +210,9 @@ export default function DashboardPage() {
           city: profileModal.city || null,
           bio: profileModal.bio || null,
           isPublic: profileModal.isPublic,
+          instagram: (profileModal as any).instagram || null,
+          tiktok: (profileModal as any).tiktok || null,
+          snapchat: (profileModal as any).snapchat || null,
         }),
       });
       const saved = await res.json();
@@ -1470,6 +1473,19 @@ export default function DashboardPage() {
                   onChange={(e) => setProfileModal((p) => p ? { ...p, notes: e.target.value } : p)}
                   placeholder="e.g. left-footed, needs extra attention on defending"
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">Social (optional)</label>
+                {[
+                  { key: "instagram", placeholder: "@username", label: "Instagram" },
+                  { key: "tiktok", placeholder: "@username", label: "TikTok" },
+                  { key: "snapchat", placeholder: "username", label: "Snapchat" },
+                ].map(({ key, placeholder, label }) => (
+                  <input key={key} value={(profileModal as any)[key] ?? ""}
+                    onChange={(e) => setProfileModal((p) => p ? { ...p, [key]: e.target.value } : p)}
+                    placeholder={`${label} — ${placeholder}`}
+                    className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                ))}
               </div>
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" checked={profileModal.isPublic}

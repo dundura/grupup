@@ -310,5 +310,9 @@ export const playerProfiles = pgTable("player_profiles", {
   bio: text("bio"),
   isPublic: boolean("is_public").default(true),
   isDefault: boolean("is_default").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  instagram: varchar("instagram", { length: 100 }),
+  tiktok: varchar("tiktok", { length: 100 }),
+  snapchat: varchar("snapchat", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow(),
 });

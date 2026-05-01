@@ -26,39 +26,6 @@ const benefits = [
 export function TrustSection() {
   return (
     <>
-      {/* ── Trust columns ── */}
-      <section className="py-16 md:py-24" style={{ backgroundColor: "#f7f8fa" }}>
-        <div className="container max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-4xl font-extrabold mb-3 tracking-tight">
-              Train Together. Grow Together.
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              <strong>Grup<span style={{ color: "#DC373E" }}>Up</span></strong> makes it easy to find local sports trainers and book affordable group sessions for your child.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {benefits.map(({ icon: Icon, title, href, text }) => (
-              <div key={title} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 flex flex-col items-start hover:shadow-md transition-shadow">
-                {/* Navy top accent */}
-                <div className="w-full h-1 rounded-full mb-6" style={{ backgroundColor: "#0F3154" }} />
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-5"
-                  style={{ backgroundColor: "#0F3154" }}>
-                  <Icon className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">
-                  <Link href={href} className="hover:underline" style={{ color: "#0F3154" }}>
-                    {title}
-                  </Link>
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── How Grupup Works split ── */}
       <section className="bg-white py-16 md:py-24">
         <div className="container max-w-5xl">
