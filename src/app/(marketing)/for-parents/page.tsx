@@ -118,9 +118,9 @@ export default function ForParentsPage() {
 
       {/* Testimonial */}
       <div className="w-full max-w-3xl px-4 pb-14">
-        <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl overflow-hidden shadow-md">
+        <div className="flex flex-col sm:flex-row items-stretch gap-0 rounded-2xl overflow-hidden shadow-md">
           {/* Quote side */}
-          <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center pr-10">
+          <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center pr-10 border-r-4 border-white">
             <p className="text-white/90 text-lg italic leading-relaxed mb-8">
               "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition."
             </p>
@@ -130,7 +130,7 @@ export default function ForParentsPage() {
             </div>
           </div>
           {/* Image side */}
-          <div className="relative w-full sm:w-56 shrink-0" style={{ minHeight: "260px" }}>
+          <div className="relative w-full sm:w-72 shrink-0" style={{ minHeight: "260px" }}>
             <Image
               src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777608895405-gn6vh9.png"
               alt="Sarah M."
