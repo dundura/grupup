@@ -32,6 +32,7 @@ export default function AdminEditClient({
     availableForFreePlay: boolean; openToTrain: boolean;
     isApproved: boolean; isHidden: boolean;
     instagram: string; tiktok: string; snapchat: string;
+    position: string; improvementAreas: string[];
   };
 }) {
   const router = useRouter();
@@ -266,6 +267,12 @@ export default function AdminEditClient({
                   <label className="text-sm font-medium mb-1.5 block">Team / Club</label>
                   <Input value={form.team} onChange={(e) => set("team", e.target.value)} placeholder="e.g. NCFC" />
                 </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Position</label>
+                <Input value={(form as any).position ?? ""} onChange={(e) => set("position", e.target.value)} placeholder="e.g. Striker, Midfielder, Goalkeeper…" />
+              </div>
+              <div className="hidden">{/* spacer to close grid */}
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Gender</label>
