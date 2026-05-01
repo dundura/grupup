@@ -53,6 +53,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
     if (body.photo !== undefined) trainerFields.photo = body.photo;
     if (body.videoUrl !== undefined) trainerFields.videoUrl = body.videoUrl || null;
     if (body.coachingLocations !== undefined) trainerFields.coachingLocations = body.coachingLocations;
+    if (body.hourlyRate !== undefined) trainerFields.hourlyRate = parseInt(body.hourlyRate) || 0;
+    if (body.skillLevels !== undefined) trainerFields.skillLevels = body.skillLevels;
+    if (body.phone !== undefined) trainerFields.phone = body.phone || null;
     if (Object.keys(trainerFields).length) {
       await db.update(trainers).set(trainerFields as any).where(eq(trainers.clerkId, userId));
     }

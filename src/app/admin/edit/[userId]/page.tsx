@@ -74,6 +74,9 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
         position: (meta.position ?? "") as string,
         videoUrl: (trainerDbProfile?.videoUrl ?? "") as string,
         coachingLocations: ((trainerDbProfile?.coachingLocations ?? []) as Array<{ name: string; city?: string; logo?: string }>),
+        hourlyRate: String(trainerDbProfile?.hourlyRate ?? ""),
+        skillLevels: ((trainerDbProfile?.skillLevels ?? []) as string[]),
+        phone: (trainerDbProfile?.phone ?? "") as string,
       }}
     />
   );

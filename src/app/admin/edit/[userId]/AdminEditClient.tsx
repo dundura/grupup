@@ -35,6 +35,9 @@ export default function AdminEditClient({
     position: string;
     videoUrl: string;
     coachingLocations: Array<{ name: string; city?: string; logo?: string }>;
+    hourlyRate: string;
+    skillLevels: string[];
+    phone: string;
   };
 }) {
   const router = useRouter();
@@ -73,7 +76,7 @@ export default function AdminEditClient({
 
   function set(key: string, val: any) { setForm((f) => ({ ...f, [key]: val })); }
 
-  function toggleArr(key: "playerSports" | "sports" | "specialties" | "certifications", val: string) {
+  function toggleArr(key: "playerSports" | "sports" | "specialties" | "certifications" | "skillLevels", val: string) {
     setForm((f) => {
       const arr = f[key] as string[];
       return { ...f, [key]: arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val] };
@@ -142,6 +145,12 @@ export default function AdminEditClient({
                 <Input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} />
               </div>
             </div>
+            {role === "trainer" && (
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Phone number</label>
+                <Input value={(form as any).phone ?? ""} onChange={(e) => set("phone", e.target.value)} placeholder="e.g. 555-000-0000" />
+              </div>
+            )}
           </div>
 
           {/* Photo */}
@@ -358,9 +367,27 @@ export default function AdminEditClient({
                   ))}
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Years coaching</label>
+                  <Input type="number" value={form.yearsExperience} onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Private rate ($/hr)</label>
+                  <Input type="number" value={(form as any).hourlyRate ?? ""} onChange={(e) => set("hourlyRate", e.target.value)} className="w-28" />
+                </div>
+              </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Years of experience</label>
-                <Input type="number" value={form.yearsExperience} onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
+                <label className="text-sm font-medium mb-2 block">Who do you coach?</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Beginner", "Intermediate", "Advanced", "Elite"].map((l) => (
+                    <button key={l} type="button" onClick={() => toggleArr("skillLevels", l)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={((form as any).skillLevels ?? []).includes(l) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Specialties</label>
