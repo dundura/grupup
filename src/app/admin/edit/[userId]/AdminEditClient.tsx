@@ -32,7 +32,7 @@ export default function AdminEditClient({
     availableForFreePlay: boolean; openToTrain: boolean;
     isApproved: boolean; isHidden: boolean;
     instagram: string; tiktok: string; snapchat: string;
-    position: string; improvementAreas: string[];
+    position: string;
   };
 }) {
   const router = useRouter();
