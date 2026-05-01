@@ -18,6 +18,7 @@ interface PlayerProfile {
   skillLevel: string | null;
   birthYear: number | null;
   team?: string | null;
+  league?: string | null;
   bio?: string | null;
 }
 
@@ -148,18 +149,28 @@ export function FeaturedPlayersCarousel() {
                     </div>
 
                     {/* Info */}
-                    <div className="p-3">
+                    <div className="p-4">
                       <p className="font-bold text-sm leading-snug truncate" style={{ color: "#0F3154" }}>{p.name}</p>
-                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                        {p.sport && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>{p.sport}</span>}
-                        {p.skillLevel && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>{p.skillLevel}</span>}
-                        {p.birthYear && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-50 border text-muted-foreground">{new Date().getFullYear() - p.birthYear}y</span>}
+                      {/* Tags row */}
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        {p.sport && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>{p.sport}</span>}
+                        {p.skillLevel && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#f0f4f9]" style={{ color: "#0F3154" }}>{p.skillLevel}</span>}
+                        {p.birthYear && <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-50 border text-muted-foreground">{new Date().getFullYear() - p.birthYear}y</span>}
                       </div>
-                      {p.team && <p className="text-[10px] text-muted-foreground mt-1 truncate">{p.team}</p>}
-                      {p.bio && <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{p.bio.length > 60 ? p.bio.slice(0, 60) + "…" : p.bio}</p>}
-                      {p.city && !p.bio && (
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                          <MapPin className="h-2.5 w-2.5 shrink-0" />{p.city}
+                      {/* Team / league */}
+                      {(p.team || p.league) && (
+                        <p className="text-xs font-semibold text-gray-600 mt-2 truncate">{p.team || p.league}</p>
+                      )}
+                      {/* City */}
+                      {p.city && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3 shrink-0" />{p.city}
+                        </p>
+                      )}
+                      {/* Bio / looking for */}
+                      {p.bio && (
+                        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed italic">
+                          "{p.bio.length > 65 ? p.bio.slice(0, 65) + "…" : p.bio}"
                         </p>
                       )}
                     </div>

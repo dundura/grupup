@@ -24,6 +24,7 @@ export async function GET() {
           skillLevel: meta.level ?? null,
           birthYear: meta.birthYear ? parseInt(meta.birthYear) : null,
           team: meta.team ?? null,
+          league: meta.league ?? null,
           bio: meta.bio ?? null,
         };
       })
