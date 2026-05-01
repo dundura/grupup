@@ -24,7 +24,6 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced", "Elite"];
 export default function ClientsPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const role = ((user?.publicMetadata ?? {}) as { role?: string }).role;
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +37,7 @@ export default function ClientsPage() {
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (role !== "trainer") { router.replace("/dashboard"); return; }
+    if (!user) { router.replace("/dashboard"); return; }
     fetch("/api/crm/clients")
       .then((r) => r.json())
       .then((data) => { setClients(Array.isArray(data) ? data : []); setLoading(false); })
