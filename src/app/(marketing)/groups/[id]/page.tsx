@@ -280,12 +280,20 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 <div>
                   <p className="font-bold text-base">{trainer.name}</p>
                   {(() => {
-                    const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string }> | null;
+                    const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | null;
                     if (!locs || locs.length === 0) return null;
                     return (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {locs.map((l) => l.name).join(" · ")}
-                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {locs.map((loc, i) => (
+                          <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-gray-50">
+                            {loc.logo && (
+                              <img src={loc.logo} alt={loc.name} className="h-5 w-5 rounded object-contain shrink-0" />
+                            )}
+                            <span className="text-xs font-semibold text-gray-700 leading-none">{loc.name}</span>
+                            {loc.city && <span className="text-xs text-muted-foreground leading-none">{loc.city}</span>}
+                          </div>
+                        ))}
+                      </div>
                     );
                   })()}
                 </div>
