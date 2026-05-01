@@ -3,13 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   MapPin, CalendarDays, Users, ShieldCheck,
-  Star, ChevronLeft, Award, Minus, Plus, Mail,
+  Star, ChevronLeft, Award, Minus, Plus, Mail, Pencil,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { trainers, trainerSessions, trainerFollows } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { PackageBooking } from "@/components/trainers/PackageBooking";
 import MessageButton from "@/components/messaging/MessageButton";
 import FollowButton from "@/components/sessions/FollowButton";
@@ -57,12 +57,19 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
   }
 
   const { userId } = await auth();
+  let isAdmin = false;
   if (userId && trainer.clerkId) {
     try {
       const [follow] = await db.select({ status: trainerFollows.status })
         .from(trainerFollows)
         .where(and(eq(trainerFollows.followerClerkId, userId), eq(trainerFollows.trainerClerkId, trainer.clerkId)));
       followStatus = follow?.status ?? null;
+    } catch {}
+    try {
+      const client = await clerkClient();
+      const me = await client.users.getUser(userId);
+      const email = me.emailAddresses.find((e) => e.id === me.primaryEmailAddressId)?.emailAddress ?? "";
+      isAdmin = ["neil@anytime-soccer.com", "nmciq2@gmail.com"].includes(email);
     } catch {}
   }
 
@@ -77,11 +84,22 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
     <div className="min-h-screen bg-[#f7f8fa]">
       <div className="container max-w-5xl py-8 px-4">
 
-        {/* Back link */}
-        <Link href="/trainers"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
-          <ChevronLeft className="h-4 w-4" /> Back to search results
-        </Link>
+        {/* Back link + admin edit */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/trainers"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronLeft className="h-4 w-4" /> Back to search results
+          </Link>
+          {isAdmin && trainer.clerkId && (
+            <Link
+              href={`/admin/edit/${trainer.clerkId}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#0F3154" }}
+            >
+              <Pencil className="h-3.5 w-3.5" /> Edit Profile
+            </Link>
+          )}
+        </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-8 items-start">
 
