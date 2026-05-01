@@ -14,11 +14,13 @@ interface Client {
   sport: string | null;
   level: string | null;
   groupTag: string | null;
+  team: string | null;
+  position: string | null;
   notes: string | null;
   createdAt: string;
 }
 
-const EMPTY_FORM = { name: "", email: "", phone: "", sport: "", level: "", groupTag: "", notes: "" };
+const EMPTY_FORM = { name: "", email: "", phone: "", sport: "", level: "", groupTag: "", team: "", position: "", notes: "" };
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "Elite"];
 
 export default function ClientsPage() {
@@ -42,7 +44,7 @@ export default function ClientsPage() {
       .then((r) => r.json())
       .then((data) => { setClients(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [isLoaded, role, router]);
+  }, [isLoaded, user, router]);
 
   const groups = useMemo(() => {
     const tags = new Set(clients.map((c) => c.groupTag).filter(Boolean) as string[]);
@@ -60,7 +62,7 @@ export default function ClientsPage() {
 
   function openAdd() { setModal({ ...EMPTY_FORM }); }
   function openEdit(c: Client) {
-    setModal({ id: c.id, name: c.name, email: c.email ?? "", phone: c.phone ?? "", sport: c.sport ?? "", level: c.level ?? "", groupTag: c.groupTag ?? "", notes: c.notes ?? "" });
+    setModal({ id: c.id, name: c.name, email: c.email ?? "", phone: c.phone ?? "", sport: c.sport ?? "", level: c.level ?? "", groupTag: c.groupTag ?? "", team: c.team ?? "", position: c.position ?? "", notes: c.notes ?? "" });
   }
 
   async function handleSave() {
@@ -202,7 +204,12 @@ export default function ClientsPage() {
                           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: "#0F3154" }}>
                             {c.name[0].toUpperCase()}
                           </div>
-                          <span className="font-semibold text-gray-800">{c.name}</span>
+                          <div>
+                            <p className="font-semibold text-gray-800">{c.name}</p>
+                            {(c.team || c.position) && (
+                              <p className="text-xs text-gray-400">{[c.position, c.team].filter(Boolean).join(" · ")}</p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-500">
@@ -291,6 +298,20 @@ export default function ClientsPage() {
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">Phone</label>
                   <input value={modal.phone} onChange={(e) => setModal((m) => m ? { ...m, phone: e.target.value } : m)}
                     placeholder="555-000-0000"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F3154]/20" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Team / School</label>
+                  <input value={modal.team} onChange={(e) => setModal((m) => m ? { ...m, team: e.target.value } : m)}
+                    placeholder="e.g. Northern High School"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F3154]/20" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Position</label>
+                  <input value={modal.position} onChange={(e) => setModal((m) => m ? { ...m, position: e.target.value } : m)}
+                    placeholder="e.g. Midfielder"
                     className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F3154]/20" />
                 </div>
               </div>

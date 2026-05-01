@@ -291,6 +291,8 @@ export const trainerClients = pgTable("trainer_clients", {
   sport: varchar("sport", { length: 100 }),
   level: varchar("level", { length: 50 }),
   groupTag: varchar("group_tag", { length: 100 }),
+  team: varchar("team", { length: 200 }),
+  position: varchar("position", { length: 100 }),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });

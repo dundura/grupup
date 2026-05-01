@@ -11,7 +11,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id: rawId } = await params;
   const id = parseInt(rawId);
   const body = await req.json();
-  const { name, email, phone, sport, level, groupTag, notes } = body;
+  const { name, email, phone, sport, level, groupTag, team, position, notes } = body;
 
   const [updated] = await db.update(trainerClients)
     .set({
@@ -21,6 +21,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       sport: sport?.trim() || null,
       level: level?.trim() || null,
       groupTag: groupTag?.trim() || null,
+      team: team?.trim() || null,
+      position: position?.trim() || null,
       notes: notes?.trim() || null,
     })
     .where(and(eq(trainerClients.id, id), eq(trainerClients.trainerClerkId, userId)))

@@ -277,7 +277,18 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
               <div className="p-4 space-y-2">
-                <p className="font-bold text-base">{trainer.name}</p>
+                <div>
+                  <p className="font-bold text-base">{trainer.name}</p>
+                  {(() => {
+                    const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string }> | null;
+                    if (!locs || locs.length === 0) return null;
+                    return (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {locs.map((l) => l.name).join(" · ")}
+                      </p>
+                    );
+                  })()}
+                </div>
                 {/* Rating row */}
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center gap-0.5">

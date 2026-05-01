@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { name, email, phone, sport, level, groupTag, notes } = body;
+  const { name, email, phone, sport, level, groupTag, team, position, notes } = body;
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const [client] = await db.insert(trainerClients).values({
@@ -31,6 +31,8 @@ export async function POST(req: Request) {
     sport: sport?.trim() || null,
     level: level?.trim() || null,
     groupTag: groupTag?.trim() || null,
+    team: team?.trim() || null,
+    position: position?.trim() || null,
     notes: notes?.trim() || null,
   }).returning();
 
