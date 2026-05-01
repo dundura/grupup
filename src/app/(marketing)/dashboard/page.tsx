@@ -1317,21 +1317,33 @@ export default function DashboardPage() {
                         {" · "}<span className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${statusColor}`}>{r.status}</span>
                       </p>
                     </div>
-                    {r.status === "open" && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      {r.status === "open" && (
+                        <button
+                          disabled={!canRemind || reminding === r.id}
+                          onClick={async () => {
+                            if (!canRemind) return;
+                            setReminding(r.id);
+                            const res = await fetch(`/api/training-requests/${r.id}/remind`, { method: "POST" });
+                            if (res.ok) setPlayerRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, sendCount: (x.sendCount ?? 1) + 1 } : x));
+                            setReminding(null);
+                          }}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted"
+                          title={canRemind ? "Send a reminder to trainers" : "Reminder limit reached"}>
+                          {reminding === r.id ? "Sending…" : canRemind ? "Remind" : "Reminded"}
+                        </button>
+                      )}
                       <button
-                        disabled={!canRemind || reminding === r.id}
                         onClick={async () => {
-                          if (!canRemind) return;
-                          setReminding(r.id);
-                          const res = await fetch(`/api/training-requests/${r.id}/remind`, { method: "POST" });
-                          if (res.ok) setPlayerRequests((prev) => prev.map((x) => x.id === r.id ? { ...x, sendCount: (x.sendCount ?? 1) + 1 } : x));
-                          setReminding(null);
+                          if (!confirm("Delete this request?")) return;
+                          await fetch(`/api/training-requests/${r.id}`, { method: "DELETE" });
+                          setPlayerRequests((prev) => prev.filter((x) => x.id !== r.id));
                         }}
-                        className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted"
-                        title={canRemind ? "Send a reminder to trainers" : "Reminder limit reached"}>
-                        {reminding === r.id ? "Sending…" : canRemind ? "Remind" : "Reminded"}
+                        className="flex items-center justify-center w-7 h-7 rounded-lg border border-transparent hover:border-red-200 hover:bg-red-50 transition-colors"
+                        title="Delete request">
+                        <Trash2 className="h-3.5 w-3.5 text-red-400" />
                       </button>
-                    )}
+                    </div>
                   </div>
                 );
               })}
