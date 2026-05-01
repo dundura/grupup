@@ -294,6 +294,20 @@ function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: Traine
           </div>
         </div>
 
+        {/* Coaching locations — directly under name */}
+        {(t.coachingLocations ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {(t.coachingLocations ?? []).map((loc, i) => (
+              <div key={i} className="flex items-center gap-1 px-2 py-1 rounded-md border bg-gray-50">
+                {loc.logo && (
+                  <img src={loc.logo} alt={loc.name} className="h-4 w-4 rounded object-contain shrink-0" />
+                )}
+                <span className="text-[11px] font-semibold text-gray-600 leading-none">{loc.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Bio */}
         {bioText && (
           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">{bioText}</p>
@@ -329,20 +343,6 @@ function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: Traine
                 style={{ borderColor: "#CBD5E1", color: "#334155", backgroundColor: "#F8FAFC" }}>
                 {tag}
               </span>
-            ))}
-          </div>
-        )}
-
-        {/* Coaching positions */}
-        {(t.coachingLocations ?? []).length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {(t.coachingLocations ?? []).map((loc, i) => (
-              <div key={i} className="flex items-center gap-1 px-2 py-1 rounded-md border bg-gray-50">
-                {loc.logo && (
-                  <img src={loc.logo} alt={loc.name} className="h-4 w-4 rounded object-contain shrink-0" />
-                )}
-                <span className="text-[11px] font-semibold text-gray-600 leading-none">{loc.name}</span>
-              </div>
             ))}
           </div>
         )}
