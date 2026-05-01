@@ -34,11 +34,16 @@ export function FeaturedPlayersCarousel() {
 
   const isAdmin = ADMIN_EMAIL.some((e) => user?.emailAddresses?.some((a) => a.emailAddress === e));
 
-  const load = useCallback(() => {
-    fetch("/api/admin/feature-player")
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setProfiles(data); })
-      .catch(() => {});
+  const load = useCallback(async () => {
+    try {
+      const featured = await fetch("/api/admin/feature-player").then((r) => r.json());
+      if (Array.isArray(featured) && featured.length > 0) {
+        setProfiles(featured);
+      } else {
+        const all = await fetch("/api/players/connect").then((r) => r.json());
+        if (Array.isArray(all)) setProfiles(all);
+      }
+    } catch {}
   }, []);
 
   useEffect(() => { load(); }, [load]);

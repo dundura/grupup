@@ -591,6 +591,9 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl border p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold">Profiles</h2>
+            <Link href="/profile" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>
+              Edit Profile →
+            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
