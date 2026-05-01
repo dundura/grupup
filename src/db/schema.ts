@@ -291,6 +291,8 @@ export const featuredPlayers = pgTable("featured_players", {
   sport: varchar("sport", { length: 100 }),
   skillLevel: varchar("skill_level", { length: 50 }),
   birthYear: integer("birth_year"),
+  team: varchar("team", { length: 200 }),
+  bio: text("bio"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

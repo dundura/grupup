@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const email = adminUser.emailAddresses?.[0]?.emailAddress ?? "";
   if (!ADMIN_EMAILS.includes(email)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { clerkUserId, featured, name, photo, city, sport, skillLevel, birthYear } = await req.json();
+  const { clerkUserId, featured, name, photo, city, sport, skillLevel, birthYear, team, bio } = await req.json();
   if (!clerkUserId) return NextResponse.json({ error: "clerkUserId required" }, { status: 400 });
 
   if (featured) {
@@ -27,9 +27,11 @@ export async function POST(req: Request) {
       sport: sport ?? null,
       skillLevel: skillLevel ?? null,
       birthYear: birthYear ? parseInt(birthYear) : null,
+      team: team ?? null,
+      bio: bio ?? null,
     }).onConflictDoUpdate({
       target: featuredPlayers.clerkUserId,
-      set: { name: name ?? "Player", photo: photo ?? null, city: city ?? null, sport: sport ?? null, skillLevel: skillLevel ?? null },
+      set: { name: name ?? "Player", photo: photo ?? null, city: city ?? null, sport: sport ?? null, skillLevel: skillLevel ?? null, team: team ?? null, bio: bio ?? null },
     });
   } else {
     await db.delete(featuredPlayers).where(eq(featuredPlayers.clerkUserId, clerkUserId));

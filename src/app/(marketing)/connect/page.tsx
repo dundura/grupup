@@ -262,6 +262,8 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
                           sport={p.sports[0]}
                           skillLevel={p.level}
                           birthYear={p.birthYear}
+                          team={p.team}
+                          bio={p.bio}
                         />
                         <Link href={`/admin/edit/${p.clerkId}`}
                           className="absolute top-2 right-2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow transition-colors"

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 
 export default function FeaturePlayerButton({
-  clerkUserId, initialFeatured, name, photo, city, sport, skillLevel, birthYear,
+  clerkUserId, initialFeatured, name, photo, city, sport, skillLevel, birthYear, team, bio,
 }: {
   clerkUserId: string;
   initialFeatured: boolean;
@@ -14,6 +14,8 @@ export default function FeaturePlayerButton({
   sport?: string;
   skillLevel?: string;
   birthYear?: string;
+  team?: string;
+  bio?: string;
 }) {
   const [featured, setFeatured] = useState(initialFeatured);
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function FeaturePlayerButton({
     await fetch("/api/admin/feature-player", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clerkUserId, featured: next, name, photo, city, sport, skillLevel, birthYear }),
+      body: JSON.stringify({ clerkUserId, featured: next, name, photo, city, sport, skillLevel, birthYear, team, bio }),
     });
     setFeatured(next);
     setLoading(false);
