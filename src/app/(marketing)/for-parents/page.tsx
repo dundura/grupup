@@ -59,23 +59,6 @@ export default function ForParentsPage() {
             <p className="text-white/40 text-xs mt-4">No account needed to browse</p>
           </div>
 
-          {/* Coach image */}
-          <div className="relative rounded-2xl overflow-hidden mb-3" style={{ height: "200px" }}>
-            <Image
-              src="https://media.anytime-soccer.com/wp-content/uploads/2026/02/ecln_boys.jpg"
-              alt="Soccer coach training group"
-              fill
-              className="object-cover"
-              style={{ objectPosition: "center 30%" }}
-              sizes="100vw"
-              unoptimized
-            />
-            <div className="absolute bottom-4 left-5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2">
-              <p className="text-white font-bold text-sm">Sessions from $22/player</p>
-              <p className="text-white/70 text-xs">Up to 65% less than private training</p>
-            </div>
-          </div>
-
           {/* Photo strip */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pb-0">
             <div className="relative col-span-2 sm:col-span-1 rounded-t-2xl overflow-hidden" style={{ height: "260px" }}>
