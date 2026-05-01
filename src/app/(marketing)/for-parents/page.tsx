@@ -120,12 +120,14 @@ export default function ForParentsPage() {
       <div className="w-full max-w-3xl px-4 pb-14">
         <div className="flex flex-col sm:flex-row items-stretch gap-0 rounded-2xl overflow-hidden shadow-md">
           {/* Quote side */}
-          <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center">
-            <p className="text-white/90 text-lg italic leading-relaxed mb-6">
+          <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center pr-10">
+            <p className="text-white/90 text-lg italic leading-relaxed mb-8">
               "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition."
             </p>
-            <p className="text-white font-bold text-sm">Sarah M.</p>
-            <p className="text-white/50 text-xs mt-0.5">Soccer Parent · Cary, NC</p>
+            <div className="border-t border-white/10 pt-5">
+              <p className="text-white font-bold text-sm">Sarah M.</p>
+              <p className="text-white/50 text-xs mt-1">Soccer Parent · Cary, NC</p>
+            </div>
           </div>
           {/* Image side */}
           <div className="relative w-full sm:w-56 shrink-0" style={{ minHeight: "260px" }}>
