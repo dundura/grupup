@@ -17,9 +17,10 @@ const skillColors: Record<string, string> = {
 
 interface SessionCardProps {
   session: GroupSession;
+  compact?: boolean;
 }
 
-export function SessionCard({ session }: SessionCardProps) {
+export function SessionCard({ session, compact }: SessionCardProps) {
   const [interested, setInterested] = useState(false);
   const [copied, setCopied] = useState(false);
   const { user } = useUser();
@@ -68,7 +69,7 @@ export function SessionCard({ session }: SessionCardProps) {
     >
       {/* Cover photo — session-specific or trainer profile photo */}
       {(session.coverPhoto || session.trainer.photo) && (
-        <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
+        <div className={`relative w-full ${compact ? "aspect-[2/1]" : "aspect-[4/3]"} overflow-hidden bg-gray-100`}>
           <Image src={session.coverPhoto || session.trainer.photo} alt={session.title} fill className="object-contain group-hover:scale-105 transition-transform duration-300" sizes="400px" unoptimized />
           {session.recurring && (
             <span className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full text-white shadow" style={{ backgroundColor: "#0F3154" }}>
@@ -115,84 +116,69 @@ export function SessionCard({ session }: SessionCardProps) {
       </div>
 
       {/* Body */}
-      <div className="p-5">
+      <div className={compact ? "px-4 pb-2" : "p-5"}>
         {/* Trainer row */}
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
+        <div className={`flex items-center gap-2 ${compact ? "mb-2" : "mb-4"}`}>
+          <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
             {session.trainer.photo ? (
-              <Image
-                src={session.trainer.photo}
-                alt={session.trainer.name}
-                fill
-                className="object-cover"
-                sizes="32px"
-                unoptimized
-              />
+              <Image src={session.trainer.photo} alt={session.trainer.name} fill className="object-cover" sizes="24px" unoptimized />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white"
-                style={{ backgroundColor: "#0F3154" }}>
+              <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: "#0F3154" }}>
                 {session.trainer.name?.[0] ?? "T"}
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{session.trainer.name}</p>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+          <p className={`${compact ? "text-xs" : "text-sm"} font-semibold text-foreground truncate flex-1`}>{session.trainer.name}</p>
+          <div className="flex items-center gap-0.5 text-xs text-muted-foreground shrink-0">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            <span className="font-medium">{session.trainer.rating}</span>
+            <span>{session.trainer.rating}</span>
           </div>
         </div>
 
         {/* Details */}
-        <div className="space-y-2 text-sm text-muted-foreground mb-4">
-          <div className="flex items-center gap-2">
-            <Clock className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium text-foreground">{session.dayOfWeek}s</span>
-            <span>·</span>
-            <span>{session.time}</span>
-            <span>·</span>
-            <span>{session.duration} min</span>
+        <div className={`text-xs text-muted-foreground ${compact ? "space-y-1 mb-2" : "space-y-2 mb-4"}`}>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3 shrink-0" />
+            <span className="font-medium text-foreground">{session.dayOfWeek}s · {session.time}</span>
+            {!compact && <><span>·</span><span>{session.duration} min</span></>}
           </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{session.venue}, {session.city}</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{session.city}</span>
           </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <Users className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">Ages {session.ageRange}</span>
-          </div>
+          {!compact && (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Users className="h-3 w-3 shrink-0" />
+              <span className="truncate">Ages {session.ageRange}</span>
+            </div>
+          )}
         </div>
 
-        {/* Skill level + age */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel]}`}>
-            {session.skillLevel}
-          </span>
-        </div>
+        {/* Skill level */}
+        {!compact && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${skillColors[session.skillLevel]}`}>
+              {session.skillLevel}
+            </span>
+          </div>
+        )}
 
-        {/* Spots progress */}
-        <div className="space-y-1.5">
+        {/* Spots */}
+        <div className={compact ? "mb-1" : "space-y-1.5"}>
           <div className="flex items-center justify-between text-xs">
             <span className={almostFull ? "font-bold text-[#DC373E]" : "text-muted-foreground"}>
-              {almostFull ? `⚡ Only ${session.spotsLeft} spot${session.spotsLeft === 1 ? "" : "s"} left!` : `${session.spotsLeft} of ${session.totalSpots} spots open`}
+              {almostFull ? `⚡ ${session.spotsLeft} left` : `${session.spotsLeft}/${session.totalSpots} open`}
             </span>
-            <span className="text-muted-foreground">{spotsFilled}/{session.totalSpots} joined</span>
+            {!compact && <span className="text-muted-foreground">{spotsFilled}/{session.totalSpots} joined</span>}
           </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${fillPct}%`,
-                backgroundColor: almostFull ? "#DC373E" : "#0F3154",
-              }}
-            />
+          <div className="h-1 bg-muted rounded-full overflow-hidden mt-1">
+            <div className="h-full rounded-full" style={{ width: `${fillPct}%`, backgroundColor: almostFull ? "#DC373E" : "#0F3154" }} />
           </div>
         </div>
       </div>
 
       {/* CTA row */}
-      <div className="px-5 pb-5 flex gap-2">
+      <div className={`${compact ? "px-4 pb-4" : "px-5 pb-5"} flex gap-2`}>
         <div
           className="flex-1 py-2.5 rounded-xl text-center text-sm font-semibold text-white transition-opacity group-hover:opacity-90"
           style={{ backgroundColor: "#DC373E" }}

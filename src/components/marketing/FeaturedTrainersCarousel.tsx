@@ -134,7 +134,7 @@ export function FeaturedTrainersCarousel() {
                     transform: isActive ? "scale(1)" : "scale(0.95)",
                   }}
                 >
-                  <SessionCard session={session} />
+                  <SessionCard session={session} compact />
 
                   {/* Admin star — only neil@anytime-soccer.com sees this */}
                   {isAdmin && (
