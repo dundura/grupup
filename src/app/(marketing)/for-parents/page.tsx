@@ -70,7 +70,6 @@ export default function ForParentsPage() {
               sizes="100vw"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2">
               <p className="text-white font-bold text-sm">Sessions from $22/player</p>
               <p className="text-white/70 text-xs">Up to 65% less than private training</p>
