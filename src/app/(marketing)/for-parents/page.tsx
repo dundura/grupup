@@ -117,18 +117,28 @@ export default function ForParentsPage() {
       </div>
 
       {/* Testimonial */}
-      <div className="w-full max-w-2xl px-4 pb-14 text-center">
-        <div className="flex justify-center mb-4">
-          <img
-            src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777608895405-gn6vh9.png"
-            alt="Sarah M."
-            className="w-14 h-14 rounded-full object-cover"
-          />
+      <div className="w-full max-w-3xl px-4 pb-14">
+        <div className="flex flex-col sm:flex-row items-stretch gap-0 rounded-2xl overflow-hidden shadow-md">
+          {/* Quote side */}
+          <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center">
+            <p className="text-white/90 text-lg italic leading-relaxed mb-6">
+              "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition."
+            </p>
+            <p className="text-white font-bold text-sm">Sarah M.</p>
+            <p className="text-white/50 text-xs mt-0.5">Soccer Parent · Cary, NC</p>
+          </div>
+          {/* Image side */}
+          <div className="relative w-full sm:w-56 shrink-0" style={{ minHeight: "260px" }}>
+            <Image
+              src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777608895405-gn6vh9.png"
+              alt="Sarah M."
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 224px"
+              unoptimized
+            />
+          </div>
         </div>
-        <p className="text-lg italic text-gray-600 leading-relaxed mb-4">
-          "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition."
-        </p>
-        <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>Sarah M. — Soccer Parent, Cary NC</p>
       </div>
 
       {/* Bottom CTA */}
