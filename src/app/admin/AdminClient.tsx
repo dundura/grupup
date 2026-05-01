@@ -7,7 +7,7 @@ import { useSignIn } from "@clerk/nextjs";
 import { Trash2, Archive, ArchiveRestore, Search, CheckCircle, XCircle, DollarSign, ExternalLink, LogIn, Eye, EyeOff, Mail, X } from "lucide-react";
 
 interface AdminUser {
-  id: string; name: string; email: string; photo: string; role: string;
+  id: string; name: string; email: string; phone: string; photo: string; role: string;
   joinedAt: string; sessionCount: number; bookingCount: number;
   archived: boolean; trainerId?: string | null; isApproved?: boolean;
 }
@@ -217,6 +217,7 @@ export default function AdminClient({
                               {u.archived && <span className="text-xs text-muted-foreground">(archived)</span>}
                             </div>
                             <p className="text-xs text-muted-foreground">{u.email}</p>
+                            {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
                           </div>
                         </div>
                       </td>

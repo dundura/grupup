@@ -49,10 +49,12 @@ export default async function AdminPage() {
     const email = u.emailAddresses?.[0]?.emailAddress ?? "";
     const meta = u.publicMetadata as { role?: string; archived?: boolean; isApproved?: boolean; photo?: string };
     const name = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || email;
+    const phone = u.phoneNumbers?.[0]?.phoneNumber ?? "";
     const base = {
       id: u.id,
       name,
       email,
+      phone,
       photo: meta.photo ?? u.imageUrl ?? "",
       joinedAt: new Date(u.createdAt).toISOString(),
       archived: meta.archived ?? false,
