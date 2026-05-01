@@ -26,6 +26,7 @@ export async function GET() {
           team: meta.team ?? null,
           league: meta.league ?? null,
           bio: meta.bio ?? null,
+          profileSlug: meta.profileSlug ?? null,
         };
       })
       .filter((p) => p.name !== "Player" || p.photo);

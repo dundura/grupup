@@ -293,6 +293,7 @@ export const featuredPlayers = pgTable("featured_players", {
   birthYear: integer("birth_year"),
   team: varchar("team", { length: 200 }),
   bio: text("bio"),
+  profileSlug: varchar("profile_slug", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

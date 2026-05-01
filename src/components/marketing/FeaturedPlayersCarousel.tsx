@@ -20,6 +20,7 @@ interface PlayerProfile {
   team?: string | null;
   league?: string | null;
   bio?: string | null;
+  profileSlug?: string | null;
 }
 
 const COLORS = ["#0F3154", "#1a4a7a", "#163d6b", "#0d2d4a"];
@@ -136,7 +137,7 @@ export function FeaturedPlayersCarousel() {
                   className="relative shrink-0 transition-all duration-500"
                   style={{ width: CARD_W, opacity: isActive ? 1 : 0.5, transform: isActive ? "scale(1)" : "scale(0.96)" }}
                 >
-                  <Link href={`/connect/${p.clerkUserId}`} className="block bg-white rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                  <Link href={`/connect/${p.profileSlug || p.clerkUserId}`} className="block bg-white rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                     {/* Photo */}
                     <div className="relative h-52 w-full" style={{ backgroundColor: avatarColor(p.name) }}>
                       {p.photo ? (
