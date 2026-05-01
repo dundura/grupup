@@ -10,14 +10,13 @@ const ADMIN_EMAIL = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
 
 interface PlayerProfile {
   id: number;
+  clerkUserId: string;
   name: string;
   photo: string | null;
   city: string | null;
   sport: string | null;
   skillLevel: string | null;
   birthYear: number | null;
-  bio: string | null;
-  isFeatured: boolean;
 }
 
 const COLORS = ["#0F3154", "#1a4a7a", "#163d6b", "#0d2d4a"];
@@ -36,7 +35,7 @@ export function FeaturedPlayersCarousel() {
   const isAdmin = ADMIN_EMAIL.some((e) => user?.emailAddresses?.some((a) => a.emailAddress === e));
 
   const load = useCallback(() => {
-    fetch("/api/players/public")
+    fetch("/api/admin/feature-player")
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setProfiles(data); })
       .catch(() => {});
@@ -62,7 +61,7 @@ export function FeaturedPlayersCarousel() {
     await fetch("/api/admin/feature-player", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profileId: p.id, featured: !p.isFeatured }),
+      body: JSON.stringify({ clerkUserId: p.clerkUserId, featured: false }),
     });
     load();
     setTogglingId(null);
@@ -172,16 +171,16 @@ export function FeaturedPlayersCarousel() {
                     </div>
                   </Link>
 
-                  {/* Admin feature toggle */}
+                  {/* Admin — click to remove from carousel */}
                   {isAdmin && (
                     <button
                       onClick={(e) => toggleFeatured(e, p)}
                       disabled={togglingId === p.id}
-                      title={p.isFeatured ? "Remove from featured" : "Feature this player"}
+                      title="Remove from carousel"
                       className="absolute top-2 left-2 z-20 flex items-center justify-center w-8 h-8 rounded-full shadow-lg border transition-colors"
-                      style={{ backgroundColor: p.isFeatured ? "#DC373E" : "white", borderColor: p.isFeatured ? "#DC373E" : "#e2e8f0" }}
+                      style={{ backgroundColor: "#DC373E", borderColor: "#DC373E" }}
                     >
-                      <Star className="h-4 w-4" style={{ color: p.isFeatured ? "white" : "#94a3b8" }} fill={p.isFeatured ? "white" : "none"} />
+                      <Star className="h-4 w-4" style={{ color: "white" }} fill="white" />
                     </button>
                   )}
                 </div>

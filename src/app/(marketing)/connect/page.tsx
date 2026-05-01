@@ -3,9 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users, Pencil } from "lucide-react";
 import { db } from "@/db";
-import { playerFollows, playerProfiles } from "@/db/schema";
+import { playerFollows, featuredPlayers } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
+import FeaturePlayerButton from "./FeaturePlayerButton";
 import ConnectFilters from "./ConnectFilters";
 import { MultipleSports } from "./MultipleSports";
 import { Suspense } from "react";
@@ -159,15 +160,22 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
       }
     }
 
-    // Fetch follower counts for all displayed players in one query
+    // Fetch follower counts + featured status in one pass
     const clerkIds = [...new Set(approvedPlayers.map((p) => p.clerkId))];
     if (clerkIds.length) {
-      const followerRows = await db.select({ targetClerkId: playerFollows.targetClerkId })
-        .from(playerFollows)
-        .where(and(inArray(playerFollows.targetClerkId, clerkIds), eq(playerFollows.status, "approved")));
+      const [followerRows, featuredRows] = await Promise.all([
+        db.select({ targetClerkId: playerFollows.targetClerkId })
+          .from(playerFollows)
+          .where(and(inArray(playerFollows.targetClerkId, clerkIds), eq(playerFollows.status, "approved"))),
+        db.select({ clerkUserId: featuredPlayers.clerkUserId })
+          .from(featuredPlayers)
+          .where(inArray(featuredPlayers.clerkUserId, clerkIds)),
+      ]);
       const counts: Record<string, number> = {};
       for (const r of followerRows) counts[r.targetClerkId] = (counts[r.targetClerkId] ?? 0) + 1;
       for (const p of approvedPlayers) p.followerCount = counts[p.clerkId] ?? 0;
+      const featuredSet = new Set(featuredRows.map((r) => r.clerkUserId));
+      for (const p of approvedPlayers) (p as any).isFeatured = featuredSet.has(p.clerkId);
     }
   } catch (err) { console.error("[connect] failed to load players:", err); }
 
@@ -242,13 +250,25 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
                       )}
                     </div>
 
-                    {/* Admin edit button */}
+                    {/* Admin buttons */}
                     {isAdmin && (
-                      <Link href={`/admin/edit/${p.clerkId}`}
-                        className="absolute top-2 right-2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow transition-colors"
-                        title="Edit profile">
-                        <Pencil className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
-                      </Link>
+                      <>
+                        <FeaturePlayerButton
+                          clerkUserId={p.clerkId}
+                          initialFeatured={(p as any).isFeatured ?? false}
+                          name={p.name}
+                          photo={p.photo}
+                          city={p.city}
+                          sport={p.sports[0]}
+                          skillLevel={p.level}
+                          birthYear={p.birthYear}
+                        />
+                        <Link href={`/admin/edit/${p.clerkId}`}
+                          className="absolute top-2 right-2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow transition-colors"
+                          title="Edit profile">
+                          <Pencil className="h-3.5 w-3.5" style={{ color: "#0F3154" }} />
+                        </Link>
+                      </>
                     )}
 
                     {/* Dark navy top */}
