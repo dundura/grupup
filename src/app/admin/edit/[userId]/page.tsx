@@ -24,13 +24,10 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
   const target = await client.users.getUser(userId);
 
   const meta = target.publicMetadata as Record<string, any>;
-  const role = meta.role ?? "player";
 
-  let trainerDbProfile = null;
-  if (role === "trainer") {
-    const [row] = await db.select().from(trainers).where(eq(trainers.clerkId, userId));
-    trainerDbProfile = row ?? null;
-  }
+  // Always try the DB — trainers may not have role set in Clerk metadata
+  const [trainerDbProfile] = await db.select().from(trainers).where(eq(trainers.clerkId, userId));
+  const role = meta.role ?? (trainerDbProfile ? "trainer" : "player");
 
   // playerSports: support both old single-sport and new array format
   const playerSports: string[] = meta.playerSports?.length
