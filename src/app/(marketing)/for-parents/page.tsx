@@ -135,10 +135,17 @@ export default function ForParentsPage() {
 
       {/* Testimonial */}
       <div className="w-full max-w-2xl px-4 pb-14 text-center">
+        <div className="flex justify-center mb-4">
+          <img
+            src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777608895405-gn6vh9.png"
+            alt="Sarah M."
+            className="w-14 h-14 rounded-full object-cover"
+          />
+        </div>
         <p className="text-lg italic text-gray-600 leading-relaxed mb-4">
           "I was paying $90/hr for private training. Group sessions on Grupup cost me $25 and honestly the level of training is just as good — maybe better because there's actual competition."
         </p>
-        <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>James K. — Player, U16</p>
+        <p className="text-sm font-semibold" style={{ color: "#0F3154" }}>Sarah M. — Soccer Parent, Cary NC</p>
       </div>
 
       {/* Bottom CTA */}
