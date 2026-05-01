@@ -51,6 +51,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
     if (body.certifications !== undefined) trainerFields.certifications = body.certifications;
     if (body.yearsExperience !== undefined) trainerFields.yearsExperience = parseInt(body.yearsExperience) || 0;
     if (body.photo !== undefined) trainerFields.photo = body.photo;
+    if (body.videoUrl !== undefined) trainerFields.videoUrl = body.videoUrl || null;
+    if (body.coachingLocations !== undefined) trainerFields.coachingLocations = body.coachingLocations;
     if (Object.keys(trainerFields).length) {
       await db.update(trainers).set(trainerFields as any).where(eq(trainers.clerkId, userId));
     }

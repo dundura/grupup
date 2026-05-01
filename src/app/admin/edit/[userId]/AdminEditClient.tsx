@@ -33,6 +33,8 @@ export default function AdminEditClient({
     isApproved: boolean; isHidden: boolean;
     instagram: string; tiktok: string; snapchat: string;
     position: string;
+    videoUrl: string;
+    coachingLocations: Array<{ name: string; city?: string; logo?: string }>;
   };
 }) {
   const router = useRouter();
@@ -359,6 +361,62 @@ export default function AdminEditClient({
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Years of experience</label>
                 <Input type="number" value={form.yearsExperience} onChange={(e) => set("yearsExperience", e.target.value)} className="w-28" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Specialties</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Finishing", "Ball Mastery", "Ball Control", "Speed & Agility", "Goalkeeping", "Defending", "1v1", "Youth Development", "Technical Skills", "Passing", "Shooting"].map((s) => (
+                    <button key={s} type="button" onClick={() => toggleArr("specialties", s)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={form.specialties.includes(s) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Certifications</label>
+                <div className="flex flex-wrap gap-2">
+                  {["USSF D License", "USSF C License", "USSF B License", "UEFA B License", "United Soccer Coaches", "NASM-CPT", "Certified Speed Specialist"].map((c) => (
+                    <button key={c} type="button" onClick={() => toggleArr("certifications", c)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                      style={form.certifications.includes(c) ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { borderColor: "#e2e8f0", color: "#475569" }}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Intro video URL</label>
+                <Input value={(form as any).videoUrl ?? ""} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://youtube.com/..." />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Where they coach</label>
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, coachingLocations: [...((f as any).coachingLocations ?? []), { name: "", city: "", logo: "" }] }))}
+                    className="text-xs font-semibold px-2 py-1 rounded-lg border hover:bg-gray-50">+ Add location</button>
+                </div>
+                <div className="space-y-2">
+                  {((form as any).coachingLocations ?? []).map((loc: { name: string; city?: string; logo?: string }, i: number) => (
+                    <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+                      <Input value={loc.name} onChange={(e) => {
+                        const locs = [...(form as any).coachingLocations];
+                        locs[i] = { ...locs[i], name: e.target.value };
+                        setForm((f) => ({ ...f, coachingLocations: locs }));
+                      }} placeholder="School / club name" className="text-sm" />
+                      <Input value={loc.city ?? ""} onChange={(e) => {
+                        const locs = [...(form as any).coachingLocations];
+                        locs[i] = { ...locs[i], city: e.target.value };
+                        setForm((f) => ({ ...f, coachingLocations: locs }));
+                      }} placeholder="City (optional)" className="text-sm" />
+                      <button type="button" onClick={() => {
+                        const locs = (form as any).coachingLocations.filter((_: unknown, j: number) => j !== i);
+                        setForm((f) => ({ ...f, coachingLocations: locs }));
+                      }} className="text-red-400 hover:text-red-600 text-sm px-1">✕</button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

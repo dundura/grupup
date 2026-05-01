@@ -72,7 +72,8 @@ export default async function AdminEditPage({ params }: { params: Promise<{ user
         tiktok: ((playerDbProfile as any)?.tiktok ?? "") as string,
         snapchat: ((playerDbProfile as any)?.snapchat ?? "") as string,
         position: (meta.position ?? "") as string,
-        improvementAreas: ((meta.improvementAreas ?? ["Ball Skills"]) as string[]),
+        videoUrl: (trainerDbProfile?.videoUrl ?? "") as string,
+        coachingLocations: ((trainerDbProfile?.coachingLocations ?? []) as Array<{ name: string; city?: string; logo?: string }>),
       }}
     />
   );
