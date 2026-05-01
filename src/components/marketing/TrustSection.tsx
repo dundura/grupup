@@ -27,8 +27,9 @@ export function TrustSection() {
   return (
     <>
       {/* ── How Grupup Works split ── */}
-      <section className="bg-white py-16 md:py-24">
+      <section className="bg-[#f7f8fa] py-8 md:py-12">
         <div className="container max-w-5xl">
+          <div className="bg-white rounded-3xl shadow-md border border-gray-100 px-8 py-10 md:px-12 md:py-14">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
 
             {/* Text */}
@@ -74,6 +75,7 @@ export function TrustSection() {
               </div>
             </div>
 
+          </div>
           </div>
         </div>
       </section>

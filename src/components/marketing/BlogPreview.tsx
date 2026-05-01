@@ -43,7 +43,7 @@ const posts = [
 
 export function BlogPreview() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-8 md:py-12">
       <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 md:mb-12">
           <div>

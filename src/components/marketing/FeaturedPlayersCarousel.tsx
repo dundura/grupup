@@ -80,7 +80,7 @@ export function FeaturedPlayersCarousel() {
   const GAP = 16;
 
   return (
-    <section className="py-16 md:py-20 bg-white">
+    <section className="py-8 md:py-12 bg-white">
       <div className="container max-w-5xl">
 
         {/* Heading */}

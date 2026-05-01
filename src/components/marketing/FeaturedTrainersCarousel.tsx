@@ -72,7 +72,7 @@ export function FeaturedTrainersCarousel() {
   if (sessions.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-24" style={{ backgroundColor: "#f7f8fa" }}>
+    <section className="py-8 md:py-12" style={{ backgroundColor: "#f7f8fa" }}>
       <div className="container max-w-5xl">
 
         {/* Header */}
