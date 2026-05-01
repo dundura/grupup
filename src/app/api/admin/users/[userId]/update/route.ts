@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { trainers } from "@/db/schema";
+import { trainers, playerProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
@@ -39,8 +39,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
     ...(body.lastName !== undefined ? { lastName: body.lastName } : {}),
   });
 
-  // If trainer, also update the trainers DB table
-  const role = (existingMeta.role ?? body.role) as string;
+  const [trainerRow] = await db.select({ id: trainers.id }).from(trainers).where(eq(trainers.clerkId, userId));
+  const role = (existingMeta.role ?? (trainerRow ? "trainer" : "player")) as string;
+
   if (role === "trainer") {
     const trainerFields: Record<string, unknown> = {};
     if (body.bio !== undefined) trainerFields.bio = body.bio;
@@ -53,6 +54,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ use
     if (Object.keys(trainerFields).length) {
       await db.update(trainers).set(trainerFields as any).where(eq(trainers.clerkId, userId));
     }
+  } else if (body.playerProfileId) {
+    // Update player's DB profile with form data
+    await db.update(playerProfiles).set({
+      name: [body.firstName, body.lastName].filter(Boolean).join(" ") || undefined,
+      city: body.city?.trim() || null,
+      bio: body.bio?.trim() || null,
+      sport: body.sport?.trim() || null,
+      skillLevel: body.level?.trim() || null,
+      birthYear: body.birthYear ? parseInt(body.birthYear) : null,
+      photo: body.photo?.trim() || null,
+      instagram: body.instagram?.trim().replace(/^@/, "") || null,
+      tiktok: body.tiktok?.trim().replace(/^@/, "") || null,
+      snapchat: body.snapchat?.trim().replace(/^@/, "") || null,
+    }).where(eq(playerProfiles.id, parseInt(body.playerProfileId)));
   }
 
   return NextResponse.json({ success: true });

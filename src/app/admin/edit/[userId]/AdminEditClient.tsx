@@ -17,10 +17,11 @@ const currentYear = new Date().getFullYear();
 const birthYears = Array.from({ length: 30 }, (_, i) => currentYear - 5 - i);
 
 export default function AdminEditClient({
-  userId, role, initialData,
+  userId, role, playerProfileId, initialData,
 }: {
   userId: string;
   role: string;
+  playerProfileId: number | null;
   initialData: {
     firstName: string; lastName: string; email: string; photo: string;
     city: string; country: string; bio: string; sport: string;
@@ -30,6 +31,7 @@ export default function AdminEditClient({
     improvementAreas: string[];
     availableForFreePlay: boolean; openToTrain: boolean;
     isApproved: boolean; isHidden: boolean;
+    instagram: string; tiktok: string; snapchat: string;
   };
 }) {
   const router = useRouter();
@@ -80,7 +82,7 @@ export default function AdminEditClient({
     const res = await fetch(`/api/admin/users/${userId}/update`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, playerProfileId }),
     });
     if (res.ok) { setSaved(true); setShowPopup(true); setTimeout(() => setSaved(false), 3000); }
     else { const d = await res.json(); setError(d.error ?? "Failed to save"); }
@@ -312,6 +314,21 @@ export default function AdminEditClient({
                   className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${form.isHidden ? "bg-[#DC373E]" : "bg-gray-200"}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.isHidden ? "translate-x-4" : "translate-x-0"}`} />
                 </button>
+              </div>
+
+              {/* Social */}
+              <div className="pt-2 border-t space-y-2">
+                <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Social</p>
+                {[
+                  { key: "instagram", label: "Instagram" },
+                  { key: "tiktok",    label: "TikTok" },
+                  { key: "snapchat",  label: "Snapchat" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="text-sm font-medium mb-1.5 block">{label}</label>
+                    <Input value={(form as any)[key] ?? ""} onChange={(e) => set(key, e.target.value)} placeholder={`@username`} />
+                  </div>
+                ))}
               </div>
             </div>
           )}
