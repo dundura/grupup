@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -34,24 +35,72 @@ export default function ForParentsPage() {
     <div className="min-h-screen bg-white flex flex-col items-center">
 
       {/* Hero */}
-      <div className="w-full text-center px-4 pt-16 pb-12" style={{ backgroundColor: "#0F3154" }}>
-        <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#DC373E" }}>
-          Group Sports Training
-        </p>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-4 max-w-2xl mx-auto">
-          Expert coaching.<br />A fraction of the price.
-        </h1>
-        <p className="text-white/70 text-lg max-w-xl mx-auto mb-8">
-          Book a coached group session from <span className="text-white font-bold">$22/player</span>. Train with others near you and level up your game.
-        </p>
-        <Link
-          href="/groups?sport=soccer"
-          className="inline-block px-10 py-4 rounded-2xl font-bold text-white text-base"
-          style={{ backgroundColor: "#DC373E" }}
-        >
-          Find Sessions Near Me →
-        </Link>
-        <p className="text-white/40 text-xs mt-4">No account needed to browse</p>
+      <div className="w-full px-4 pt-10 pb-0" style={{ backgroundColor: "#0F3154" }}>
+        <div className="max-w-5xl mx-auto">
+
+          {/* Text */}
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#DC373E" }}>
+              Group Sports Training
+            </p>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
+              Expert coaching.<br />A fraction of the price.
+            </h1>
+            <p className="text-white/70 text-lg max-w-xl mx-auto mb-8">
+              Book a coached group session from <span className="text-white font-bold">$22/player</span>. Train with others near you and level up your game.
+            </p>
+            <Link
+              href="/groups?sport=soccer"
+              className="inline-block px-10 py-4 rounded-2xl font-bold text-white text-base"
+              style={{ backgroundColor: "#DC373E" }}
+            >
+              Find Sessions Near Me →
+            </Link>
+            <p className="text-white/40 text-xs mt-4">No account needed to browse</p>
+          </div>
+
+          {/* Photo strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pb-0">
+            <div className="relative col-span-2 sm:col-span-1 rounded-t-2xl overflow-hidden" style={{ height: "260px" }}>
+              <Image
+                src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777378113162-feqi88.png"
+                alt="Soccer group training"
+                fill
+                className="object-cover"
+                style={{ objectPosition: "center 35%" }}
+                sizes="(max-width: 640px) 100vw, 33vw"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <p className="absolute bottom-3 left-4 text-white font-bold text-sm drop-shadow">⚽ Soccer</p>
+            </div>
+            <div className="relative rounded-t-2xl overflow-hidden hidden sm:block" style={{ height: "260px" }}>
+              <Image
+                src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377344723-zsegtl.png"
+                alt="Basketball group training"
+                fill
+                className="object-cover"
+                sizes="33vw"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <p className="absolute bottom-3 left-4 text-white font-bold text-sm drop-shadow">🏀 Basketball</p>
+            </div>
+            <div className="relative rounded-t-2xl overflow-hidden hidden sm:block" style={{ height: "260px" }}>
+              <Image
+                src="https://d2vm0l3c6tu9qp.cloudfront.net/soccer-directory/uploads/1777377633398-c04se8.png"
+                alt="Football group training"
+                fill
+                className="object-cover"
+                sizes="33vw"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <p className="absolute bottom-3 left-4 text-white font-bold text-sm drop-shadow">🏈 Football</p>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Benefits */}
