@@ -329,5 +329,6 @@ export const playerProfiles = pgTable("player_profiles", {
   instagram: varchar("instagram", { length: 100 }),
   tiktok: varchar("tiktok", { length: 100 }),
   snapchat: varchar("snapchat", { length: 100 }),
+  focusAreas: json("focus_areas").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });

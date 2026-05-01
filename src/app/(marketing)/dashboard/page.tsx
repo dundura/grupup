@@ -58,9 +58,10 @@ export default function DashboardPage() {
     trainingType?: string; status: string; sendCount?: number; createdAt: string;
   }>>([]);
   const [playerProfiles, setPlayerProfiles] = useState<Array<{
-    id: number; name: string; birthYear?: number; sport?: string; skillLevel?: string; notes?: string; isDefault?: boolean;
+    id: number; name: string; birthYear?: number; sport?: string; skillLevel?: string; notes?: string; isDefault?: boolean; focusAreas?: string[];
   }>>([]);
-  const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string; photo: string; city: string; bio: string; isPublic: boolean } | null>(null);
+  const FOCUS_AREAS = ["Ball Skills","Finishing","Defending","1v1","Passing","Shooting","Speed & Agility","Dribbling","Heading","Goalkeeping","Game Sense","Set Pieces"];
+  const [profileModal, setProfileModal] = useState<{ id?: number; name: string; birthYear: string; sport: string; skillLevel: string; notes: string; photo: string; city: string; bio: string; isPublic: boolean; focusAreas: string[] } | null>(null);
   const [activePlayerProfileId, setActivePlayerProfileId] = useState<number | null>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("activePlayerProfileId");
@@ -213,6 +214,7 @@ export default function DashboardPage() {
           instagram: (profileModal as any).instagram || null,
           tiktok: (profileModal as any).tiktok || null,
           snapchat: (profileModal as any).snapchat || null,
+          focusAreas: profileModal.focusAreas ?? [],
         }),
       });
       const saved = await res.json();
@@ -660,7 +662,7 @@ export default function DashboardPage() {
                   View public profile →
                 </Link>
                 <button
-                  onClick={() => setProfileModal({ id: activeKid.id, name: activeKid.name, birthYear: activeKid.birthYear ? String(activeKid.birthYear) : "", sport: activeKid.sport ?? "", skillLevel: activeKid.skillLevel ?? "", notes: activeKid.notes ?? "", photo: (activeKid as any).photo ?? "", city: (activeKid as any).city ?? "", bio: (activeKid as any).bio ?? "", isPublic: (activeKid as any).isPublic !== false })}
+                  onClick={() => setProfileModal({ id: activeKid.id, name: activeKid.name, birthYear: activeKid.birthYear ? String(activeKid.birthYear) : "", sport: activeKid.sport ?? "", skillLevel: activeKid.skillLevel ?? "", notes: activeKid.notes ?? "", photo: (activeKid as any).photo ?? "", city: (activeKid as any).city ?? "", bio: (activeKid as any).bio ?? "", isPublic: (activeKid as any).isPublic !== false, focusAreas: (activeKid as any).focusAreas ?? [] })}
                   className="text-xs font-medium text-[#0F3154] hover:underline">
                   Edit
                 </button>
@@ -683,6 +685,13 @@ export default function DashboardPage() {
             </div>
             {(activeKid as any).bio && (
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{(activeKid as any).bio}</p>
+            )}
+            {((activeKid as any).focusAreas?.length ?? 0) > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {((activeKid as any).focusAreas as string[]).map((a) => (
+                  <span key={a} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#f0f4f9", color: "#0F3154" }}>{a}</span>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -1489,6 +1498,32 @@ export default function DashboardPage() {
                   placeholder="e.g. left-footed, needs extra attention on defending"
                   className="w-full px-3 py-2 rounded-lg border border-input text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Focus Areas <span className="font-normal">(tap to select)</span></label>
+                <div className="flex flex-wrap gap-1.5">
+                  {FOCUS_AREAS.map((area) => {
+                    const selected = profileModal.focusAreas.includes(area);
+                    return (
+                      <button
+                        key={area}
+                        type="button"
+                        onClick={() => setProfileModal((p) => p ? {
+                          ...p,
+                          focusAreas: selected
+                            ? p.focusAreas.filter((a) => a !== area)
+                            : [...p.focusAreas, area],
+                        } : p)}
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-all"
+                        style={selected
+                          ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
+                          : { backgroundColor: "white", color: "#6b7280", borderColor: "#e2e8f0" }}>
+                        {area}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground block">Social (optional)</label>
                 {[

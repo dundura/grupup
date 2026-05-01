@@ -8,7 +8,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { name, birthYear, sport, skillLevel, notes, isDefault, photo, city, bio, isPublic, instagram, tiktok, snapchat } = await req.json();
+  const { name, birthYear, sport, skillLevel, notes, isDefault, photo, city, bio, isPublic, instagram, tiktok, snapchat, focusAreas } = await req.json();
 
   if (isDefault) {
     await db.update(playerProfiles).set({ isDefault: false }).where(eq(playerProfiles.clerkUserId, userId));
@@ -29,6 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       instagram: instagram?.trim().replace(/^@/, "") || null,
       tiktok: tiktok?.trim().replace(/^@/, "") || null,
       snapchat: snapchat?.trim().replace(/^@/, "") || null,
+      focusAreas: Array.isArray(focusAreas) ? focusAreas : [],
     })
     .where(and(eq(playerProfiles.id, parseInt(id)), eq(playerProfiles.clerkUserId, userId)))
     .returning();
