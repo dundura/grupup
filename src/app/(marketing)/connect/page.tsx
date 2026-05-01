@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users, Pencil } from "lucide-react";
 import { db } from "@/db";
-import { playerFollows, featuredPlayers } from "@/db/schema";
+import { playerFollows, playerProfiles, featuredPlayers } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import FollowCardButton from "./FollowCardButton";
 import FeaturePlayerButton from "./FeaturePlayerButton";
