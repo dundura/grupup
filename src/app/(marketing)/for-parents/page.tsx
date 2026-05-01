@@ -118,7 +118,7 @@ export default function ForParentsPage() {
 
       {/* Testimonial */}
       <div className="w-full max-w-3xl px-4 pb-14">
-        <div className="flex flex-col sm:flex-row items-stretch gap-0 rounded-2xl overflow-hidden shadow-md">
+        <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl overflow-hidden shadow-md">
           {/* Quote side */}
           <div className="flex-1 bg-[#0F3154] px-8 py-10 flex flex-col justify-center pr-10">
             <p className="text-white/90 text-lg italic leading-relaxed mb-8">
