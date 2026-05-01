@@ -58,5 +58,26 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const players = await db.select().from(featuredPlayers).orderBy(featuredPlayers.createdAt);
+
+  // Fill in missing profileSlugs from Clerk metadata
+  const missing = players.filter((p) => !p.profileSlug);
+  if (missing.length > 0) {
+    try {
+      const client = await clerkClient();
+      await Promise.all(missing.map(async (p) => {
+        try {
+          const u = await client.users.getUser(p.clerkUserId);
+          const slug = (u.publicMetadata as { profileSlug?: string }).profileSlug ?? null;
+          if (slug) {
+            p.profileSlug = slug;
+            await db.update(featuredPlayers)
+              .set({ profileSlug: slug })
+              .where(eq(featuredPlayers.clerkUserId, p.clerkUserId));
+          }
+        } catch {}
+      }));
+    } catch {}
+  }
+
   return NextResponse.json(players);
 }
