@@ -12,6 +12,34 @@ import BlockButton from "./BlockButton";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  try {
+    const client = await clerkClient();
+    let target;
+    if (id.startsWith("user_")) {
+      target = await client.users.getUser(id);
+    } else if (!id.startsWith("player-")) {
+      const { data: allUsers } = await client.users.getUserList({ limit: 500 });
+      target = allUsers.find((u) => (u.publicMetadata as { profileSlug?: string }).profileSlug === id);
+    }
+    if (!target) return {};
+    const meta = target.publicMetadata as { photo?: string; city?: string; sport?: string; level?: string; bio?: string };
+    const name = `${target.firstName ?? ""} ${target.lastName ?? ""}`.trim() || "Player";
+    const photo = meta.photo ?? target.imageUrl ?? "";
+    const location = meta.city ? ` · ${meta.city}` : "";
+    const sport = meta.sport ? `${meta.sport} Player` : "Player";
+    const title = `${name} — ${sport}${location} | GrupUp`;
+    const description = meta.bio || `Connect with ${name} on GrupUp to find training partners and join group sessions.`;
+    return {
+      title,
+      description,
+      openGraph: { title, description, images: photo ? [{ url: photo, width: 800, height: 800 }] : [], type: "profile" },
+      twitter: { card: "summary_large_image", title, description, images: photo ? [photo] : [] },
+    };
+  } catch { return {}; }
+}
+
 export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { userId: viewerUserId } = await auth();
   const { id } = await params;
