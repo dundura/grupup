@@ -568,8 +568,6 @@ export default function DashboardPage() {
           <div className="container max-w-4xl flex gap-1 overflow-x-auto py-2 px-4 scrollbar-hide">
             {[
               { label: "Sessions", href: "#sessions" },
-              { label: "Requests", href: "#requests" },
-              { label: "Earnings", href: "#earnings" },
               { label: "My Clients", href: "/clients" },
             ].map(({ label, href }) => (
               <a
