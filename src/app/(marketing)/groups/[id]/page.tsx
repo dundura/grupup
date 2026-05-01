@@ -188,22 +188,25 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* About section */}
-            {bioText && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About {trainer.name.split(" ")[0]}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {bioText.length > 400 ? `${bioText.slice(0, 400)}…` : bioText}
-                </p>
-
-                {/* Coaching positions */}
-                {(() => {
-                  const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | null;
-                  if (!locs?.length) return null;
-                  return (
-                    <div className="mt-4 pt-4 border-t">
+            {(() => {
+              const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | null;
+              const hasLocs = locs && locs.length > 0;
+              if (!bioText && !hasLocs) return null;
+              return (
+                <div className="bg-white rounded-2xl border shadow-sm p-6">
+                  {bioText && (
+                    <>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About {trainer.name.split(" ")[0]}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {bioText.length > 400 ? `${bioText.slice(0, 400)}…` : bioText}
+                      </p>
+                    </>
+                  )}
+                  {hasLocs && (
+                    <div className={bioText ? "mt-4 pt-4 border-t" : ""}>
                       <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Coaches at</p>
                       <div className="flex flex-wrap gap-2">
-                        {locs.map((loc, i) => (
+                        {locs!.map((loc, i) => (
                           <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-gray-50">
                             {loc.logo && (
                               <img src={loc.logo} alt={loc.name} className="h-5 w-5 rounded object-contain shrink-0" />
@@ -214,10 +217,10 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                         ))}
                       </div>
                     </div>
-                  );
-                })()}
-              </div>
-            )}
+                  )}
+                </div>
+              );
+            })()}
 
             {/* No sessions — request CTA */}
             {sessions.length === 0 && (
