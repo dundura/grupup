@@ -23,6 +23,8 @@ export async function GET() {
           sport: sports[0] ?? null,
           skillLevel: meta.level ?? null,
           birthYear: meta.birthYear ? parseInt(meta.birthYear) : null,
+          team: meta.team ?? null,
+          bio: meta.bio ?? null,
         };
       })
       .filter((p) => p.name !== "Player" || p.photo);

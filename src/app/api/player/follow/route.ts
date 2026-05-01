@@ -27,7 +27,12 @@ export async function POST(req: NextRequest) {
   );
   if (existing.length) return NextResponse.json({ status: existing[0].status });
 
-  await db.insert(playerFollows).values({ followerClerkId: userId, targetClerkId, status: "pending" });
+  try {
+    await db.insert(playerFollows).values({ followerClerkId: userId, targetClerkId, status: "pending" });
+  } catch (dbErr) {
+    console.error("[follow] DB insert failed:", dbErr);
+    return NextResponse.json({ error: "Failed to create follow" }, { status: 500 });
+  }
 
   // Email notification to the target player
   try {
