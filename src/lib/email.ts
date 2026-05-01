@@ -525,6 +525,58 @@ export async function sendTrainerNewSession({
   });
 }
 
+export async function sendPlayerFeatured({
+  playerEmail,
+  playerName,
+  profileSlug,
+  photo,
+}: {
+  playerEmail: string;
+  playerName: string;
+  profileSlug?: string;
+  photo?: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const profileUrl = `https://www.grupup.app/connect/${profileSlug || ""}`;
+  await getResend().emails.send({
+    from: FROM,
+    to: playerEmail,
+    bcc: "neil@anytime-soccer.com",
+    subject: `You've been featured on GrupUp! ⭐`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+        <div style="background: #0F3154; border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center;">
+          ${photo ? `<img src="${photo}" alt="${playerName}" width="80" height="80" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.3);margin-bottom:16px;" />` : ""}
+          <h1 style="color: white; margin: 0; font-size: 24px;">You're Featured! ⭐</h1>
+          <p style="color: rgba(255,255,255,0.75); margin: 8px 0 0; font-size: 15px;">Your profile is now in the spotlight on GrupUp.</p>
+        </div>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
+          Hey ${playerName}, your profile has been selected to be featured on the GrupUp homepage! Players and coaches will see your card in the player carousel.
+        </p>
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.7;">
+            ✅ Your profile is visible on the homepage carousel<br />
+            👥 More players will discover and follow you<br />
+            🤝 Connect with training partners near you
+          </p>
+        </div>
+        ${profileSlug ? `
+        <a href="${profileUrl}"
+          style="display: block; background: #DC373E; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin-bottom: 12px;">
+          View Your Profile
+        </a>` : ""}
+        <a href="https://www.grupup.app"
+          style="display: block; background: #0F3154; color: white; text-align: center; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+          Visit GrupUp
+        </a>
+        <p style="margin-top: 24px; font-size: 13px; color: #9ca3af; text-align: center;">
+          Questions? Reply to this email or visit <a href="https://www.grupup.app" style="color: #0F3154;">www.grupup.app</a>
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendTrainerNewBooking({
   trainerEmail,
   trainerName,

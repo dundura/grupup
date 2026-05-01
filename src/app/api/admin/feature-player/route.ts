@@ -3,6 +3,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { featuredPlayers } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { sendPlayerFeatured } from "@/lib/email";
 
 const ADMIN_EMAILS = ["neil@anytime-soccer.com", "nmciq2@gmail.com"];
 
@@ -34,6 +35,20 @@ export async function POST(req: Request) {
       target: featuredPlayers.clerkUserId,
       set: { name: name ?? "Player", photo: photo ?? null, city: city ?? null, sport: sport ?? null, skillLevel: skillLevel ?? null, team: team ?? null, bio: bio ?? null, profileSlug: profileSlug ?? null },
     });
+
+    // Email the featured player (fire-and-forget)
+    try {
+      const featuredUser = await client.users.getUser(clerkUserId);
+      const playerEmail = featuredUser.emailAddresses?.[0]?.emailAddress;
+      if (playerEmail) {
+        await sendPlayerFeatured({
+          playerEmail,
+          playerName: name ?? "Player",
+          profileSlug: profileSlug ?? undefined,
+          photo: photo ?? undefined,
+        });
+      }
+    } catch {}
   } else {
     await db.delete(featuredPlayers).where(eq(featuredPlayers.clerkUserId, clerkUserId));
   }
