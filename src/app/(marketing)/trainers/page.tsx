@@ -14,6 +14,7 @@ interface TrainerRow {
   yearsExperience: number; specialties: string[]; certifications: string[];
   skillLevels: string[]; sports: string[]; sport: string;
   hourlyRate: number; hasActiveSessions: boolean; clerkId: string;
+  coachingLocations?: Array<{ name: string; city?: string; logo?: string }>;
 }
 
 const SPORTS = ["All Sports", "Soccer", "Basketball", "Football", "Baseball", "Tennis", "Swimming", "Lacrosse", "Volleyball", "Speed & Agility"];
@@ -322,12 +323,26 @@ function TrainerCard({ trainer: t, followStatus, isSignedIn }: { trainer: Traine
 
         {/* Specialty tags */}
         {specialties.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {specialties.map((tag) => (
               <span key={tag} className="text-[11px] px-2 py-0.5 rounded-full border font-medium"
                 style={{ borderColor: "#CBD5E1", color: "#334155", backgroundColor: "#F8FAFC" }}>
                 {tag}
               </span>
+            ))}
+          </div>
+        )}
+
+        {/* Coaching positions */}
+        {(t.coachingLocations ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {(t.coachingLocations ?? []).map((loc, i) => (
+              <div key={i} className="flex items-center gap-1 px-2 py-1 rounded-md border bg-gray-50">
+                {loc.logo && (
+                  <img src={loc.logo} alt={loc.name} className="h-4 w-4 rounded object-contain shrink-0" />
+                )}
+                <span className="text-[11px] font-semibold text-gray-600 leading-none">{loc.name}</span>
+              </div>
             ))}
           </div>
         )}
