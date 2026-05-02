@@ -30,7 +30,7 @@ interface Follower {
   clerkId: string; name: string; email: string; photo: string;
 }
 
-type Modal = { type: "session"; sessionId: number; sessionTitle: string } | { type: "followers" } | { type: "waitlist"; sessionId: number; sessionTitle: string; count: number } | null;
+type Modal = { type: "session"; sessionId: number; sessionTitle: string } | { type: "followers" } | { type: "waitlist"; sessionId: number; sessionTitle: string; count: number; emails: string[] } | null;
 
 export default function TrainerManagePage() {
   const router = useRouter();
@@ -39,6 +39,7 @@ export default function TrainerManagePage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [waitlists, setWaitlists] = useState<Record<number, WaitlistEntry[]>>({});
+  const [selectedWaitlist, setSelectedWaitlist] = useState<Record<number, Set<number>>>({});
   const [notifying, setNotifying] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -115,10 +116,12 @@ export default function TrainerManagePage() {
       if (modal.type === "session") url = `/api/trainer/sessions/${modal.sessionId}/message`;
       else if (modal.type === "waitlist") url = `/api/trainer/sessions/${modal.sessionId}/message-waitlist`;
       else url = "/api/trainer/message-followers";
+      const body: Record<string, unknown> = { subject, message };
+      if (modal.type === "waitlist") body.emails = modal.emails;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, message }),
+        body: JSON.stringify(body),
       });
       const d = await res.json();
       setSentMsg(`Sent to ${d.sent} ${d.sent === 1 ? "person" : "people"}`);
@@ -266,59 +269,92 @@ export default function TrainerManagePage() {
                     {/* Waitlist */}
                     {s.waitlistEnabled && waitlists[s.id] !== undefined && (
                       <div className="mt-3 pt-3 border-t space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-muted-foreground">
-                            Waitlist — {waitlists[s.id].length === 0 ? "no signups yet" : `${waitlists[s.id].length} waiting`}
-                          </p>
-                          {waitlists[s.id].length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <button type="button"
-                                onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length }); setSentMsg(""); }}
-                                className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-4 py-2 rounded-lg border border-[#0F3154] transition-colors hover:bg-[#0F3154] hover:text-white">
-                                <Mail className="h-4 w-4" />
-                                Custom email
-                              </button>
-                              <button type="button"
-                                onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
-                                className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors"
-                                style={{ backgroundColor: "#DC373E" }}>
-                                <Mail className="h-4 w-4" />
-                                Notify — spots open!
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        {waitlists[s.id].length > 0 && (
-                        <div className="border rounded-lg overflow-hidden">
-                          <table className="w-full text-xs">
-                            <thead className="bg-muted/50">
-                              <tr>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Parent</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Child</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Age</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Phone</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {waitlists[s.id].map((w) => (
-                                <tr key={w.id} className="border-t">
-                                  <td className="px-3 py-2">
-                                    <p className="font-medium">{w.userName || "—"}</p>
-                                    <p className="text-muted-foreground truncate max-w-[120px]">{w.userEmail}</p>
-                                  </td>
-                                  <td className="px-3 py-2 font-medium">{w.childName || "—"}</td>
-                                  <td className="px-3 py-2 text-muted-foreground">{w.childAge || "—"}</td>
-                                  <td className="px-3 py-2 text-muted-foreground">{w.parentPhone || "—"}</td>
-                                  <td className="px-3 py-2 text-muted-foreground">
-                                    {new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        )}
+                        {(() => {
+                          const sel = selectedWaitlist[s.id] ?? new Set<number>();
+                          const allChecked = waitlists[s.id].length > 0 && sel.size === waitlists[s.id].length;
+                          const selectedEmails = waitlists[s.id].filter((w) => sel.has(w.id)).map((w) => w.userEmail);
+                          function toggleAll() {
+                            setSelectedWaitlist((prev) => ({
+                              ...prev,
+                              [s.id]: allChecked ? new Set() : new Set(waitlists[s.id].map((w) => w.id)),
+                            }));
+                          }
+                          function toggleOne(id: number) {
+                            setSelectedWaitlist((prev) => {
+                              const next = new Set(prev[s.id] ?? []);
+                              next.has(id) ? next.delete(id) : next.add(id);
+                              return { ...prev, [s.id]: next };
+                            });
+                          }
+                          return (
+                            <>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs font-semibold text-muted-foreground">
+                                  Waitlist — {waitlists[s.id].length === 0 ? "no signups yet" : `${waitlists[s.id].length} waiting`}
+                                  {sel.size > 0 && <span className="ml-2 text-[#0F3154]">{sel.size} selected</span>}
+                                </p>
+                                {waitlists[s.id].length > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    <button type="button"
+                                      disabled={sel.size === 0}
+                                      onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: sel.size, emails: selectedEmails }); setSentMsg(""); }}
+                                      className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                                      <Mail className="h-4 w-4" />
+                                      Custom email{sel.size > 0 ? ` (${sel.size})` : ""}
+                                    </button>
+                                    <button type="button"
+                                      onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
+                                      className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors"
+                                      style={{ backgroundColor: "#DC373E" }}>
+                                      <Mail className="h-4 w-4" />
+                                      Notify — spots open!
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                              {waitlists[s.id].length > 0 && (
+                              <div className="border rounded-lg overflow-hidden">
+                                <table className="w-full text-xs">
+                                  <thead className="bg-muted/50">
+                                    <tr>
+                                      <th className="px-3 py-2 w-8">
+                                        <input type="checkbox" checked={allChecked} onChange={toggleAll} className="rounded" />
+                                      </th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Parent</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Child</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Age</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Phone</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {waitlists[s.id].map((w) => (
+                                      <tr key={w.id} className={`border-t cursor-pointer ${sel.has(w.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                                        onClick={() => toggleOne(w.id)}>
+                                        <td className="px-3 py-2">
+                                          <input type="checkbox" checked={sel.has(w.id)} onChange={() => toggleOne(w.id)}
+                                            onClick={(e) => e.stopPropagation()} className="rounded" />
+                                        </td>
+                                        <td className="px-3 py-2">
+                                          <p className="font-medium">{w.userName || "—"}</p>
+                                          <p className="text-muted-foreground">{w.userEmail}</p>
+                                        </td>
+                                        <td className="px-3 py-2 font-medium">{w.childName || "—"}</td>
+                                        <td className="px-3 py-2 text-muted-foreground">{w.childAge || "—"}</td>
+                                        <td className="px-3 py-2 text-muted-foreground">{w.parentPhone || "—"}</td>
+                                        <td className="px-3 py-2 text-muted-foreground">
+                                          {new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -339,7 +375,7 @@ export default function TrainerManagePage() {
                 {modal.type === "session"
                   ? `Message registrants — ${modal.sessionTitle}`
                   : modal.type === "waitlist"
-                    ? `Email waitlist — ${modal.sessionTitle} (${modal.count})`
+                    ? `Email ${modal.count} selected — ${modal.sessionTitle}`
                     : `Message all followers (${followers.length})`}
               </h3>
               <button type="button" onClick={() => setModal(null)}>

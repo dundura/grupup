@@ -14,14 +14,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const { id } = await params;
     const sessionId = parseInt(id);
-    const { subject, message } = await req.json();
+    const { subject, message, emails } = await req.json();
     if (!message?.trim()) return NextResponse.json({ error: "Message required" }, { status: 400 });
 
     const [session] = await db.select().from(trainerSessions)
       .where(and(eq(trainerSessions.id, sessionId), eq(trainerSessions.trainerClerkId, userId)));
     if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const waitlistEntries = await db.select().from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+    let waitlistEntries = await db.select().from(sessionWaitlist).where(eq(sessionWaitlist.sessionId, sessionId));
+    if (Array.isArray(emails) && emails.length > 0) {
+      waitlistEntries = waitlistEntries.filter((w) => emails.includes(w.userEmail));
+    }
     if (!waitlistEntries.length) return NextResponse.json({ ok: true, sent: 0 });
 
     const resend = new Resend(process.env.RESEND_API_KEY);
