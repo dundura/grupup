@@ -78,54 +78,61 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   if (loading || plans.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border-2 shadow-sm p-5 overflow-hidden" style={{ borderColor: "#DC373E", backgroundColor: "#fff8f8" }}>
-      <div className="flex items-center gap-2 mb-1">
-        <Sparkles className="h-4 w-4 text-amber-500" />
-        <p className="font-bold text-base" style={{ color: "#DC373E" }}>Gauge Interest</p>
+    <div className="rounded-2xl border-2 shadow-sm overflow-hidden" style={{ borderColor: "#DC373E", backgroundColor: "#fff8f8" }}>
+      {/* Header */}
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          <p className="font-bold text-base" style={{ color: "#DC373E" }}>Gauge Interest</p>
+        </div>
+        <p className="text-xs font-semibold mb-1" style={{ color: "#DC373E" }}>These are potential sessions — not yet confirmed.</p>
+        <p className="text-xs text-muted-foreground">Your trainer is considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.</p>
       </div>
-      <p className="text-xs font-semibold mb-1" style={{ color: "#DC373E" }}>These are potential sessions — not yet confirmed.</p>
-      <p className="text-xs text-muted-foreground mb-4">Your trainer is considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.</p>
 
-      <div className="space-y-3">
-        {plans.map((plan) => {
-          const interested = myInterests.includes(plan.id);
-          return (
-            <div key={plan.id} className="flex items-center justify-between gap-3 py-3 border-b last:border-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg shrink-0"
-                  style={{ backgroundColor: "#EFF6FF" }}>
-                  <CalendarDays className="h-4 w-4" style={{ color: "#0F3154" }} />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm">
-                    {plan.dayOfWeek
-                      ? `Every ${plan.dayOfWeek}${plan.time ? ` · ${formatTime(plan.time)}` : ""}`
-                      : plan.date
-                        ? new Date(plan.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (plan.time ? ` · ${formatTime(plan.time)}` : "")
-                        : "Date TBD"}
-                  </p>
-                  {(plan.sport || plan.city || plan.note) && (
-                    <p className="text-xs text-muted-foreground truncate">
-                      {[plan.sport, plan.city].filter(Boolean).join(" · ") || plan.note}
-                    </p>
-                  )}
-                  {plan.interestCount > 0 && (
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{plan.interestCount} interested</p>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => { if (!interested) setInterestModal(plan.id); }}
-                disabled={interested || acting === plan.id}
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors shrink-0"
-                style={interested
-                  ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" }
-                  : { backgroundColor: "#DC373E", color: "white", borderColor: "#DC373E" }}>
-                {interested ? <><Check className="h-3 w-3" /> Interested</> : "I'm interested"}
-              </button>
-            </div>
-          );
-        })}
+      {/* Table */}
+      <div className="border-t">
+        <table className="w-full text-sm">
+          <thead className="bg-white/60">
+            <tr>
+              <th className="text-left px-5 py-2.5 text-xs font-semibold text-muted-foreground">Date</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground">Sport · Location</th>
+              <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground">Interest</th>
+              <th className="px-4 py-2.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {plans.map((plan) => {
+              const interested = myInterests.includes(plan.id);
+              const dateLabel = plan.dayOfWeek
+                ? `Every ${plan.dayOfWeek}${plan.time ? ` · ${formatTime(plan.time)}` : ""}`
+                : plan.date
+                  ? new Date(plan.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (plan.time ? ` · ${formatTime(plan.time)}` : "")
+                  : "Date TBD";
+              return (
+                <tr key={plan.id} className="border-t bg-white/40">
+                  <td className="px-5 py-3 font-semibold text-sm">{dateLabel}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {[plan.sport, plan.city].filter(Boolean).join(" · ") || plan.note || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-center text-xs text-muted-foreground">
+                    {plan.interestCount > 0 ? `${plan.interestCount} interested` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => { if (!interested) setInterestModal(plan.id); }}
+                      disabled={interested || acting === plan.id}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all shrink-0 ml-auto"
+                      style={interested
+                        ? { backgroundColor: "#16a34a", color: "white", borderColor: "#16a34a" }
+                        : { backgroundColor: "#DC373E", color: "white", borderColor: "#DC373E" }}>
+                      {interested ? <><Check className="h-3 w-3" /> Interested</> : "I'm interested"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Interest modal */}
