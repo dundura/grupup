@@ -574,15 +574,16 @@ export default function DashboardPage() {
       {/* Trainer quick-nav */}
       {isTrainerMode && (
         <div className="border-b bg-white sticky top-0 z-10">
-          <div className="container max-w-4xl flex gap-1 overflow-x-auto py-2 px-4 scrollbar-hide">
+          <div className="container max-w-4xl flex gap-2 overflow-x-auto py-3 px-4 scrollbar-hide">
             {[
               { label: "My Sessions", href: "/trainer/manage" },
+              { label: "My Followers", href: "/clients" },
               { label: "CRM", href: "/clients" },
             ].map(({ label, href }) => (
               <a
-                key={href}
+                key={label}
                 href={href}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50 transition-colors text-[#0F3154]"
+                className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors text-[#0F3154] bg-white"
               >
                 {label}
               </a>

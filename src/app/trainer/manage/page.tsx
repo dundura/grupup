@@ -52,6 +52,7 @@ export default function TrainerManagePage() {
   const [refundModal, setRefundModal] = useState<{ id: number; name: string; amount: number } | null>(null);
   const [notifyModal, setNotifyModal] = useState<{ sessionId: number; sessionTitle: string; count: number } | null>(null);
   const [notifySent, setNotifySent] = useState<number | null>(null);
+  const [plans, setPlans] = useState<Array<{ id: number; date?: string; dayOfWeek?: string; time?: string; sport?: string; city?: string; note?: string; interestCount: number; createdAt: string }>>([]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -60,11 +61,13 @@ export default function TrainerManagePage() {
       fetch("/api/trainer/sessions").then((r) => r.json()),
       fetch("/api/trainer/bookings").then((r) => r.json()),
       fetch("/api/trainer/message-followers").then((r) => r.json()),
-    ]).then(async ([sess, bkgs, fols]) => {
+      fetch("/api/trainer/plans").then((r) => r.json()),
+    ]).then(async ([sess, bkgs, fols, plansData]) => {
       const sessArr: Session[] = Array.isArray(sess) ? sess : [];
       setSessions(sessArr);
       setBookings(Array.isArray(bkgs) ? bkgs : []);
       setFollowers(Array.isArray(fols) ? fols : []);
+      setPlans(Array.isArray(plansData?.plans) ? plansData.plans : []);
       // Load waitlists for all sessions
       const wlMap: Record<number, WaitlistEntry[]> = {};
       await Promise.all(sessArr.map(async (s) => {
@@ -391,6 +394,53 @@ export default function TrainerManagePage() {
           )}
         </div>
 
+        {/* Pre-launch Plans */}
+        {plans.length > 0 && (
+          <div className="bg-white rounded-2xl border p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold">Pre-launch Events</h2>
+              <Button variant="outline" asChild>
+                <Link href="/trainer/plans">Manage all</Link>
+              </Button>
+            </div>
+            <div className="border rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Date / Day</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Sport · Location</th>
+                    <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs">Interested</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((p) => {
+                    const label = p.dayOfWeek
+                      ? `Every ${p.dayOfWeek}${p.time ? ` · ${fmtTime(p.time)}` : ""}`
+                      : p.date
+                        ? new Date(p.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (p.time ? ` · ${fmtTime(p.time)}` : "")
+                        : p.time ? fmtTime(p.time) : "TBD";
+                    return (
+                      <tr key={p.id} className="border-t hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 font-semibold">{label}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                          {[p.sport, p.city].filter(Boolean).join(" · ") || p.note || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="font-semibold text-amber-600">{p.interestCount}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Link href="/trainer/plans" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Details</Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Message modal */}
@@ -487,4 +537,11 @@ export default function TrainerManagePage() {
       )}
     </div>
   );
+}
+
+function fmtTime(t: string) {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
 }
