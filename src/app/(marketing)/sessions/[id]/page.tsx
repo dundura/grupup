@@ -253,6 +253,19 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       isSignedIn={!!currentUserId}
                     />
                   </div>
+                  {(() => {
+                    const locs = (trainer.coachingLocations as Array<{ name: string; city?: string }> | null);
+                    if (!locs?.length) return null;
+                    return (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {locs.map((loc, i) => (
+                          <span key={i} className="text-xs px-2 py-0.5 rounded-lg border bg-gray-50 font-medium text-gray-700">
+                            {loc.name}{loc.city ? `, ${loc.city}` : ""}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -577,6 +590,19 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
                       isSignedIn={!!currentUserId}
                     />
                   </div>
+                  {(() => {
+                    const locs = (trainer.coachingLocations as Array<{ name: string; city?: string }> | null);
+                    if (!locs?.length) return null;
+                    return (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {locs.map((loc, i) => (
+                          <span key={i} className="text-xs px-2 py-0.5 rounded-lg border bg-gray-50 font-medium text-gray-700">
+                            {loc.name}{loc.city ? `, ${loc.city}` : ""}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (
