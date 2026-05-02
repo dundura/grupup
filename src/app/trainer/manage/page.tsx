@@ -180,7 +180,7 @@ export default function TrainerManagePage() {
         {/* Sessions + Roster */}
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-bold">Sessions</h2>
+            <h2 className="text-base font-bold">My Sessions</h2>
             <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
               <Link href="/trainer/new-session">+ New session</Link>
             </Button>
