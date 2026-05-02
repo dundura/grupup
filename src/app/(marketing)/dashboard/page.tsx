@@ -89,7 +89,6 @@ export default function DashboardPage() {
   const [activeQuestionnaire, setActiveQuestionnaire] = useState<typeof pendingQuestionnaires[0] | null>(null);
   const [qResponses, setQResponses] = useState<Record<string, string>>({});
   const [qSubmitting, setQSubmitting] = useState(false);
-  const [showFollowers, setShowFollowers] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -110,13 +109,15 @@ export default function DashboardPage() {
         fetch("/api/trainer/follow-requests").then((r) => r.json()),
         fetch("/api/training-requests").then((r) => r.json()).catch(() => []),
         fetch("/api/player/profiles").then((r) => r.json()).catch(() => []),
-      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs, tRequests, profiles]) => {
+        fetch("/api/trainer/message-followers").then((r) => r.json()).catch(() => []),
+      ]).then(([profile, sess, bkgs, stripeStatus, trainerReqs, tRequests, profiles, fols]) => {
         setTrainerProfile(profile ?? null);
         setSessions(Array.isArray(sess) ? sess : []);
         setTrainerBookings(Array.isArray(bkgs) ? bkgs : []);
         setTrainerFollowRequests(Array.isArray(trainerReqs) ? trainerReqs : []);
         if (Array.isArray(tRequests)) setTrainingRequests(tRequests);
         if (Array.isArray(profiles)) setPlayerProfiles(profiles);
+        if (Array.isArray(fols)) setFollowers(fols.map((f: any) => ({ followerClerkId: f.clerkId, name: f.name, photo: f.photo ?? "" })));
         setIsArchived(profile?.isArchived ?? false);
         setStripeConnected(stripeStatus?.connected ?? false);
         setLoading(false);
@@ -632,47 +633,15 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-3">
-                            <button
-                              onClick={() => setShowFollowers((v) => !v)}
-                              className="text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors"
-                              style={showFollowers ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { color: "#0F3154", borderColor: "#0F3154" }}>
+                            <Link href="/clients"
+                              className="text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors hover:bg-[#0F3154] hover:text-white"
+                              style={{ color: "#0F3154", borderColor: "#0F3154" }}>
                               Followers{followers.length > 0 ? ` (${followers.length})` : ""}
-                            </button>
+                            </Link>
                             <button onClick={() => switchProfile(null)} className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Switch</button>
                           </div>
                         </td>
                       </tr>
-                      {showFollowers && (
-                        <tr className="border-t bg-gray-50">
-                          <td colSpan={4} className="px-4 py-3">
-                            {followers.length === 0 ? (
-                              <p className="text-xs text-muted-foreground">No followers yet.</p>
-                            ) : (
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr>
-                                    <th className="text-left py-1.5 font-semibold text-muted-foreground">Name</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {followers.map((f) => (
-                                    <tr key={f.followerClerkId} className="border-t border-gray-200">
-                                      <td className="py-2">
-                                        <div className="flex items-center gap-2">
-                                          {f.photo
-                                            ? <img src={f.photo} alt={f.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
-                                            : <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0"><span className="text-[10px] font-bold">{f.name?.[0]}</span></div>}
-                                          <span className="font-medium">{f.name}</span>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            )}
-                          </td>
-                        </tr>
-                      )}
                     </>
                   )}
                   {playerProfiles.map((p) => (
