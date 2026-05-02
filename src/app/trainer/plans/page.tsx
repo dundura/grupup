@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { CalendarDays, Plus, Trash2, Check, X, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import Link from "next/link";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -34,30 +35,33 @@ export default function TrainerPlansPage() {
   const [acting, setActing] = useState<number | null>(null);
   const [plansAbout, setPlansAbout] = useState("");
   const [savingAbout, setSavingAbout] = useState(false);
-  const aboutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [savedAbout, setSavedAbout] = useState(false);
+  const [trainerId, setTrainerId] = useState("");
 
   useEffect(() => {
     if (!isLoaded) return;
-    fetch("/api/trainer/plans").then((r) => r.json()).then((d) => {
+    Promise.all([
+      fetch("/api/trainer/plans").then((r) => r.json()),
+      fetch("/api/trainer/profile").then((r) => r.json()),
+    ]).then(([d, profile]) => {
       setPlans(d.plans ?? []);
       setInterests(d.interests ?? []);
       setPlansAbout(d.plansAbout ?? "");
+      if (profile?.id) setTrainerId(profile.id);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [isLoaded]);
 
-  function handleAboutChange(val: string) {
-    setPlansAbout(val);
-    if (aboutTimer.current) clearTimeout(aboutTimer.current);
-    aboutTimer.current = setTimeout(async () => {
-      setSavingAbout(true);
-      await fetch("/api/trainer/plans", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plansAbout: val }),
-      });
-      setSavingAbout(false);
-    }, 800);
+  async function saveAbout() {
+    setSavingAbout(true);
+    await fetch("/api/trainer/plans", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plansAbout }),
+    });
+    setSavingAbout(false);
+    setSavedAbout(true);
+    setTimeout(() => setSavedAbout(false), 2000);
   }
 
   function openForm() {
@@ -131,17 +135,19 @@ export default function TrainerPlansPage() {
         </div>
 
         {/* About text */}
-        <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-2">
+        <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold">About (shown on your profile page)</label>
-            {savingAbout && <span className="text-xs text-muted-foreground">Saving…</span>}
+            <Button size="sm" onClick={saveAbout} disabled={savingAbout}
+              style={{ backgroundColor: "#0F3154" }}>
+              {savedAbout ? "Saved ✓" : savingAbout ? "Saving…" : "Save"}
+            </Button>
           </div>
-          <textarea
+          <RichTextEditor
             value={plansAbout}
-            onChange={(e) => handleAboutChange(e.target.value)}
-            rows={3}
+            onChange={setPlansAbout}
             placeholder="Write a brief overview about yourself or your training style. This appears at the top of your gauge interest page."
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            maxLength={1000}
           />
         </div>
 
@@ -294,6 +300,13 @@ export default function TrainerPlansPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
+                      {trainerId && (
+                        <Link href={`/groups/${trainerId}`}
+                          className="text-xs font-semibold hover:underline"
+                          style={{ color: "#0F3154" }}>
+                          View session
+                        </Link>
+                      )}
                       <button onClick={() => setExpanded(isOpen ? null : plan.id)}
                         className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                         <Users className="h-3.5 w-3.5" />
