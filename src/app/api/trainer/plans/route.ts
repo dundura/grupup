@@ -18,10 +18,26 @@ export async function GET() {
       .where(eq(trainerPlanInterests.trainerClerkId, userId))
       .orderBy(desc(trainerPlanInterests.createdAt));
 
-    return NextResponse.json({ plans, interests });
+    const [trainerRow] = await db.select({ plansAbout: trainers.plansAbout })
+      .from(trainers).where(eq(trainers.clerkId, userId));
+
+    return NextResponse.json({ plans, interests, plansAbout: trainerRow?.plansAbout ?? "" });
   } catch (err) {
     console.error("[GET /api/trainer/plans]", err);
-    return NextResponse.json({ plans: [], interests: [] });
+    return NextResponse.json({ plans: [], interests: [], plansAbout: "" });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { plansAbout } = await req.json();
+    await db.update(trainers).set({ plansAbout: plansAbout ?? null }).where(eq(trainers.clerkId, userId));
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[PATCH /api/trainer/plans]", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
 

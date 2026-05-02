@@ -15,7 +15,9 @@ interface Session {
   waitlistEnabled?: boolean;
 }
 interface WaitlistEntry {
-  id: number; sessionId: number; userName: string | null; userEmail: string; createdAt: string;
+  id: number; sessionId: number; userName: string | null; userEmail: string;
+  childName?: string | null; childAge?: number | null; parentPhone?: string | null;
+  createdAt: string;
 }
 
 interface Booking {
@@ -28,7 +30,7 @@ interface Follower {
   clerkId: string; name: string; email: string; photo: string;
 }
 
-type Modal = { type: "session"; sessionId: number; sessionTitle: string } | { type: "followers" } | null;
+type Modal = { type: "session"; sessionId: number; sessionTitle: string } | { type: "followers" } | { type: "waitlist"; sessionId: number; sessionTitle: string; count: number } | null;
 
 export default function TrainerManagePage() {
   const router = useRouter();
@@ -111,6 +113,7 @@ export default function TrainerManagePage() {
     try {
       let url = "";
       if (modal.type === "session") url = `/api/trainer/sessions/${modal.sessionId}/message`;
+      else if (modal.type === "waitlist") url = `/api/trainer/sessions/${modal.sessionId}/message-waitlist`;
       else url = "/api/trainer/message-followers";
       const res = await fetch(url, {
         method: "POST",
@@ -268,13 +271,21 @@ export default function TrainerManagePage() {
                             Waitlist — {waitlists[s.id].length === 0 ? "no signups yet" : `${waitlists[s.id].length} waiting`}
                           </p>
                           {waitlists[s.id].length > 0 && (
-                          <button type="button"
-                            onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ backgroundColor: "#DC373E" }}>
-                            <Mail className="h-3 w-3" />
-                            Notify — spots open!
-                          </button>
+                            <div className="flex items-center gap-2">
+                              <button type="button"
+                                onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length }); setSentMsg(""); }}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-[#0F3154] px-3 py-1.5 rounded-lg border border-[#0F3154] transition-colors hover:bg-[#0F3154] hover:text-white">
+                                <Mail className="h-3 w-3" />
+                                Custom email
+                              </button>
+                              <button type="button"
+                                onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors"
+                                style={{ backgroundColor: "#DC373E" }}>
+                                <Mail className="h-3 w-3" />
+                                Notify — spots open!
+                              </button>
+                            </div>
                           )}
                         </div>
                         {waitlists[s.id].length > 0 && (
@@ -282,16 +293,23 @@ export default function TrainerManagePage() {
                           <table className="w-full text-xs">
                             <thead className="bg-muted/50">
                               <tr>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Name</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Email</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Parent</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Child</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Age</th>
+                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Phone</th>
                                 <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
                               </tr>
                             </thead>
                             <tbody>
                               {waitlists[s.id].map((w) => (
                                 <tr key={w.id} className="border-t">
-                                  <td className="px-3 py-2 font-medium">{w.userName || "—"}</td>
-                                  <td className="px-3 py-2 text-muted-foreground">{w.userEmail}</td>
+                                  <td className="px-3 py-2">
+                                    <p className="font-medium">{w.userName || "—"}</p>
+                                    <p className="text-muted-foreground truncate max-w-[120px]">{w.userEmail}</p>
+                                  </td>
+                                  <td className="px-3 py-2 font-medium">{w.childName || "—"}</td>
+                                  <td className="px-3 py-2 text-muted-foreground">{w.childAge || "—"}</td>
+                                  <td className="px-3 py-2 text-muted-foreground">{w.parentPhone || "—"}</td>
                                   <td className="px-3 py-2 text-muted-foreground">
                                     {new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                   </td>
@@ -310,44 +328,6 @@ export default function TrainerManagePage() {
           )}
         </div>
 
-        {/* Followers */}
-        <div className="bg-white rounded-2xl border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-bold">Followers</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">{followers.length} {followers.length === 1 ? "person follows" : "people follow"} you</p>
-            </div>
-            {followers.length > 0 && (
-              <button type="button"
-                onClick={() => { setModal({ type: "followers" }); setSentMsg(""); }}
-                className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-xl transition-colors"
-                style={{ backgroundColor: "#0F3154" }}>
-                <Mail className="h-4 w-4" /> Message all
-              </button>
-            )}
-          </div>
-
-          {followers.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No followers yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {followers.map((f) => (
-                <div key={f.clerkId} className="flex items-center gap-3 py-2 border-b last:border-0">
-                  {f.photo ? (
-                    <Image src={f.photo} alt={f.name} width={32} height={32} className="rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{f.name}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Message modal */}
@@ -358,7 +338,9 @@ export default function TrainerManagePage() {
               <h3 className="font-bold text-base">
                 {modal.type === "session"
                   ? `Message registrants — ${modal.sessionTitle}`
-                  : `Message all followers (${followers.length})`}
+                  : modal.type === "waitlist"
+                    ? `Email waitlist — ${modal.sessionTitle} (${modal.count})`
+                    : `Message all followers (${followers.length})`}
               </h3>
               <button type="button" onClick={() => setModal(null)}>
                 <X className="h-5 w-5 text-muted-foreground" />

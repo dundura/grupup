@@ -11,8 +11,14 @@ export default function JoinWaitlistButton({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [childName, setChildName] = useState("");
+  const [childAge, setChildAge] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(initialJoined);
+  const [leaving, setLeaving] = useState(false);
+  const [left, setLeft] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -20,19 +26,21 @@ export default function JoinWaitlistButton({
       setEmail((prev) => prev || (user.emailAddresses?.[0]?.emailAddress ?? ""));
     }
   }, [user]);
-  const [leaving, setLeaving] = useState(false);
-  const [left, setLeft] = useState(false);
-  const [error, setError] = useState("");
 
-  async function submit(n: string, e: string) {
-    if (!e.trim()) return;
+  async function submit() {
+    if (!email.trim() || !childName.trim() || !childAge.trim()) return;
     setSending(true);
     setError("");
     try {
       const res = await fetch(`/api/sessions/${sessionId}/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: n, email: e, sessionTitle }),
+        body: JSON.stringify({
+          name, email, sessionTitle,
+          childName: childName.trim(),
+          childAge: parseInt(childAge),
+          parentPhone: parentPhone.trim() || null,
+        }),
       });
       if (res.ok) {
         setDone(true);
@@ -49,7 +57,7 @@ export default function JoinWaitlistButton({
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
-    await submit(name, email);
+    await submit();
   }
 
   async function handleLeave() {
@@ -92,11 +100,11 @@ export default function JoinWaitlistButton({
       {!open ? (
         <>
           <button
-            onClick={() => email.trim() ? submit(name, email) : setOpen(true)}
+            onClick={() => setOpen(true)}
             disabled={sending}
             className="w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:bg-[#0F3154] hover:text-white disabled:opacity-60"
             style={{ borderColor: "#0F3154", color: "#0F3154" }}>
-            {sending ? "Sending…" : "Express Interest"}
+            Express Interest
           </button>
           {error && <p className="text-xs text-red-600 text-center">{error}</p>}
         </>
@@ -105,11 +113,18 @@ export default function JoinWaitlistButton({
           <p className="text-xs text-muted-foreground">No charge — we'll email you when booking opens.</p>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required />
+          <Input value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="Child's name *" required />
+          <div className="grid grid-cols-2 gap-2">
+            <Input type="number" value={childAge} onChange={(e) => setChildAge(e.target.value)}
+              placeholder="Child's age *" min={1} max={99} required />
+            <Input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
+              placeholder="Parent phone (optional)" />
+          </div>
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setOpen(false)}
               className="flex-1 py-2 rounded-xl text-sm border font-medium">Cancel</button>
-            <button type="submit" disabled={sending || !email.trim()}
+            <button type="submit" disabled={sending || !email.trim() || !childName.trim() || !childAge.trim()}
               className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
               style={{ backgroundColor: "#0F3154" }}>
               {sending ? "Sending…" : "RSVP"}

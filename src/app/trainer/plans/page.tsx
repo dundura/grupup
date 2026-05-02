@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { CalendarDays, Plus, Trash2, Check, X, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,15 +32,33 @@ export default function TrainerPlansPage() {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [acting, setActing] = useState<number | null>(null);
+  const [plansAbout, setPlansAbout] = useState("");
+  const [savingAbout, setSavingAbout] = useState(false);
+  const aboutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
     fetch("/api/trainer/plans").then((r) => r.json()).then((d) => {
       setPlans(d.plans ?? []);
       setInterests(d.interests ?? []);
+      setPlansAbout(d.plansAbout ?? "");
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [isLoaded]);
+
+  function handleAboutChange(val: string) {
+    setPlansAbout(val);
+    if (aboutTimer.current) clearTimeout(aboutTimer.current);
+    aboutTimer.current = setTimeout(async () => {
+      setSavingAbout(true);
+      await fetch("/api/trainer/plans", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plansAbout: val }),
+      });
+      setSavingAbout(false);
+    }, 800);
+  }
 
   function openForm() {
     setForm(emptyForm);
@@ -110,6 +128,21 @@ export default function TrainerPlansPage() {
           <Button onClick={openForm} style={{ backgroundColor: "#DC373E" }} size="sm">
             <Plus className="h-4 w-4 mr-1" /> Add
           </Button>
+        </div>
+
+        {/* About text */}
+        <div className="bg-white rounded-2xl border shadow-sm p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold">About (shown on your profile page)</label>
+            {savingAbout && <span className="text-xs text-muted-foreground">Saving…</span>}
+          </div>
+          <textarea
+            value={plansAbout}
+            onChange={(e) => handleAboutChange(e.target.value)}
+            rows={3}
+            placeholder="Write a brief overview about yourself or your training style. This appears at the top of your gauge interest page."
+            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          />
         </div>
 
         {/* Add form */}

@@ -10,10 +10,8 @@ import { db } from "@/db";
 import { trainers, trainerSessions, trainerFollows } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { PackageBooking } from "@/components/trainers/PackageBooking";
 import MessageButton from "@/components/messaging/MessageButton";
 import FollowButton from "@/components/sessions/FollowButton";
-import RequestSessionModal from "@/components/trainers/RequestSessionModal";
 import TrainerPlansSection from "@/components/trainers/TrainerPlansSection";
 
 export const dynamic = "force-dynamic";
@@ -166,13 +164,6 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   <p className="text-[11px] text-muted-foreground">Training location</p>
                 </div>
               )}
-              {sessions.length > 0 && (
-                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
-                  <CalendarDays className="h-5 w-5" style={{ color: "#0F3154" }} />
-                  <p className="text-xs font-medium">{sessions.length} session{sessions.length === 1 ? "" : "s"}</p>
-                  <p className="text-[11px] text-muted-foreground">Available now</p>
-                </div>
-              )}
               {skillLevels.length > 0 && (
                 <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
                   <Users className="h-5 w-5" style={{ color: "#0F3154" }} />
@@ -187,76 +178,15 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            {/* About section */}
-            {(() => {
-              const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | null;
-              const hasLocs = locs && locs.length > 0;
-              if (!bioText && !hasLocs) return null;
-              return (
-                <div className="bg-white rounded-2xl border shadow-sm p-6">
-                  {bioText && (
-                    <>
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About {trainer.name.split(" ")[0]}</p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {bioText.length > 400 ? `${bioText.slice(0, 400)}…` : bioText}
-                      </p>
-                    </>
-                  )}
-                  {hasLocs && (
-                    <div className={bioText ? "mt-4 pt-4 border-t" : ""}>
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Coaches at</p>
-                      <div className="flex flex-wrap gap-2">
-                        {locs!.map((loc, i) => (
-                          <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-gray-50">
-                            {loc.logo && (
-                              <img src={loc.logo} alt={loc.name} className="h-5 w-5 rounded object-contain shrink-0" />
-                            )}
-                            <span className="text-xs font-semibold text-gray-700 leading-none">{loc.name}</span>
-                            {loc.city && <span className="text-xs text-muted-foreground leading-none">{loc.city}</span>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* No sessions — request CTA */}
-            {sessions.length === 0 && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6 text-center">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ backgroundColor: "#f0f4f9" }}>
-                  <CalendarDays className="h-7 w-7" style={{ color: "#0F3154" }} />
-                </div>
-                <h3 className="font-bold text-base mb-1">No sessions available right now</h3>
-                <p className="text-sm text-muted-foreground mb-5">
-                  {trainer.name.split(" ")[0]} isn't running any group sessions at the moment. Send a request and we'll let them know you're interested.
-                </p>
-                <RequestSessionModal trainerId={trainer.id} trainerName={trainer.name} />
-                <p className="text-xs text-muted-foreground mt-3">We'll follow up within 24 hours.</p>
+            {/* About — trainer's overview text */}
+            {(trainer as any).plansAbout && (
+              <div className="bg-white rounded-2xl border shadow-sm p-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">About</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{(trainer as any).plansAbout}</p>
               </div>
             )}
 
-            {/* Package booking — client component */}
-            <PackageBooking
-              trainerId={trainer.id}
-              trainerName={trainer.name}
-              sessions={sessions.map((s) => ({
-                id: s.id,
-                title: s.title,
-                pricePerPlayer: s.pricePerPlayer,
-                sessionType: s.sessionType,
-                dayOfWeek: s.dayOfWeek ?? "",
-                time: s.time ?? "",
-                duration: s.duration ?? 60,
-                city: s.city ?? "",
-                spotsLeft: s.spotsLeft,
-                spotsTotal: s.spotsTotal,
-              }))}
-            />
-
-            {/* Gauge Interest — below group sessions */}
+            {/* Gauge Interest */}
             <TrainerPlansSection trainerId={trainer.id} />
 
           </div>
@@ -279,23 +209,6 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               <div className="p-4 space-y-2">
                 <div>
                   <p className="font-bold text-base">{trainer.name}</p>
-                  {(() => {
-                    const locs = (trainer as any).coachingLocations as Array<{ name: string; city?: string; logo?: string }> | null;
-                    if (!locs || locs.length === 0) return null;
-                    return (
-                      <div className="flex flex-wrap gap-1.5 mt-1.5">
-                        {locs.map((loc, i) => (
-                          <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-gray-50">
-                            {loc.logo && (
-                              <img src={loc.logo} alt={loc.name} className="h-5 w-5 rounded object-contain shrink-0" />
-                            )}
-                            <span className="text-xs font-semibold text-gray-700 leading-none">{loc.name}</span>
-                            {loc.city && <span className="text-xs text-muted-foreground leading-none">{loc.city}</span>}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
                 </div>
                 {/* Rating row */}
                 <div className="flex items-center gap-1.5">

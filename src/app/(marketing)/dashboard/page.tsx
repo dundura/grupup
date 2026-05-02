@@ -129,7 +129,8 @@ export default function DashboardPage() {
         fetch("/api/player/requests").then((r) => r.json()).catch(() => []),
         fetch("/api/player/profiles").then((r) => r.json()).catch(() => []),
         fetch("/api/trainer/profile").then((r) => r.json()).catch(() => null),
-      ]).then(([followData, qData, bkgs, reqs, profiles, trainerProf]) => {
+        fetch("/api/trainer/sessions").then((r) => r.json()).catch(() => []),
+      ]).then(([followData, qData, bkgs, reqs, profiles, trainerProf, sess]) => {
         if (followData.pending) setFollowRequests(followData.pending);
         if (followData.approved) setFollowers(followData.approved);
         if (qData.pending) setPendingQuestionnaires(qData.pending);
@@ -137,6 +138,7 @@ export default function DashboardPage() {
         if (Array.isArray(reqs)) setPlayerRequests(reqs);
         if (Array.isArray(profiles)) setPlayerProfiles(profiles);
         if (trainerProf?.id) setTrainerProfile(trainerProf);
+        setSessions(Array.isArray(sess) ? sess : []);
         setLoading(false);
       });
     }
@@ -911,22 +913,18 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Trainer: Sessions */}
+        {/* Trainer: Sessions quick-link */}
         {isTrainerMode && (
           <div id="sessions" className="bg-white rounded-2xl border p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold">
-                My Sessions
-                {sessions.length > 0 && (
-                  <span className="ml-2 text-xs font-semibold text-muted-foreground">({sessions.length})</span>
-                )}
-              </h2>
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Link href="/trainer/manage"
-                  className="flex items-center gap-1.5 text-sm font-medium hover:underline"
-                  style={{ color: "#0F3154" }}>
-                  <ClipboardList className="h-3.5 w-3.5" /> Manage
-                </Link>
+                <h2 className="text-base font-bold">Sessions</h2>
+                {sessions.length > 0 && (
+                  <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-[11px] font-bold text-white rounded-full"
+                    style={{ backgroundColor: "#DC373E" }}>{sessions.length}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
                 <Link href="/trainer/plans"
                   className="flex items-center gap-1.5 text-sm font-medium hover:underline"
                   style={{ color: "#0F3154" }}>
@@ -939,120 +937,19 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
-
-            {sessions.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-3">🎯</div>
-                <p className="font-semibold mb-1">No sessions posted yet</p>
-                <p className="text-muted-foreground text-sm mb-5">
-                  Create your first group session and start filling spots.
-                </p>
-                <Button style={{ backgroundColor: "#DC373E" }} asChild>
-                  <Link href="/trainer/new-session">
-                    <Users className="h-4 w-4 mr-2" />
-                    Create a training session
-                  </Link>
-                </Button>
+            <Link href="/trainer/manage"
+              className="flex items-center justify-between mt-4 p-4 rounded-xl border hover:bg-gray-50 transition-colors group">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: "#EFF6FF" }}>
+                  <ClipboardList className="h-5 w-5" style={{ color: "#0F3154" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Manage Sessions</p>
+                  <p className="text-xs text-muted-foreground">View registrations, waitlists &amp; send emails</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {sessions.map((s) => (
-                  <div key={s.id} className="border rounded-xl p-4 flex items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="font-semibold text-sm leading-snug">{s.title}</p>
-                        <span className="shrink-0 text-sm font-bold">${s.pricePerPlayer}/player</span>
-                      </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mb-2">
-                        <span>{s.sport} · {formatSessionType(s.sessionType)}</span>
-                        {s.dayOfWeek && s.time && (
-                          <span className="flex items-center gap-1">
-                            <CalendarDays className="h-3 w-3" />{s.dayOfWeek} at {s.time}
-                          </span>
-                        )}
-                        {s.duration && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />{s.duration} min
-                          </span>
-                        )}
-                        {s.city && <span>{s.city}</span>}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs font-semibold ${s.spotsLeft === 0 ? "text-red-600" : s.spotsLeft <= 2 ? "text-amber-600" : "text-green-700"}`}>
-                          {s.spotsLeft === 0 ? "Full" : `${s.spotsLeft} of ${s.spotsTotal} spots open`}
-                        </span>
-                        {s.skillLevel && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{s.skillLevel}</span>
-                        )}
-                      </div>
-                      {/* Registrations roster toggle */}
-                      {(() => {
-                        const roster = trainerBookings.filter((b) => b.sessionId === String(s.id));
-                        if (roster.length === 0) return (
-                          <p className="text-xs text-muted-foreground mt-1.5">No registrations yet</p>
-                        );
-                        const isOpen = expandedSession === s.id;
-                        return (
-                          <div className="mt-1.5">
-                            <button type="button"
-                              onClick={() => setExpandedSession(isOpen ? null : s.id)}
-                              className="flex items-center gap-1 text-xs font-semibold text-[#0F3154] hover:underline">
-                              {roster.length} registered
-                              {isOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                            </button>
-                            {isOpen && (
-                              <div className="mt-2 border rounded-lg overflow-hidden">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-muted/50">
-                                    <tr>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Player</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Athlete</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Booked</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {roster.map((b: any) => (
-                                      <tr key={b.id} className="border-t">
-                                        <td className="px-3 py-2 font-medium">{b.userName || "—"}</td>
-                                        <td className="px-3 py-2 text-muted-foreground">
-                                          {b.athleteName && b.athleteName !== b.userName ? b.athleteName : "—"}
-                                        </td>
-                                        <td className="px-3 py-2 text-muted-foreground">
-                                          {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      <Link href={`/sessions/${s.id}`}
-                        className="p-1.5 rounded-lg hover:bg-green-50 text-muted-foreground hover:text-green-600 transition-colors"
-                        title="View session">
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                      <Link href={`/trainer/sessions/${s.id}/edit`}
-                        className="p-1.5 rounded-lg hover:bg-blue-50 text-muted-foreground hover:text-blue-600 transition-colors"
-                        title="Edit session">
-                        <Pencil className="h-4 w-4" />
-                      </Link>
-                      <button
-                        onClick={() => setDeleteModal(s.id)}
-                        className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors"
-                        title="Delete session"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </Link>
           </div>
         )}
 

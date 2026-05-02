@@ -30,6 +30,7 @@ export const trainers = pgTable("trainers", {
   isApproved: boolean("is_approved").default(true),
   isArchived: boolean("is_archived").default(false),
   coachingLocations: json("coaching_locations").$type<Array<{ name: string; city?: string; logo?: string }>>().default([]),
+  plansAbout: text("plans_about"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -161,6 +162,9 @@ export const sessionWaitlist = pgTable("session_waitlist", {
   clerkUserId: varchar("clerk_user_id", { length: 255 }),
   userName: varchar("user_name", { length: 200 }),
   userEmail: varchar("user_email", { length: 255 }).notNull(),
+  childName: varchar("child_name", { length: 200 }),
+  childAge: integer("child_age"),
+  parentPhone: varchar("parent_phone", { length: 30 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -278,6 +282,9 @@ export const trainerPlanInterests = pgTable("trainer_plan_interests", {
   suggestedDate: varchar("suggested_date", { length: 20 }),
   suggestedTime: varchar("suggested_time", { length: 20 }),
   message: text("message"),
+  childName: varchar("child_name", { length: 200 }),
+  childAge: integer("child_age"),
+  parentPhone: varchar("parent_phone", { length: 30 }),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });

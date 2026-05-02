@@ -50,7 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const { userId } = await auth();
     const body = await req.json();
-    const { type, planId, playerName, playerEmail, suggestedDate, suggestedTime, message } = body;
+    const { type, planId, playerName, playerEmail, suggestedDate, suggestedTime, message, childName, childAge, parentPhone } = body;
 
     if (type === "interest") {
       // Check not already interested
@@ -70,6 +70,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         playerEmail: playerEmail || "",
         type: "interest",
         status: "pending",
+        childName: childName || null,
+        childAge: childAge ? parseInt(childAge) : null,
+        parentPhone: parentPhone || null,
       });
 
       // Bump interest count
