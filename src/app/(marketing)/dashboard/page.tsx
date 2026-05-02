@@ -574,7 +574,7 @@ export default function DashboardPage() {
         <div className="border-b bg-white sticky top-0 z-10">
           <div className="container max-w-4xl flex gap-1 overflow-x-auto py-2 px-4 scrollbar-hide">
             {[
-              { label: "Sessions", href: "#sessions" },
+              { label: "My Sessions", href: "/trainer/manage" },
               { label: "My Clients", href: "/clients" },
             ].map(({ label, href }) => (
               <a
