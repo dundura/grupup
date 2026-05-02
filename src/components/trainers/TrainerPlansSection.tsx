@@ -78,19 +78,9 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   if (loading || plans.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border-2 shadow-sm overflow-hidden" style={{ borderColor: "#DC373E", backgroundColor: "#fff8f8" }}>
-      {/* Header */}
-      <div className="px-5 pt-5 pb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-4 w-4 text-amber-500" />
-          <p className="font-bold text-base" style={{ color: "#DC373E" }}>Gauge Interest</p>
-        </div>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#DC373E" }}>These are potential sessions — not yet confirmed.</p>
-        <p className="text-xs text-muted-foreground">Your trainer is considering offering these dates and would like to know if there's enough interest before committing. Tap <strong>I'm interested</strong> to let them know — the more interest, the more likely they'll launch it.</p>
-      </div>
-
+    <div className="rounded-2xl border shadow-sm overflow-hidden bg-white">
       {/* Table */}
-      <div className="border-t">
+      <div>
         <table className="w-full text-sm">
           <thead className="bg-white/60">
             <tr>

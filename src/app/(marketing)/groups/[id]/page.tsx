@@ -107,25 +107,12 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             {/* Hero text */}
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold leading-snug mb-2">
-                Book {sports[0] ?? "Sports"} Sessions with {trainer.name}
+                {trainer.name}
               </h1>
-              {sports.length > 0 && (
-                <p className="text-muted-foreground text-base">
-                  {sports.join(" · ")} Coach{location ? ` · ${location}` : ""}
-                  {trainer.yearsExperience ? ` · ${trainer.yearsExperience} years experience` : ""}
-                </p>
-              )}
-              {trainer.rating != null && (
-                <div className="hidden lg:flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-4 w-4 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
-                    ))}
-                  </div>
-                  <span className="font-bold text-sm">{trainer.rating?.toFixed(1)}</span>
-                  <span className="text-muted-foreground text-sm">({trainer.reviewCount} reviews)</span>
-                </div>
-              )}
+              <p className="text-sm font-semibold mb-1" style={{ color: "#DC373E" }}>Gauge Interest — These are potential sessions, not yet confirmed.</p>
+              <p className="text-sm text-muted-foreground">
+                {trainer.name.split(" ")[0]} is considering offering these dates and would like to know if there&apos;s enough interest before committing. Tap <strong>I&apos;m interested</strong> to let them know — the more interest, the more likely they&apos;ll launch it.
+              </p>
             </div>
 
             {/* Mobile-only trainer card */}
@@ -139,42 +126,10 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                   </div>
                 )}
               </div>
-              <div className="p-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`h-3 w-3 ${i < Math.round(trainer.rating ?? 0) ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`} />
-                  ))}
-                  <span className="text-xs text-muted-foreground">{trainer.rating?.toFixed(1)} · {trainer.reviewCount} reviews</span>
-                  {(trainer.yearsExperience ?? 0) > 0 && (
-                    <span className="text-xs text-muted-foreground">· {trainer.yearsExperience} yrs exp</span>
-                  )}
-                </div>
+              <div className="p-4 flex items-center justify-end">
                 {trainer.clerkId && (
                   <FollowButton trainerClerkId={trainer.clerkId} initialIsFollowing={!!followStatus} initialStatus={followStatus} isSignedIn={!!userId} />
                 )}
-              </div>
-            </div>
-
-            {/* 4-column overview */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {location && (
-                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
-                  <MapPin className="h-5 w-5" style={{ color: "#0F3154" }} />
-                  <p className="text-xs font-medium leading-snug">{location}</p>
-                  <p className="text-[11px] text-muted-foreground">Training location</p>
-                </div>
-              )}
-              {skillLevels.length > 0 && (
-                <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
-                  <Users className="h-5 w-5" style={{ color: "#0F3154" }} />
-                  <p className="text-xs font-medium leading-snug">{skillLevels.slice(0, 2).join(", ")}</p>
-                  <p className="text-[11px] text-muted-foreground">Skill levels</p>
-                </div>
-              )}
-              <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col items-center text-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-green-600" />
-                <p className="text-xs font-medium">Verified</p>
-                <p className="text-[11px] text-muted-foreground">GrupUp trainer</p>
               </div>
             </div>
 
