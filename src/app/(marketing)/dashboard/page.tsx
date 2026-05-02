@@ -578,7 +578,7 @@ export default function DashboardPage() {
             {[
               { label: "Sessions", href: "/trainer/manage" },
               { label: "My Profile", href: "/trainer/setup" },
-              { label: "My Followers", href: "/clients" },
+              { label: "Followers", href: "/clients" },
               { label: "CRM", href: "/clients" },
               { label: "Payout", href: "/trainer/payout" },
             ].map(({ label, href }) => (
