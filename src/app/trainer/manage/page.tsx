@@ -184,182 +184,209 @@ export default function TrainerManagePage() {
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold">My Sessions</h2>
-            <Button style={{ backgroundColor: "#DC373E" }} asChild>
-              <Link href="/trainer/new-session">+ New session</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/trainer/plans">+ Pre-launch event</Link>
+              </Button>
+              <Button style={{ backgroundColor: "#DC373E" }} asChild>
+                <Link href="/trainer/new-session">+ New session</Link>
+              </Button>
+            </div>
           </div>
 
           {sessions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No sessions yet.</p>
           ) : (
-            <div className="space-y-3">
-              {sessions.map((s) => {
-                const roster = bookings.filter((b) => b.sessionId === String(s.id));
-                const isOpen = expanded === s.id;
-                return (
-                  <div key={s.id} className="border rounded-xl p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{s.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {s.sport}{s.city ? ` · ${s.city}` : ""}
-                          {s.dayOfWeek && s.time ? ` · ${s.dayOfWeek}s at ${s.time}` : ""}
-                        </p>
-                        <p className={`text-xs font-semibold mt-1 ${s.spotsLeft === 0 ? "text-red-600" : s.spotsLeft <= 2 ? "text-amber-600" : "text-green-700"}`}>
-                          {s.spotsLeft === 0 ? "Full" : `${s.spotsTotal - s.spotsLeft} booked · ${s.spotsLeft} spots left`}
-                        </p>
-                      </div>
-                      {roster.length > 0 && (
-                        <button type="button" onClick={() => setExpanded(isOpen ? null : s.id)}
-                          className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-3 py-1.5 rounded-lg border border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors shrink-0">
-                          {roster.length} registered
-                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </button>
-                      )}
-                    </div>
+            <div className="border rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Session</th>
+                    <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Schedule</th>
+                    <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs">Booked</th>
+                    <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs">Spots left</th>
+                    <th className="text-center px-4 py-3 font-semibold text-muted-foreground text-xs">Waitlist</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s) => {
+                    const roster = bookings.filter((b) => b.sessionId === String(s.id));
+                    const waitlist = waitlists[s.id] ?? [];
+                    const isOpen = expanded === s.id;
+                    const booked = s.spotsTotal - s.spotsLeft;
+                    const sel = selectedWaitlist[s.id] ?? new Set<number>();
+                    const allChecked = waitlist.length > 0 && sel.size === waitlist.length;
+                    const selectedEmails = waitlist.filter((w) => sel.has(w.id)).map((w) => w.userEmail);
+                    function toggleAll() {
+                      setSelectedWaitlist((prev) => ({
+                        ...prev,
+                        [s.id]: allChecked ? new Set() : new Set(waitlist.map((w) => w.id)),
+                      }));
+                    }
+                    function toggleOne(id: number) {
+                      setSelectedWaitlist((prev) => {
+                        const next = new Set(prev[s.id] ?? []);
+                        next.has(id) ? next.delete(id) : next.add(id);
+                        return { ...prev, [s.id]: next };
+                      });
+                    }
+                    return (
+                      <>
+                        <tr key={s.id}
+                          className={`border-t cursor-pointer hover:bg-gray-50 transition-colors ${isOpen ? "bg-blue-50/50" : ""}`}
+                          onClick={() => setExpanded(isOpen ? null : s.id)}>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold">{s.title}</p>
+                            <p className="text-xs text-muted-foreground">{s.sport}{s.city ? ` · ${s.city}` : ""}</p>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">
+                            {s.dayOfWeek && s.time ? `${s.dayOfWeek}s · ${s.time}` : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="font-semibold text-[#0F3154]">{booked}</span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`font-semibold text-xs ${s.spotsLeft === 0 ? "text-red-600" : s.spotsLeft <= 2 ? "text-amber-600" : "text-green-700"}`}>
+                              {s.spotsLeft === 0 ? "Full" : s.spotsLeft}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {s.waitlistEnabled
+                              ? <span className="font-semibold text-amber-600">{waitlist.length}</span>
+                              : <span className="text-xs text-muted-foreground">—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-3">
+                              <Link href={`/trainer/sessions/${s.id}/edit`}
+                                className="text-xs font-semibold hover:underline"
+                                style={{ color: "#0F3154" }}>
+                                More details
+                              </Link>
+                              {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                            </div>
+                          </td>
+                        </tr>
 
-                    {isOpen && roster.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <div className="border rounded-lg overflow-hidden">
-                          <table className="w-full text-xs">
-                            <thead className="bg-muted/50">
-                              <tr>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Name</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Athlete</th>
-                                <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Booked</th>
-                                <th className="px-3 py-2"></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {roster.map((b) => (
-                                <tr key={b.id} className="border-t">
-                                  <td className="px-3 py-2 font-medium">{b.userName || "—"}</td>
-                                  <td className="px-3 py-2 text-muted-foreground">
-                                    {b.athleteName && b.athleteName !== b.userName ? b.athleteName : "—"}
-                                  </td>
-                                  <td className="px-3 py-2 text-muted-foreground">
-                                    {new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                  </td>
-                                  <td className="px-3 py-2 text-right">
-                                    <button type="button"
-                                      onClick={() => setRefundModal({ id: b.id, name: b.userName || "this player", amount: b.amountPaid })}
-                                      disabled={refunding === b.id}
-                                      className="text-xs text-muted-foreground hover:text-red-600 transition-colors flex items-center gap-1"
-                                      title="Refund this booking">
-                                      <RotateCcw className="h-3 w-3" />
-                                      {refunding === b.id ? "…" : "Refund"}
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        <button type="button"
-                          onClick={() => { setModal({ type: "session", sessionId: s.id, sessionTitle: s.title }); setSentMsg(""); }}
-                          className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-3 py-2 rounded-lg border border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors">
-                          <Mail className="h-4 w-4" /> Message all registrants
-                        </button>
-                      </div>
-                    )}
-                    {roster.length === 0 && (
-                      <p className="text-xs text-muted-foreground mt-1.5">No registrations yet.</p>
-                    )}
+                        {isOpen && (
+                          <tr key={`${s.id}-detail`} className="border-t bg-gray-50/80">
+                            <td colSpan={6} className="px-4 py-4 space-y-4">
 
-                    {/* Waitlist */}
-                    {s.waitlistEnabled && waitlists[s.id] !== undefined && (
-                      <div className="mt-3 pt-3 border-t space-y-2">
-                        {(() => {
-                          const sel = selectedWaitlist[s.id] ?? new Set<number>();
-                          const allChecked = waitlists[s.id].length > 0 && sel.size === waitlists[s.id].length;
-                          const selectedEmails = waitlists[s.id].filter((w) => sel.has(w.id)).map((w) => w.userEmail);
-                          function toggleAll() {
-                            setSelectedWaitlist((prev) => ({
-                              ...prev,
-                              [s.id]: allChecked ? new Set() : new Set(waitlists[s.id].map((w) => w.id)),
-                            }));
-                          }
-                          function toggleOne(id: number) {
-                            setSelectedWaitlist((prev) => {
-                              const next = new Set(prev[s.id] ?? []);
-                              next.has(id) ? next.delete(id) : next.add(id);
-                              return { ...prev, [s.id]: next };
-                            });
-                          }
-                          return (
-                            <>
-                              <div className="flex items-center justify-between">
-                                <p className="text-xs font-semibold text-muted-foreground">
-                                  Waitlist — {waitlists[s.id].length === 0 ? "no signups yet" : `${waitlists[s.id].length} waiting`}
-                                  {sel.size > 0 && <span className="ml-2 text-[#0F3154]">{sel.size} selected</span>}
-                                </p>
-                                {waitlists[s.id].length > 0 && (
-                                  <div className="flex items-center gap-2">
+                              {/* Registrations */}
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Registrations ({roster.length})</p>
+                                  {roster.length > 0 && (
                                     <button type="button"
-                                      disabled={sel.size === 0}
-                                      onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: sel.size, emails: selectedEmails }); setSentMsg(""); }}
-                                      className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                      style={{ color: "#0F3154", borderColor: "#0F3154" }}>
-                                      <Mail className="h-4 w-4" />
-                                      Custom email{sel.size > 0 ? ` (${sel.size})` : ""}
+                                      onClick={(e) => { e.stopPropagation(); setModal({ type: "session", sessionId: s.id, sessionTitle: s.title }); setSentMsg(""); }}
+                                      className="flex items-center gap-1.5 text-xs font-semibold text-[#0F3154] px-3 py-1.5 rounded-lg border border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors">
+                                      <Mail className="h-3.5 w-3.5" /> Message all
                                     </button>
-                                    <button type="button"
-                                      onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
-                                      className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors"
-                                      style={{ backgroundColor: "#DC373E" }}>
-                                      <Mail className="h-4 w-4" />
-                                      Notify — spots open!
-                                    </button>
+                                  )}
+                                </div>
+                                {roster.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground">No registrations yet.</p>
+                                ) : (
+                                  <div className="border rounded-lg overflow-hidden bg-white">
+                                    <table className="w-full text-xs">
+                                      <thead className="bg-muted/50">
+                                        <tr>
+                                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Name</th>
+                                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Athlete</th>
+                                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Booked</th>
+                                          <th className="px-3 py-2"></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {roster.map((b) => (
+                                          <tr key={b.id} className="border-t">
+                                            <td className="px-3 py-2 font-medium">{b.userName || "—"}</td>
+                                            <td className="px-3 py-2 text-muted-foreground">{b.athleteName && b.athleteName !== b.userName ? b.athleteName : "—"}</td>
+                                            <td className="px-3 py-2 text-muted-foreground">{new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
+                                            <td className="px-3 py-2 text-right">
+                                              <button type="button"
+                                                onClick={(e) => { e.stopPropagation(); setRefundModal({ id: b.id, name: b.userName || "this player", amount: b.amountPaid }); }}
+                                                disabled={refunding === b.id}
+                                                className="text-xs text-muted-foreground hover:text-red-600 transition-colors flex items-center gap-1">
+                                                <RotateCcw className="h-3 w-3" />{refunding === b.id ? "…" : "Refund"}
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
                                   </div>
                                 )}
                               </div>
-                              {waitlists[s.id].length > 0 && (
-                              <div className="border rounded-lg overflow-hidden">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-muted/50">
-                                    <tr>
-                                      <th className="px-3 py-2 w-8">
-                                        <input type="checkbox" checked={allChecked} onChange={toggleAll} className="rounded" />
-                                      </th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Parent</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Child</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Age</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Phone</th>
-                                      <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {waitlists[s.id].map((w) => (
-                                      <tr key={w.id} className={`border-t cursor-pointer ${sel.has(w.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
-                                        onClick={() => toggleOne(w.id)}>
-                                        <td className="px-3 py-2">
-                                          <input type="checkbox" checked={sel.has(w.id)} onChange={() => toggleOne(w.id)}
-                                            onClick={(e) => e.stopPropagation()} className="rounded" />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                          <p className="font-medium">{w.userName || "—"}</p>
-                                          <p className="text-muted-foreground">{w.userEmail}</p>
-                                        </td>
-                                        <td className="px-3 py-2 font-medium">{w.childName || "—"}</td>
-                                        <td className="px-3 py-2 text-muted-foreground">{w.childAge || "—"}</td>
-                                        <td className="px-3 py-2 text-muted-foreground">{w.parentPhone || "—"}</td>
-                                        <td className="px-3 py-2 text-muted-foreground">
-                                          {new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+
+                              {/* Waitlist */}
+                              {s.waitlistEnabled && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                      Waitlist ({waitlist.length}){sel.size > 0 && <span className="ml-2 normal-case text-[#0F3154]">{sel.size} selected</span>}
+                                    </p>
+                                    {waitlist.length > 0 && (
+                                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                        <button type="button"
+                                          disabled={sel.size === 0}
+                                          onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: sel.size, emails: selectedEmails }); setSentMsg(""); }}
+                                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                          style={{ color: "#0F3154", borderColor: "#0F3154" }}>
+                                          <Mail className="h-3.5 w-3.5" />
+                                          Custom email{sel.size > 0 ? ` (${sel.size})` : ""}
+                                        </button>
+                                        <button type="button"
+                                          onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlist.length })}
+                                          className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors"
+                                          style={{ backgroundColor: "#DC373E" }}>
+                                          <Mail className="h-3.5 w-3.5" />
+                                          Notify — spots open!
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  {waitlist.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground">No waitlist signups yet.</p>
+                                  ) : (
+                                    <div className="border rounded-lg overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
+                                      <table className="w-full text-xs">
+                                        <thead className="bg-muted/50">
+                                          <tr>
+                                            <th className="px-3 py-2 w-8"><input type="checkbox" checked={allChecked} onChange={toggleAll} className="rounded" /></th>
+                                            <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Parent</th>
+                                            <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Child</th>
+                                            <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Age</th>
+                                            <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Phone</th>
+                                            <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Joined</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {waitlist.map((w) => (
+                                            <tr key={w.id} className={`border-t cursor-pointer ${sel.has(w.id) ? "bg-blue-50" : "hover:bg-gray-50"}`} onClick={() => toggleOne(w.id)}>
+                                              <td className="px-3 py-2"><input type="checkbox" checked={sel.has(w.id)} onChange={() => toggleOne(w.id)} onClick={(e) => e.stopPropagation()} className="rounded" /></td>
+                                              <td className="px-3 py-2"><p className="font-medium">{w.userName || "—"}</p><p className="text-muted-foreground">{w.userEmail}</p></td>
+                                              <td className="px-3 py-2 font-medium">{w.childName || "—"}</td>
+                                              <td className="px-3 py-2 text-muted-foreground">{w.childAge || "—"}</td>
+                                              <td className="px-3 py-2 text-muted-foreground">{w.parentPhone || "—"}</td>
+                                              <td className="px-3 py-2 text-muted-foreground">{new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </div>
                               )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
