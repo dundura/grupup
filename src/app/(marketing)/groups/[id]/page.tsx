@@ -134,12 +134,13 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* About — trainer's overview text */}
-            {(trainer as any).plansAbout && (
-              <div className="bg-white rounded-2xl border shadow-sm p-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">More About Upcoming Sessions</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{(trainer as any).plansAbout}</p>
-              </div>
-            )}
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">More About Upcoming Sessions</p>
+              <p className="text-sm text-muted-foreground leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: (trainer as any).plansAbout?.trim()
+                  ? (trainer as any).plansAbout
+                  : "I am considering offering future events and want to gauge interest before launching them." }} />
+            </div>
 
             {/* Gauge Interest */}
             <TrainerPlansSection trainerId={trainer.id} />
