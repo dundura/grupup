@@ -576,7 +576,7 @@ export default function DashboardPage() {
         <div className="border-b bg-white sticky top-0 z-10">
           <div className="container max-w-4xl flex gap-2 overflow-x-auto py-3 px-4 scrollbar-hide">
             {[
-              { label: "My Sessions", href: "/trainer/manage" },
+              { label: "Sessions", href: "/trainer/manage" },
               { label: "My Profile", href: "/trainer/setup" },
               { label: "My Followers", href: "/clients" },
               { label: "CRM", href: "/clients" },
