@@ -578,7 +578,7 @@ export default function DashboardPage() {
             {[
               { label: "Sessions", href: "/trainer/manage" },
               { label: "Profile", href: "/trainer/setup" },
-              { label: "Followers", href: "/clients" },
+              { label: "Followers", href: "/trainer/followers" },
               { label: "CRM", href: "/clients" },
               { label: "Payout", href: "/trainer/payout" },
             ].map(({ label, href }) => (
@@ -636,7 +636,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-3">
-                            <Link href="/clients"
+                            <Link href="/trainer/followers"
                               className="text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors hover:bg-[#0F3154] hover:text-white"
                               style={{ color: "#0F3154", borderColor: "#0F3154" }}>
                               Followers{followers.length > 0 ? ` (${followers.length})` : ""}
