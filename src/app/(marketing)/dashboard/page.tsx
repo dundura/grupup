@@ -577,6 +577,7 @@ export default function DashboardPage() {
           <div className="container max-w-4xl flex gap-2 overflow-x-auto py-3 px-4 scrollbar-hide">
             {[
               { label: "My Sessions", href: "/trainer/manage" },
+              { label: "My Profile", href: "/trainer/setup" },
               { label: "My Followers", href: "/clients" },
               { label: "CRM", href: "/clients" },
               { label: "Payout", href: "/trainer/payout" },
@@ -726,103 +727,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Trainer profile card (only when trainer is active) ── */}
-        {!activeKid && isTrainerMode && trainerProfile && (
-        <div className="bg-white rounded-2xl border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold">Trainer Profile</h2>
-            <div className="flex items-center gap-3">
-              <Link href="/trainer/setup"
-                className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Link>
-            </div>
-          </div>
-
-          {isTrainerMode && trainerProfile ? (
-            <div className="space-y-3">
-              {profileComplete ? (
-                <div className="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg px-3 py-2 text-sm">
-                  <CheckCircle className="h-4 w-4 shrink-0" />
-                  <span>Profile complete — you appear in trainer listings</span>
-                  <Link href={`/groups/${trainerProfile.id}`} className="ml-auto flex items-center gap-1 text-xs font-medium hover:underline">
-                    View public profile <ExternalLink className="h-3 w-3" />
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 rounded-lg px-3 py-2 text-sm">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>Complete your profile to appear in trainer listings</span>
-                  <Link href="/trainer/setup" className="ml-auto text-xs font-medium hover:underline">Finish setup →</Link>
-                </div>
-              )}
-              <div className="grid sm:grid-cols-2 gap-3 pt-1">
-                {trainerProfile.bio && (
-                  <div className="sm:col-span-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Bio</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2"
-                      dangerouslySetInnerHTML={{ __html: trainerProfile.bio.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() }} />
-                  </div>
-                )}
-                {(trainerProfile.sports ?? []).length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Sports</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(trainerProfile.sports ?? []).map((s) => (
-                        <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-[#0F3154]/10 text-[#0F3154] font-medium">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {(trainerProfile.specialties ?? []).length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Specialties</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(trainerProfile.specialties ?? []).slice(0, 4).map((s) => (
-                        <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Location</p>
-                  <p className="text-sm">{[trainerProfile.city, trainerProfile.state].filter(Boolean).join(", ") || "—"}</p>
-                </div>
-                {trainerProfile.hourlyRate > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Private Rate</p>
-                    <p className="text-sm">${trainerProfile.hourlyRate}/hr</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : isTrainerMode && !trainerProfile ? (
-            <div className="text-center py-6">
-              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-amber-500" />
-              <p className="font-semibold mb-1">Coaching profile not set up yet</p>
-              <p className="text-sm text-muted-foreground mb-4">Set up your profile so players can find and book you.</p>
-              <Button style={{ backgroundColor: "#DC373E" }} asChild>
-                <Link href="/trainer/setup">Set up coaching profile →</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Name</p>
-                <p>{[user?.firstName, user?.lastName].filter(Boolean).join(" ") || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Location</p>
-                <p>{meta.city || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Sport</p>
-                <p>{meta.sport || "—"}</p>
-              </div>
-            </div>
-          )}
-        </div>
-        )}
 
         {/* Player: Pending Questionnaires */}
         {!isTrainerMode && pendingQuestionnaires.length > 0 && (
