@@ -913,45 +913,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Trainer: Sessions quick-link */}
-        {isTrainerMode && (
-          <div id="sessions" className="bg-white rounded-2xl border p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h2 className="text-base font-bold">Sessions</h2>
-                {sessions.length > 0 && (
-                  <span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-[11px] font-bold text-white rounded-full"
-                    style={{ backgroundColor: "#DC373E" }}>{sessions.length}</span>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <Link href="/trainer/plans"
-                  className="flex items-center gap-1.5 text-sm font-medium hover:underline"
-                  style={{ color: "#0F3154" }}>
-                  <CalendarDays className="h-3.5 w-3.5" /> Pre-launch
-                </Link>
-                <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
-                  <Link href="/trainer/new-session">
-                    <Plus className="h-4 w-4 mr-1" /> New session
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            <Link href="/trainer/manage"
-              className="flex items-center justify-between mt-4 p-4 rounded-xl border hover:bg-gray-50 transition-colors group">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: "#EFF6FF" }}>
-                  <ClipboardList className="h-5 w-5" style={{ color: "#0F3154" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Manage Sessions</p>
-                  <p className="text-xs text-muted-foreground">View registrations, waitlists &amp; send emails</p>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </Link>
-          </div>
-        )}
 
         {/* Trainer: Follow Requests */}
         {isTrainerMode && trainerFollowRequests.length > 0 && (
