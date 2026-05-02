@@ -579,6 +579,7 @@ export default function DashboardPage() {
               { label: "My Sessions", href: "/trainer/manage" },
               { label: "My Followers", href: "/clients" },
               { label: "CRM", href: "/clients" },
+              { label: "Payout", href: "/trainer/payout" },
             ].map(({ label, href }) => (
               <a
                 key={label}
@@ -731,12 +732,6 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold">Trainer Profile</h2>
             <div className="flex items-center gap-3">
-              {isTrainerMode && (
-                <Link href="/trainer/payout"
-                  className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
-                  <DollarSign className="h-3.5 w-3.5" /> Payout
-                </Link>
-              )}
               <Link href="/trainer/setup"
                 className="flex items-center gap-1.5 text-sm font-medium text-[#0F3154] hover:underline">
                 <Pencil className="h-3.5 w-3.5" /> Edit
@@ -1245,44 +1240,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Stripe Payouts — trainers only */}
-        {isTrainerMode && stripeConnected !== null && (
-          <div className="bg-white rounded-2xl border p-6">
-            <h2 className="text-base font-bold mb-1">Payouts</h2>
-            <p className="text-xs text-muted-foreground mb-5">Connect Stripe to receive automatic payouts after each session.</p>
-
-            {stripeConnected ? (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
-                <div>
-                  <p className="font-semibold text-sm text-green-800">Stripe connected</p>
-                  <p className="text-xs text-green-700 mt-0.5">You'll receive 85% of every booking automatically within 2–7 business days.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-[#f0f4f9] border">
-                  <DollarSign className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "#0F3154" }} />
-                  <div>
-                    <p className="font-semibold text-sm">Get paid automatically</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Connect your bank account once — 85% of every booking transfers to you directly after the session.</p>
-                  </div>
-                </div>
-                <button onClick={handleConnectStripe} disabled={connectingStripe}
-                  className="w-full py-3 rounded-xl text-white font-semibold text-sm disabled:opacity-60 transition-opacity"
-                  style={{ backgroundColor: "#0F3154" }}>
-                  {connectingStripe ? "Redirecting to Stripe…" : "Connect Stripe Payouts"}
-                </button>
-                {stripeError && (
-                  <p className="text-xs text-red-600 text-center">{stripeError}</p>
-                )}
-                <p className="text-xs text-muted-foreground text-center">
-                  Powered by Stripe · Takes ~2 minutes · Your bank info is never stored by GrupUp
-                </p>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Account */}
         <div className="bg-white rounded-2xl border p-6">
