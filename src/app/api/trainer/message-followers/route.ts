@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { subject, message } = await req.json();
+    const { subject, message, emails } = await req.json();
     if (!message?.trim()) return NextResponse.json({ error: "Message is required" }, { status: 400 });
 
     const client = await clerkClient();
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
         const fu = await client.users.getUser(followerClerkId);
         const email = fu.emailAddresses?.[0]?.emailAddress ?? "";
         if (!email) continue;
+        if (Array.isArray(emails) && emails.length > 0 && !emails.includes(email)) continue;
         const toName = `${fu.firstName ?? ""} ${fu.lastName ?? ""}`.trim() || "there";
 
         await resend.emails.send({

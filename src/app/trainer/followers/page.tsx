@@ -21,6 +21,7 @@ export default function TrainerFollowersPage() {
   const router = useRouter();
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [modal, setModal] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -32,21 +33,36 @@ export default function TrainerFollowersPage() {
     if (!isSignedIn) { router.push("/sign-in"); return; }
     fetch("/api/trainer/message-followers")
       .then((r) => r.json())
-      .then((data) => {
-        setFollowers(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
+      .then((data) => { setFollowers(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [isLoaded, isSignedIn, router]);
+
+  const allChecked = followers.length > 0 && selected.size === followers.length;
+
+  function toggleAll() {
+    setSelected(allChecked ? new Set() : new Set(followers.map((f) => f.clerkId)));
+  }
+
+  function toggleOne(clerkId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(clerkId) ? next.delete(clerkId) : next.add(clerkId);
+      return next;
+    });
+  }
+
+  const selectedEmails = followers.filter((f) => selected.has(f.clerkId)).map((f) => f.email);
 
   async function handleSend() {
     if (!message.trim()) return;
     setSending(true);
     try {
+      const body: Record<string, unknown> = { subject, message };
+      if (selected.size > 0 && selected.size < followers.length) body.emails = selectedEmails;
       const res = await fetch("/api/trainer/message-followers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, message }),
+        body: JSON.stringify(body),
       });
       const d = await res.json();
       setSentMsg(`Sent to ${d.sent} ${d.sent === 1 ? "person" : "people"}`);
@@ -63,6 +79,8 @@ export default function TrainerFollowersPage() {
     </div>
   );
 
+  const recipientCount = selected.size === 0 ? followers.length : selected.size;
+
   return (
     <div className="min-h-screen bg-[#f4f6f9] px-4 py-12">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -70,13 +88,19 @@ export default function TrainerFollowersPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Followers</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{followers.length} {followers.length === 1 ? "person follows" : "people follow"} you</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {followers.length} {followers.length === 1 ? "person follows" : "people follow"} you
+              {selected.size > 0 && <span className="ml-2 font-semibold text-[#0F3154]">· {selected.size} selected</span>}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/dashboard" className="text-sm text-muted-foreground hover:underline">← Dashboard</Link>
             {followers.length > 0 && (
               <Button onClick={() => { setModal(true); setSentMsg(""); }} style={{ backgroundColor: "#0F3154" }}>
-                <Mail className="h-4 w-4 mr-2" /> Message all
+                <Mail className="h-4 w-4 mr-2" />
+                {selected.size > 0 && selected.size < followers.length
+                  ? `Email selected (${selected.size})`
+                  : `Email all (${followers.length})`}
               </Button>
             )}
           </div>
@@ -93,14 +117,24 @@ export default function TrainerFollowersPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left px-5 py-3 font-semibold text-muted-foreground text-xs">Name</th>
-                  <th className="text-left px-5 py-3 font-semibold text-muted-foreground text-xs">Email</th>
+                  <th className="px-5 py-3 w-10">
+                    <input type="checkbox" checked={allChecked} onChange={toggleAll} className="rounded" />
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Name</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs">Email</th>
                 </tr>
               </thead>
               <tbody>
                 {followers.map((f) => (
-                  <tr key={f.clerkId} className="border-t hover:bg-gray-50 transition-colors">
+                  <tr key={f.clerkId}
+                    className={`border-t cursor-pointer transition-colors ${selected.has(f.clerkId) ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    onClick={() => toggleOne(f.clerkId)}>
                     <td className="px-5 py-3">
+                      <input type="checkbox" checked={selected.has(f.clerkId)}
+                        onChange={() => toggleOne(f.clerkId)}
+                        onClick={(e) => e.stopPropagation()} className="rounded" />
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {f.photo ? (
                           <Image src={f.photo} alt={f.name} width={32} height={32} className="rounded-full object-cover shrink-0" />
@@ -112,7 +146,7 @@ export default function TrainerFollowersPage() {
                         <span className="font-medium">{f.name}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{f.email}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{f.email}</td>
                   </tr>
                 ))}
               </tbody>
@@ -122,12 +156,14 @@ export default function TrainerFollowersPage() {
 
       </div>
 
-      {/* Message modal */}
+      {/* Email modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-base">Message all followers ({followers.length})</h3>
+              <h3 className="font-bold text-base">
+                Email {recipientCount} {recipientCount === 1 ? "follower" : "followers"}
+              </h3>
               <button onClick={() => setModal(false)} className="text-muted-foreground hover:text-foreground">✕</button>
             </div>
             {sentMsg ? (
@@ -151,7 +187,7 @@ export default function TrainerFollowersPage() {
                   <Button variant="outline" className="flex-1" onClick={() => setModal(false)}>Cancel</Button>
                   <Button className="flex-1" disabled={!message.trim() || sending}
                     style={{ backgroundColor: "#DC373E" }} onClick={handleSend}>
-                    {sending ? "Sending…" : "Send"}
+                    {sending ? "Sending…" : `Send to ${recipientCount}`}
                   </Button>
                 </div>
               </>

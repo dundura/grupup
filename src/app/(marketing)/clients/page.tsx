@@ -120,7 +120,7 @@ export default function ClientsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Users className="h-5 w-5 text-white/70" />
-              <h1 className="text-xl font-bold text-white">My Clients</h1>
+              <h1 className="text-xl font-bold text-white">Manage Clients &amp; Prospects</h1>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/80">{clients.length}</span>
             </div>
             <button
