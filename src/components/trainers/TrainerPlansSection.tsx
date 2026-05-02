@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { Check, X } from "lucide-react";
+import { Check, X, Mail } from "lucide-react";
 
 interface Plan {
   id: number; date?: string; dayOfWeek?: string; time?: string; sport?: string; city?: string;
@@ -18,6 +18,10 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   const [interestModal, setInterestModal] = useState<number | null>(null);
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactSent, setContactSent] = useState(false);
+  const [contactSending, setContactSending] = useState(false);
   const [parentPhone, setParentPhone] = useState("");
 
   useEffect(() => {
@@ -30,6 +34,33 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
         setLoading(false);
       }).catch(() => setLoading(false));
   }, [trainerId]);
+
+  useEffect(() => {
+    if (user) {
+      setContactForm((f) => ({
+        ...f,
+        name: f.name || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+        email: f.email || (user.emailAddresses?.[0]?.emailAddress ?? ""),
+      }));
+    }
+  }, [user]);
+
+  async function submitContact() {
+    if (!contactForm.name.trim() || !contactForm.email.trim() || !contactForm.message.trim()) return;
+    setContactSending(true);
+    await fetch(`/api/trainers/${trainerId}/plans`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "suggestion",
+        playerName: contactForm.name,
+        playerEmail: contactForm.email,
+        message: contactForm.message,
+      }),
+    });
+    setContactSent(true);
+    setContactSending(false);
+  }
 
   async function expressInterest(planId: number) {
     if (!isLoaded) return;
@@ -106,6 +137,71 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
           </tbody>
         </table>
       </div>
+
+      {/* Contact button */}
+      <div className="px-5 py-4 border-t bg-white/60 flex items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">Not sure? Send a message and we'll be in touch.</p>
+        <button
+          onClick={() => setContactOpen(true)}
+          className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl border-2 transition-colors shrink-0"
+          style={{ borderColor: "#0F3154", color: "#0F3154" }}>
+          <Mail className="h-4 w-4" /> Contact
+        </button>
+      </div>
+
+      {/* Contact modal */}
+      {contactOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold">Express Interest</h2>
+              <button onClick={() => setContactOpen(false)}><X className="h-4 w-4 text-muted-foreground" /></button>
+            </div>
+            {contactSent ? (
+              <div className="text-center py-6">
+                <div className="text-4xl mb-3">✅</div>
+                <p className="font-semibold">Message sent!</p>
+                <p className="text-sm text-muted-foreground mt-1">The trainer will be in touch soon.</p>
+                <button onClick={() => { setContactOpen(false); setContactSent(false); }}
+                  className="mt-4 text-sm font-semibold hover:underline" style={{ color: "#0F3154" }}>Close</button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">Your name *</label>
+                    <input value={contactForm.name} onChange={(e) => setContactForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="First & last name"
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">Email *</label>
+                    <input type="email" value={contactForm.email} onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
+                      placeholder="you@example.com"
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">Message *</label>
+                    <textarea value={contactForm.message} onChange={(e) => setContactForm((f) => ({ ...f, message: e.target.value }))}
+                      rows={3} placeholder="Tell us about your child, what you're looking for…"
+                      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setContactOpen(false)}
+                    className="flex-1 py-2.5 rounded-xl border text-sm font-semibold hover:bg-muted transition-colors">Cancel</button>
+                  <button onClick={submitContact}
+                    disabled={!contactForm.name.trim() || !contactForm.email.trim() || !contactForm.message.trim() || contactSending}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
+                    style={{ backgroundColor: "#0F3154" }}>
+                    {contactSending ? "Sending…" : "Send"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Interest modal */}
       {interestModal !== null && (
