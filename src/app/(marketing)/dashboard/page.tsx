@@ -89,6 +89,7 @@ export default function DashboardPage() {
   const [activeQuestionnaire, setActiveQuestionnaire] = useState<typeof pendingQuestionnaires[0] | null>(null);
   const [qResponses, setQResponses] = useState<Record<string, string>>({});
   const [qSubmitting, setQSubmitting] = useState(false);
+  const [showFollowers, setShowFollowers] = useState(false);
 
   const meta = (user?.publicMetadata ?? {}) as {
     role?: string; city?: string; sport?: string; level?: string; country?: string;
@@ -575,7 +576,7 @@ export default function DashboardPage() {
           <div className="container max-w-4xl flex gap-1 overflow-x-auto py-2 px-4 scrollbar-hide">
             {[
               { label: "My Sessions", href: "/trainer/manage" },
-              { label: "My Clients", href: "/clients" },
+              { label: "CRM", href: "/clients" },
             ].map(({ label, href }) => (
               <a
                 key={href}
@@ -593,65 +594,121 @@ export default function DashboardPage() {
 
         {/* ── Profile picker ── */}
         <div className="bg-white rounded-2xl border p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold">Profiles</h2>
-            <Link href="/profile" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>
-              Edit Profile →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-
-            {/* Trainer profile */}
-            {trainerProfile && (
-              <button onClick={() => switchProfile(null)}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                style={activeKid === null
-                  ? { borderColor: "#0F3154", backgroundColor: "#EFF6FF" }
-                  : { borderColor: "#e5e7eb", backgroundColor: "white" }}>
-                <div className="relative w-14 h-14 rounded-full overflow-hidden bg-[#0F3154] shrink-0">
-                  {trainerProfile.photo
-                    ? <img src={trainerProfile.photo} alt={firstName} className="w-full h-full object-cover" />
-                    : <span className="w-full h-full flex items-center justify-center text-xl font-bold text-white">{firstName?.[0]}</span>}
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-sm truncate max-w-[100px]">{firstName}</p>
-                  <p className="text-xs text-muted-foreground">Trainer</p>
-                </div>
-                {activeKid === null && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>Active</span>}
-              </button>
-            )}
-
-            {/* Player profiles */}
-            {playerProfiles.map((p) => (
-              <button key={p.id} onClick={() => switchProfile(p.id)}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                style={activeKid?.id === p.id
-                  ? { borderColor: "#DC373E", backgroundColor: "#fff8f8" }
-                  : { borderColor: "#e5e7eb", backgroundColor: "white" }}>
-                <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0"
-                  style={{ backgroundColor: "#DC373E" }}>
-                  {(p as any).photo
-                    ? <img src={(p as any).photo} alt={p.name} className="w-full h-full object-cover" />
-                    : <span className="w-full h-full flex items-center justify-center text-xl font-bold text-white">{p.name[0]}</span>}
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-sm truncate max-w-[100px]">{p.name.split(" ")[0]}</p>
-                  <p className="text-xs text-muted-foreground">{p.sport || "Player"}</p>
-                </div>
-                {activeKid?.id === p.id && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>Active</span>}
-              </button>
-            ))}
-
-            {/* Add player profile — max 5 */}
-            {playerProfiles.length < 5 && (
-              <Link href="/onboarding"
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gray-300 transition-all">
-                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-400">+</div>
-                <p className="text-xs font-semibold text-muted-foreground">Add Profile</p>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">Profiles</h2>
+              <Link href="/profile" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>
+                Edit Profile →
               </Link>
-            )}
+            </div>
+            <div className="border rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground text-xs">Name</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground text-xs">Type</th>
+                    <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground text-xs">Status</th>
+                    <th className="px-4 py-2.5"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {trainerProfile && (
+                    <>
+                      <tr className="border-t hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#0F3154] shrink-0 flex items-center justify-center">
+                              {trainerProfile.photo
+                                ? <img src={trainerProfile.photo} alt={firstName} className="w-full h-full object-cover" />
+                                : <span className="text-xs font-bold text-white">{firstName?.[0]}</span>}
+                            </div>
+                            <span className="font-semibold">{firstName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground text-xs">Trainer</td>
+                        <td className="px-4 py-3">
+                          {activeKid === null
+                            ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#0F3154" }}>Active</span>
+                            : <span className="text-[11px] text-muted-foreground">Inactive</span>}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              onClick={() => setShowFollowers((v) => !v)}
+                              className="text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors"
+                              style={showFollowers ? { backgroundColor: "#0F3154", color: "white", borderColor: "#0F3154" } : { color: "#0F3154", borderColor: "#0F3154" }}>
+                              Followers{followers.length > 0 ? ` (${followers.length})` : ""}
+                            </button>
+                            <button onClick={() => switchProfile(null)} className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Switch</button>
+                          </div>
+                        </td>
+                      </tr>
+                      {showFollowers && (
+                        <tr className="border-t bg-gray-50">
+                          <td colSpan={4} className="px-4 py-3">
+                            {followers.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">No followers yet.</p>
+                            ) : (
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr>
+                                    <th className="text-left py-1.5 font-semibold text-muted-foreground">Name</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {followers.map((f) => (
+                                    <tr key={f.followerClerkId} className="border-t border-gray-200">
+                                      <td className="py-2">
+                                        <div className="flex items-center gap-2">
+                                          {f.photo
+                                            ? <img src={f.photo} alt={f.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                                            : <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0"><span className="text-[10px] font-bold">{f.name?.[0]}</span></div>}
+                                          <span className="font-medium">{f.name}</span>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                  {playerProfiles.map((p) => (
+                    <tr key={p.id} className="border-t hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => switchProfile(p.id)}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center" style={{ backgroundColor: "#DC373E" }}>
+                            {(p as any).photo
+                              ? <img src={(p as any).photo} alt={p.name} className="w-full h-full object-cover" />
+                              : <span className="text-xs font-bold text-white">{p.name[0]}</span>}
+                          </div>
+                          <span className="font-semibold">{p.name.split(" ")[0]}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{p.sport || "Player"}</td>
+                      <td className="px-4 py-3">
+                        {activeKid?.id === p.id
+                          ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "#DC373E" }}>Active</span>
+                          : <span className="text-[11px] text-muted-foreground">Inactive</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Switch</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {playerProfiles.length < 5 && (
+                <Link href="/onboarding"
+                  className="flex items-center gap-2 px-4 py-3 border-t hover:bg-gray-50 transition-colors text-sm font-semibold text-muted-foreground">
+                  <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-lg shrink-0">+</span>
+                  Add Profile
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
 
         {/* ── Active kid profile card ── */}
         {activeKid && (
@@ -1073,7 +1130,7 @@ export default function DashboardPage() {
                 <Users className="h-5 w-5" style={{ color: "#0F3154" }} />
               </div>
               <div>
-                <p className="font-semibold text-sm text-[#0F3154]">My Clients</p>
+                <p className="font-semibold text-sm text-[#0F3154]">CRM</p>
                 <p className="text-xs text-muted-foreground">Track clients, groups & notes</p>
               </div>
             </div>

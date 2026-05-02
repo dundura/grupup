@@ -181,7 +181,7 @@ export default function TrainerManagePage() {
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold">My Sessions</h2>
-            <Button size="sm" style={{ backgroundColor: "#DC373E" }} asChild>
+            <Button style={{ backgroundColor: "#DC373E" }} asChild>
               <Link href="/trainer/new-session">+ New session</Link>
             </Button>
           </div>
@@ -208,9 +208,9 @@ export default function TrainerManagePage() {
                       </div>
                       {roster.length > 0 && (
                         <button type="button" onClick={() => setExpanded(isOpen ? null : s.id)}
-                          className="flex items-center gap-1 text-xs font-semibold text-[#0F3154] shrink-0">
+                          className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-3 py-1.5 rounded-lg border border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors shrink-0">
                           {roster.length} registered
-                          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </button>
                       )}
                     </div>
@@ -254,8 +254,8 @@ export default function TrainerManagePage() {
                         </div>
                         <button type="button"
                           onClick={() => { setModal({ type: "session", sessionId: s.id, sessionTitle: s.title }); setSentMsg(""); }}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-[#0F3154] hover:underline">
-                          <Mail className="h-3.5 w-3.5" /> Message all registrants
+                          className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-3 py-2 rounded-lg border border-[#0F3154] hover:bg-[#0F3154] hover:text-white transition-colors">
+                          <Mail className="h-4 w-4" /> Message all registrants
                         </button>
                       </div>
                     )}
@@ -274,15 +274,15 @@ export default function TrainerManagePage() {
                             <div className="flex items-center gap-2">
                               <button type="button"
                                 onClick={() => { setModal({ type: "waitlist", sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length }); setSentMsg(""); }}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-[#0F3154] px-3 py-1.5 rounded-lg border border-[#0F3154] transition-colors hover:bg-[#0F3154] hover:text-white">
-                                <Mail className="h-3 w-3" />
+                                className="flex items-center gap-1.5 text-sm font-semibold text-[#0F3154] px-4 py-2 rounded-lg border border-[#0F3154] transition-colors hover:bg-[#0F3154] hover:text-white">
+                                <Mail className="h-4 w-4" />
                                 Custom email
                               </button>
                               <button type="button"
                                 onClick={() => setNotifyModal({ sessionId: s.id, sessionTitle: s.title, count: waitlists[s.id].length })}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors"
+                                className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors"
                                 style={{ backgroundColor: "#DC373E" }}>
-                                <Mail className="h-3 w-3" />
+                                <Mail className="h-4 w-4" />
                                 Notify — spots open!
                               </button>
                             </div>
