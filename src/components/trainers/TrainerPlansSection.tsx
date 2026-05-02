@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { CalendarDays, Check, Sparkles, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface Plan {
   id: number; date?: string; dayOfWeek?: string; time?: string; sport?: string; city?: string;
@@ -13,13 +13,8 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   const { user, isLoaded } = useUser();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [myInterests, setMyInterests] = useState<number[]>([]);
-  const [trainerClerkId, setTrainerClerkId] = useState("");
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<number | null>(null);
-  const [showSuggest, setShowSuggest] = useState(false);
-  const [suggest, setSuggest] = useState({ date: "", time: "", message: "" });
-  const [suggestSent, setSuggestSent] = useState(false);
-  const [sending, setSending] = useState(false);
   const [interestModal, setInterestModal] = useState<number | null>(null);
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
@@ -32,7 +27,6 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
         if (Array.isArray(d)) { setLoading(false); return; }
         setPlans(d.plans ?? []);
         setMyInterests(d.myInterests ?? []);
-        setTrainerClerkId(d.trainerClerkId ?? "");
         setLoading(false);
       }).catch(() => setLoading(false));
   }, [trainerId]);
@@ -62,18 +56,6 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
     setChildName(""); setChildAge(""); setParentPhone("");
   }
 
-  async function submitSuggestion() {
-    setSending(true);
-    const name = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "";
-    const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
-    await fetch(`/api/trainers/${trainerId}/plans`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "suggestion", playerName: name, playerEmail: email, ...suggest }),
-    });
-    setSuggestSent(true);
-    setSending(false);
-  }
 
   if (loading || plans.length === 0) return null;
 
@@ -170,37 +152,6 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
         </div>
       )}
 
-      {/* Suggest a time */}
-      <div className="mt-4 pt-3 border-t">
-        {suggestSent ? (
-          <p className="text-xs text-green-700 font-medium text-center py-1">✓ Suggestion sent! The trainer will review it.</p>
-        ) : showSuggest ? (
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground">Suggest a different time</p>
-            <div className="grid grid-cols-2 gap-2">
-              <input type="date" value={suggest.date} onChange={(e) => setSuggest((s) => ({ ...s, date: e.target.value }))}
-                className="border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-              <input type="time" value={suggest.time} onChange={(e) => setSuggest((s) => ({ ...s, time: e.target.value }))}
-                className="border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-            </div>
-            <input value={suggest.message} onChange={(e) => setSuggest((s) => ({ ...s, message: e.target.value }))}
-              placeholder="Optional note..." className="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring" />
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowSuggest(false)} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5">Cancel</button>
-              <button onClick={submitSuggestion} disabled={sending || (!suggest.date && !suggest.time)}
-                className="text-xs font-semibold px-4 py-1.5 rounded-lg text-white transition-colors"
-                style={{ backgroundColor: "#0F3154" }}>
-                {sending ? "Sending…" : "Send"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => setShowSuggest(true)}
-            className="w-full text-xs font-medium text-muted-foreground hover:text-foreground transition-colors py-1">
-            + Suggest a different time
-          </button>
-        )}
-      </div>
     </div>
   );
 }
