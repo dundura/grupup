@@ -1087,21 +1087,6 @@ export default function DashboardPage() {
 
 
 
-        {/* Trainer: CRM link card */}
-        {isTrainerMode && (
-          <Link href="/clients" className="flex items-center justify-between bg-white rounded-2xl border p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#EFF6FF" }}>
-                <Users className="h-5 w-5" style={{ color: "#0F3154" }} />
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-[#0F3154]">CRM</p>
-                <p className="text-xs text-muted-foreground">Track clients, groups & notes</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300" />
-          </Link>
-        )}
 
         {/* Player: My Sessions */}
         {!isTrainerMode && (
