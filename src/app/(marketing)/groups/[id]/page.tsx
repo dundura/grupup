@@ -139,7 +139,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               <p className="text-sm text-muted-foreground leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: (trainer as any).plansAbout?.trim()
                   ? (trainer as any).plansAbout
-                  : "I am considering offering future events and want to gauge interest before launching them." }} />
+                  : "I am considering offering future events and want to gauge interest before launching them. Please express interest and I will be in touch." }} />
             </div>
 
             {/* Gauge Interest */}
