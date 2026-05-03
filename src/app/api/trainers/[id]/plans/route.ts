@@ -83,13 +83,84 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
       // Notify trainer
       try {
+        const name = playerName ?? "A player";
         await resend.emails.send({
           from: "GrupUp <bookings@soccer-near-me.com>",
           to: playerEmail ? [playerEmail] : [],
           bcc: "neil@anytime-soccer.com",
-          subject: `${playerName ?? "Someone"} is interested in your planned session`,
-          html: `<p><strong>${playerName ?? "A player"}</strong> expressed interest in one of your planned sessions on GrupUp.</p>
-          <p><a href="https://www.grupup.app/trainer/plans">View your plans dashboard</a></p>`,
+          subject: `${name} is interested in your planned session`,
+          html: `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table role="presentation" width="100%" style="max-width:520px;" cellpadding="0" cellspacing="0">
+
+        <!-- Card -->
+        <tr><td style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+          <!-- Header bar -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="background:#0F3154;padding:24px 32px;">
+              <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">GrupUp</p>
+            </td></tr>
+          </table>
+
+          <!-- Body -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:32px;">
+
+              <!-- Avatar + name -->
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="width:48px;height:48px;background:#DC373E;border-radius:50%;text-align:center;vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:20px;font-weight:800;line-height:48px;">${name[0].toUpperCase()}</span>
+                  </td>
+                  <td style="padding-left:14px;vertical-align:middle;">
+                    <p style="margin:0;font-size:17px;font-weight:700;color:#0F3154;">${name}</p>
+                    <p style="margin:4px 0 0;font-size:13px;color:#64748b;">expressed interest in your planned session</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Info box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr><td style="background:#f8faff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;">
+                  <p style="margin:0;font-size:14px;color:#475569;line-height:1.6;">
+                    A player on GrupUp has seen your upcoming session idea and wants to join when you're ready to launch it.
+                  </p>
+                </td></tr>
+              </table>
+
+              <!-- CTA button -->
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#DC373E;border-radius:50px;">
+                    <a href="https://www.grupup.app/trainer/plans"
+                      style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:50px;">
+                      View your plans dashboard
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td></tr>
+          </table>
+
+          <!-- Footer -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:20px 32px;border-top:1px solid #f1f5f9;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;">You're receiving this because you have an active trainer profile on GrupUp.</p>
+            </td></tr>
+          </table>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
         });
       } catch {}
     } else {

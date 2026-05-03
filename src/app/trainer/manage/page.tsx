@@ -53,6 +53,8 @@ export default function TrainerManagePage() {
   const [notifyModal, setNotifyModal] = useState<{ sessionId: number; sessionTitle: string; count: number } | null>(null);
   const [notifySent, setNotifySent] = useState<number | null>(null);
   const [plans, setPlans] = useState<Array<{ id: number; date?: string; dayOfWeek?: string; time?: string; sport?: string; city?: string; note?: string; interestCount: number; createdAt: string }>>([]);
+  const [planInterests, setPlanInterests] = useState<Array<{ id: number; planId?: number; playerName?: string; playerEmail?: string; type: string; status: string }>>([]);
+  const [expandedPlan, setExpandedPlan] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -68,6 +70,7 @@ export default function TrainerManagePage() {
       setBookings(Array.isArray(bkgs) ? bkgs : []);
       setFollowers(Array.isArray(fols) ? fols : []);
       setPlans(Array.isArray(plansData?.plans) ? plansData.plans : []);
+      setPlanInterests(Array.isArray(plansData?.interests) ? plansData.interests : []);
       // Load waitlists for all sessions
       const wlMap: Record<number, WaitlistEntry[]> = {};
       await Promise.all(sessArr.map(async (s) => {
@@ -420,19 +423,53 @@ export default function TrainerManagePage() {
                       : p.date
                         ? new Date(p.date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + (p.time ? ` · ${fmtTime(p.time)}` : "")
                         : p.time ? fmtTime(p.time) : "TBD";
+                    const interested = planInterests.filter((i) => i.planId === p.id && i.type === "interest");
+                    const isOpen = expandedPlan === p.id;
                     return (
-                      <tr key={p.id} className="border-t hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3 font-semibold">{label}</td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">
-                          {[p.sport, p.city].filter(Boolean).join(" · ") || p.note || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="font-semibold text-amber-600">{p.interestCount}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Link href="/trainer/plans" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Details</Link>
-                        </td>
-                      </tr>
+                      <>
+                        <tr key={p.id} className="border-t hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 font-semibold">{label}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">
+                            {[p.sport, p.city].filter(Boolean).join(" · ") || p.note || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => setExpandedPlan(isOpen ? null : p.id)}
+                              className="inline-flex items-center gap-1 font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+                            >
+                              {p.interestCount}
+                              {p.interestCount > 0 && (isOpen
+                                ? <ChevronUp className="h-3.5 w-3.5" />
+                                : <ChevronDown className="h-3.5 w-3.5" />)}
+                            </button>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Link href="/trainer/plans" className="text-xs font-semibold hover:underline" style={{ color: "#0F3154" }}>Details</Link>
+                          </td>
+                        </tr>
+                        {isOpen && (
+                          <tr key={`${p.id}-interests`} className="border-t bg-amber-50/50">
+                            <td colSpan={4} className="px-4 py-3">
+                              {interested.length === 0 ? (
+                                <p className="text-xs text-muted-foreground">No interest details available.</p>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  {interested.map((i) => (
+                                    <div key={i.id} className="flex items-center gap-2">
+                                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                                        style={{ backgroundColor: "#0F3154" }}>
+                                        {(i.playerName ?? "?")[0].toUpperCase()}
+                                      </div>
+                                      <span className="text-xs font-medium">{i.playerName ?? "Player"}</span>
+                                      {i.playerEmail && <span className="text-xs text-muted-foreground">{i.playerEmail}</span>}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     );
                   })}
                 </tbody>
