@@ -114,3 +114,37 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
+
+// DELETE — remove interest for a plan
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const { userId } = await auth();
+    const { planId } = await req.json();
+
+    const [trainer] = await db.select({ clerkId: trainers.clerkId })
+      .from(trainers).where(eq(trainers.id, id));
+    if (!trainer?.clerkId) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    if (userId) {
+      await db.delete(trainerPlanInterests).where(
+        and(
+          eq(trainerPlanInterests.planId, planId),
+          eq(trainerPlanInterests.playerClerkId, userId),
+          eq(trainerPlanInterests.type, "interest"),
+        )
+      );
+    }
+
+    // Decrement interest count
+    const [plan] = await db.select({ interestCount: trainerPlans.interestCount })
+      .from(trainerPlans).where(eq(trainerPlans.id, planId));
+    const newCount = Math.max(0, (plan?.interestCount ?? 1) - 1);
+    await db.update(trainerPlans).set({ interestCount: newCount }).where(eq(trainerPlans.id, planId));
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[DELETE /api/trainers/[id]/plans]", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
+}

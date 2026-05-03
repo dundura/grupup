@@ -87,6 +87,20 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
     setChildName(""); setChildAge(""); setParentPhone("");
   }
 
+  async function removeInterest(planId: number) {
+    setActing(planId);
+    const res = await fetch(`/api/trainers/${trainerId}/plans`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planId }),
+    });
+    if (res.ok) {
+      setMyInterests((p) => p.filter((id) => id !== planId));
+      setPlans((prev) => prev.map((pl) => pl.id === planId ? { ...pl, interestCount: Math.max(0, pl.interestCount - 1) } : pl));
+    }
+    setActing(null);
+  }
+
 
   if (loading || plans.length === 0) return null;
 
@@ -122,13 +136,13 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => { if (!interested) setInterestModal(plan.id); }}
-                      disabled={interested || acting === plan.id}
+                      onClick={() => interested ? removeInterest(plan.id) : setInterestModal(plan.id)}
+                      disabled={acting === plan.id}
                       className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all shrink-0 ml-auto"
                       style={interested
                         ? { backgroundColor: "#16a34a", color: "white", borderColor: "#16a34a" }
                         : { backgroundColor: "#DC373E", color: "white", borderColor: "#DC373E" }}>
-                      {interested ? <><Check className="h-3 w-3" /> Interested</> : "I'm interested"}
+                      {acting === plan.id ? "…" : interested ? <><Check className="h-3 w-3" /> Interested</> : "I'm interested"}
                     </button>
                   </td>
                 </tr>
