@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { CalendarDays, Plus, Trash2, X, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarDays, Plus, Trash2, X, Check, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import Link from "next/link";
