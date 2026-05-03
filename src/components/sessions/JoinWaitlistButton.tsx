@@ -115,15 +115,27 @@ export default function JoinWaitlistButton({
           <p className="text-xs text-muted-foreground">No charge — we'll email you when booking opens.</p>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required />
-          <Input value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="Child's name *" required />
-          <div className="grid grid-cols-2 gap-2">
-            <Input type="number" value={childAge} onChange={(e) => setChildAge(e.target.value)}
-              placeholder="Child's age *" min={1} max={99} required />
-            <Input value={childCity} onChange={(e) => setChildCity(e.target.value)}
-              placeholder="City *" required />
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Child's name <span className="text-red-500">*</span></label>
+            <Input value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="First & last name" required />
           </div>
-          <Input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
-            placeholder="Parent phone *" required />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Child's age <span className="text-red-500">*</span></label>
+              <Input type="number" value={childAge} onChange={(e) => setChildAge(e.target.value)}
+                placeholder="Age" min={1} max={99} required />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground mb-1 block">City <span className="text-red-500">*</span></label>
+              <Input value={childCity} onChange={(e) => setChildCity(e.target.value)}
+                placeholder="e.g. Cary, NC" required />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Parent phone <span className="text-red-500">*</span></label>
+            <Input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
+              placeholder="(555) 123-4567" required />
+          </div>
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setOpen(false)}
