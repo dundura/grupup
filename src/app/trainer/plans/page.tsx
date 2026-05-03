@@ -349,7 +349,7 @@ export default function TrainerPlansPage() {
                           {i.playerEmail && <p className="text-xs text-muted-foreground flex-1">{i.playerEmail}</p>}
                           <button
                             onClick={() => removeInterest(i.id, plan.id)}
-                            className="text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                            className="text-muted-foreground hover:text-red-500 transition-colors shrink-0"
                             title="Remove">
                             <X className="h-3.5 w-3.5" />
                           </button>
