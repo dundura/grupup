@@ -294,17 +294,12 @@ function SessionsPageInner() {
                         <p className="text-[11px] text-muted-foreground">{plan.interestCount} interested</p>
                       )}
 
-                      <button
-                        onClick={() => expressInterest(plan)}
-                        disabled={interested || actingPlan === plan.id}
-                        className="mt-auto w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                        style={interested
-                          ? { backgroundColor: "#0F3154", color: "white" }
-                          : { backgroundColor: "#DC373E", color: "white" }}>
-                        {interested
-                          ? <span className="flex items-center justify-center gap-1.5"><Check className="h-3.5 w-3.5" /> Interested</span>
-                          : "I'm interested"}
-                      </button>
+                      <a
+                        href={`/groups/${plan.trainerId}`}
+                        className="mt-auto w-full py-2.5 rounded-xl text-sm font-semibold transition-colors text-center block"
+                        style={{ backgroundColor: "#DC373E", color: "white" }}>
+                        View upcoming events
+                      </a>
                     </div>
                   </div>
                 );

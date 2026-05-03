@@ -109,7 +109,11 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
               <h1 className="text-2xl md:text-3xl font-extrabold leading-snug mb-2">
                 {trainer.name}
               </h1>
-              <p className="text-sm font-semibold mb-1" style={{ color: "#DC373E" }}>Gauge Interest — These are potential sessions, not yet confirmed.</p>
+              <div className="flex items-center gap-2 mt-2 mb-1">
+                <span className="text-amber-500 text-lg">✦</span>
+                <p className="text-xl font-extrabold" style={{ color: "#DC373E" }}>Gauge Interest</p>
+              </div>
+              <p className="text-sm font-semibold mb-1" style={{ color: "#DC373E" }}>These are potential sessions — not yet confirmed.</p>
               <p className="text-sm text-muted-foreground">
                 {trainer.name.split(" ")[0]} is considering offering these dates and would like to know if there&apos;s enough interest before committing. Tap <strong>I&apos;m interested</strong> to let them know — the more interest, the more likely they&apos;ll launch it.
               </p>
