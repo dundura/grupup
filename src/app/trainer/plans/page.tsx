@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { CalendarDays, Plus, Trash2, Check, X, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarDays, Plus, Trash2, X, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import Link from "next/link";
@@ -93,6 +93,16 @@ export default function TrainerPlansPage() {
   async function deletePlan(id: number) {
     await fetch(`/api/trainer/plans/${id}`, { method: "DELETE" });
     setPlans((p) => p.filter((x) => x.id !== id));
+  }
+
+  async function removeInterest(interestId: number, planId: number) {
+    await fetch("/api/trainer/plans", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ interestId, planId }),
+    });
+    setInterests((prev) => prev.filter((i) => i.id !== interestId));
+    setPlans((prev) => prev.map((p) => p.id === planId ? { ...p, interestCount: Math.max(0, p.interestCount - 1) } : p));
   }
 
   async function actOnSuggestion(interestId: number, action: "approve" | "reject") {
@@ -330,13 +340,19 @@ export default function TrainerPlansPage() {
                       {planInterests.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No one has expressed interest yet.</p>
                       ) : planInterests.map((i) => (
-                        <div key={i.id} className="flex items-center gap-2">
+                        <div key={i.id} className="flex items-center gap-2 group">
                           <div className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
                             style={{ backgroundColor: "#0F3154" }}>
                             {(i.playerName ?? "?")[0].toUpperCase()}
                           </div>
                           <p className="text-xs font-medium">{i.playerName ?? "Player"}</p>
-                          {i.playerEmail && <p className="text-xs text-muted-foreground">{i.playerEmail}</p>}
+                          {i.playerEmail && <p className="text-xs text-muted-foreground flex-1">{i.playerEmail}</p>}
+                          <button
+                            onClick={() => removeInterest(i.id, plan.id)}
+                            className="text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                            title="Remove">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>

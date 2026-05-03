@@ -112,6 +112,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// DELETE — trainer removes a specific interest entry
+export async function DELETE(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { interestId, planId } = await req.json();
+
+    await db.delete(trainerPlanInterests)
+      .where(and(eq(trainerPlanInterests.id, interestId), eq(trainerPlanInterests.trainerClerkId, userId)));
+
+    // Decrement interest count
+    const [plan] = await db.select({ interestCount: trainerPlans.interestCount })
+      .from(trainerPlans).where(eq(trainerPlans.id, planId));
+    await db.update(trainerPlans)
+      .set({ interestCount: Math.max(0, (plan?.interestCount ?? 1) - 1) })
+      .where(eq(trainerPlans.id, planId));
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[DELETE /api/trainer/plans]", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
+}
+
 function fmtTime(t: string) {
   const [h, m] = t.split(":").map(Number);
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
