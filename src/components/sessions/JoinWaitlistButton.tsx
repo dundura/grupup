@@ -14,6 +14,7 @@ export default function JoinWaitlistButton({
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
   const [parentPhone, setParentPhone] = useState("");
+  const [childCity, setChildCity] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(initialJoined);
   const [leaving, setLeaving] = useState(false);
@@ -28,7 +29,7 @@ export default function JoinWaitlistButton({
   }, [user]);
 
   async function submit() {
-    if (!email.trim() || !childName.trim() || !childAge.trim()) return;
+    if (!email.trim() || !childName.trim() || !childAge.trim() || !parentPhone.trim() || !childCity.trim()) return;
     setSending(true);
     setError("");
     try {
@@ -39,7 +40,8 @@ export default function JoinWaitlistButton({
           name, email, sessionTitle,
           childName: childName.trim(),
           childAge: parseInt(childAge),
-          parentPhone: parentPhone.trim() || null,
+          parentPhone: parentPhone.trim(),
+          childCity: childCity.trim(),
         }),
       });
       if (res.ok) {
@@ -117,14 +119,16 @@ export default function JoinWaitlistButton({
           <div className="grid grid-cols-2 gap-2">
             <Input type="number" value={childAge} onChange={(e) => setChildAge(e.target.value)}
               placeholder="Child's age *" min={1} max={99} required />
-            <Input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
-              placeholder="Parent phone (optional)" />
+            <Input value={childCity} onChange={(e) => setChildCity(e.target.value)}
+              placeholder="City *" required />
           </div>
+          <Input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
+            placeholder="Parent phone *" required />
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setOpen(false)}
               className="flex-1 py-2 rounded-xl text-sm border font-medium">Cancel</button>
-            <button type="submit" disabled={sending || !email.trim() || !childName.trim() || !childAge.trim()}
+            <button type="submit" disabled={sending || !email.trim() || !childName.trim() || !childAge.trim() || !parentPhone.trim() || !childCity.trim()}
               className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
               style={{ backgroundColor: "#0F3154" }}>
               {sending ? "Sending…" : "RSVP"}

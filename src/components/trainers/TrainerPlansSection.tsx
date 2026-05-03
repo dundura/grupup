@@ -18,11 +18,12 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
   const [interestModal, setInterestModal] = useState<number | null>(null);
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
+  const [childCity, setChildCity] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
   const [contactSent, setContactSent] = useState(false);
   const [contactSending, setContactSending] = useState(false);
-  const [parentPhone, setParentPhone] = useState("");
 
   useEffect(() => {
     fetch(`/api/trainers/${trainerId}/plans`)
@@ -64,7 +65,7 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
 
   async function expressInterest(planId: number) {
     if (!isLoaded) return;
-    if (!childName.trim() || !childAge.trim()) return;
+    if (!childName.trim() || !childAge.trim() || !parentPhone.trim() || !childCity.trim()) return;
     setActing(planId);
     const name = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "";
     const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
@@ -75,7 +76,8 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
         type: "interest", planId, playerName: name, playerEmail: email,
         childName: childName.trim(),
         childAge: parseInt(childAge),
-        parentPhone: parentPhone.trim() || null,
+        parentPhone: parentPhone.trim(),
+        childCity: childCity.trim(),
       }),
     });
     if (res.ok) {
@@ -84,7 +86,7 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
     }
     setActing(null);
     setInterestModal(null);
-    setChildName(""); setChildAge(""); setParentPhone("");
+    setChildName(""); setChildAge(""); setParentPhone(""); setChildCity("");
   }
 
   async function removeInterest(planId: number) {
@@ -239,7 +241,13 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Parent phone (optional)</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">City *</label>
+                <input value={childCity} onChange={(e) => setChildCity(e.target.value)}
+                  placeholder="e.g. Cary, NC"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Parent phone *</label>
                 <input type="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)}
                   placeholder="(555) 123-4567"
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -252,7 +260,7 @@ export default function TrainerPlansSection({ trainerId }: { trainerId: string }
               </button>
               <button
                 onClick={() => expressInterest(interestModal)}
-                disabled={!childName.trim() || !childAge.trim() || acting === interestModal}
+                disabled={!childName.trim() || !childAge.trim() || !parentPhone.trim() || !childCity.trim() || acting === interestModal}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
                 style={{ backgroundColor: "#DC373E" }}>
                 {acting === interestModal ? "Saving…" : "I'm interested"}

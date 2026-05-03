@@ -165,6 +165,7 @@ export const sessionWaitlist = pgTable("session_waitlist", {
   childName: varchar("child_name", { length: 200 }),
   childAge: integer("child_age"),
   parentPhone: varchar("parent_phone", { length: 30 }),
+  childCity: varchar("child_city", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -285,6 +286,7 @@ export const trainerPlanInterests = pgTable("trainer_plan_interests", {
   childName: varchar("child_name", { length: 200 }),
   childAge: integer("child_age"),
   parentPhone: varchar("parent_phone", { length: 30 }),
+  childCity: varchar("child_city", { length: 100 }),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });

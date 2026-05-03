@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const { userId } = await auth();
     const { id } = await params;
-    const { name, email, childName, childAge, parentPhone } = await req.json();
+    const { name, email, childName, childAge, parentPhone, childCity } = await req.json();
     if (!email?.trim()) return NextResponse.json({ error: "Email required" }, { status: 400 });
 
     const sessionId = parseInt(id);
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       childName: childName?.trim() || null,
       childAge: childAge ? parseInt(childAge) : null,
       parentPhone: parentPhone?.trim() || null,
+      childCity: childCity?.trim() || null,
     });
 
     // Return success immediately — emails fire after
