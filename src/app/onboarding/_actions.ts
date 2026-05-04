@@ -2,6 +2,9 @@
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { sendAdminNewPlayerNotification } from "@/lib/email";
+import { db } from "@/db";
+import { playerProfiles } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function completeOnboarding(formData: {
   role: string;
@@ -134,6 +137,23 @@ export async function completeOnboarding(formData: {
         playerCountry: formData.country,
         role: formData.role,
       });
+    }
+
+    // Create player_profiles DB record on first signup so dashboard shows profile immediately
+    if (isPlayer && formData.isNewSignup && !existingMeta.onboardingComplete) {
+      const existing_profiles = await db.select().from(playerProfiles).where(eq(playerProfiles.clerkUserId, userId));
+      if (existing_profiles.length === 0) {
+        const name = `${formData.firstName} ${formData.lastName}`.trim();
+        const sport = formData.selectedPlayerSports?.[0] ?? formData.sport ?? null;
+        await db.insert(playerProfiles).values({
+          clerkUserId: userId,
+          name: name || formData.firstName || "Player",
+          sport: sport?.trim() || null,
+          city: formData.city?.trim() || null,
+          isDefault: true,
+          isPublic: true,
+        });
+      }
     }
 
     return { success: true };
