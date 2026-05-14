@@ -83,8 +83,8 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
         }>;
       };
 
-      // Show player_profiles (kids/athletes) for ANY account role, unless parent is hidden
-      const dbProfiles = meta.isHidden ? [] : (profilesByUser[u.id] ?? []).filter((p) => p.isPublic !== false);
+      // Show player_profiles (kids/athletes) only if no childProfiles exist (avoid duplicates)
+      const dbProfiles = (meta.isHidden || meta.childProfiles?.length) ? [] : (profilesByUser[u.id] ?? []).filter((p) => p.isPublic !== false);
       for (const p of dbProfiles) {
         approvedPlayers.push({
           id: `player/${p.id}`,
