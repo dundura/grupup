@@ -85,6 +85,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
 
       // Show player_profiles (kids/athletes) only if no childProfiles exist (avoid duplicates)
       const dbProfiles = (meta.isHidden || meta.childProfiles?.length) ? [] : (profilesByUser[u.id] ?? []).filter((p) => p.isPublic !== false);
+      const hasDbProfiles = dbProfiles.length > 0;
       for (const p of dbProfiles) {
         approvedPlayers.push({
           id: `player/${p.id}`,
@@ -135,8 +136,8 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
         }
       }
 
-      // Also show the user's own profile card (unless hidden)
-      if (!meta.isHidden) {
+      // Also show the user's own profile card (unless hidden or already shown via DB profiles/childProfiles)
+      if (!meta.isHidden && !hasDbProfiles && !meta.childProfiles?.length) {
         const playerSports = meta.playerSports?.length ? meta.playerSports : (meta.sport ? [meta.sport] : []);
         approvedPlayers.push({
           id: meta.profileSlug ?? u.id,
